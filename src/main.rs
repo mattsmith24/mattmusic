@@ -21,8 +21,8 @@ fn main() -> anyhow::Result<()> {
 }
 
 trait SoundSource {
-    fn next_value(&mut self, t: f32) -> (f32, f32);
-    fn is_done(&self, t: f32) -> bool;
+    fn next_value(&self, t: f32) -> (f32, f32);
+    fn duration(&self) -> f32;
 }
 type DynSoundSource = Box<dyn SoundSource + Send + Sync>;
 
@@ -30,7 +30,6 @@ struct PureTone {
     freq: f32,
     gain: f32,
     duration: f32,
-    last_time: f32,
 }
 
 impl PureTone {
@@ -46,24 +45,22 @@ impl PureTone {
             freq: freq,
             gain: gain,
             duration: duration,
-            last_time: 0.0
         }
     }
 }
 
 impl SoundSource for PureTone {
-    fn next_value(&mut self, t: f32) -> (f32, f32) {
-        if self.is_done(t) {
+    fn next_value(&self, t: f32) -> (f32, f32) {
+        if t > self.duration {
             (0.0, 0.0)
         } else {
             let val = (t * self.freq * 2.0 * std::f32::consts::PI).sin() * self.gain;
-            self.last_time = t;
             (val, val)
         }
     }
 
-    fn is_done(&self, t: f32) -> bool {
-        t >= self.duration
+    fn duration(&self) -> f32 {
+        self.duration
     }
 }
 
@@ -228,14 +225,14 @@ impl Tremolo {
 }
 
 impl SoundSource for Tremolo {
-    fn next_value(&mut self, t: f32) -> (f32, f32) {
+    fn next_value(&self, t: f32) -> (f32, f32) {
         let source_val = (*self.source).next_value(t);
         let tremolo_gain = 1.0 - ((t * self.freq * 2.0 * std::f32::consts::PI).sin() + 1.0) * 0.5 * self.depth;
         (source_val.0 * tremolo_gain, source_val.1 * tremolo_gain)
     }
 
-    fn is_done(&self, t: f32) -> bool {
-        (*self.source).is_done(t)
+    fn duration(&self) -> f32 {
+        (*self.source).duration()
     }
 }
 
@@ -260,7 +257,7 @@ impl DingEnvelope {
 }
 
 impl SoundSource for DingEnvelope {
-    fn next_value(&mut self, t: f32) -> (f32, f32) {
+    fn next_value(&self, t: f32) -> (f32, f32) {
         let source_val = (*self.source).next_value(t);
         let mut gain;
         const IMPULSE: f32 = 0.05;
@@ -285,8 +282,8 @@ impl SoundSource for DingEnvelope {
         (source_val.0 * gain, source_val.1 * gain)
     }
 
-    fn is_done(&self, t: f32) -> bool {
-        t > self.decay || t > self.duration || (*self.source).is_done(t)
+    fn duration(&self) -> f32 {
+        self.decay.min(self.duration).min((*self.source).duration())
     }
 }
 
@@ -296,56 +293,92 @@ struct SequenceMember {
 }
 
 struct Sequence {
-    notes: Vec<SequenceMember>
+    notes: Vec<SequenceMember>,
+    repeat: u32,
 }
 
 impl Sequence {
-    fn new(bpm: f32, mut notes: Vec<DynSoundSource>) -> Self {
-        let mut vec = Vec::<SequenceMember>::new();
+    fn new() -> Self {
+        Sequence{ notes: Vec::<SequenceMember>::new(), repeat: 1 }
+    }
+
+    // Add notes into the sequence at arbitrary time offsets
+    fn add(&mut self, start_time: f32, note: DynSoundSource) -> &mut Sequence {
+        self.notes.push( SequenceMember { sound_source: note, start_time: start_time } );
+        self
+    }
+    
+    // Use new for evenly spaced notes (or pass empty notes vector)
+    fn new_with_sequence(bpm: f32, mut notes: Vec<DynSoundSource>, repeat: u32) -> Self {
+        let mut seq = Sequence::new();
+        seq.repeat = repeat;
         let mut t_idx: f32 = 0.0;
         for note in notes.drain(..) {
-            vec.push( SequenceMember { sound_source: note, start_time: t_idx } );
+            seq.add(t_idx, note);
             t_idx += 60.0 / bpm;
         }
-        Sequence{ notes: vec }
+        seq
+    }
+
+    fn single_duration(&self) -> f32 {
+        let mut duration: f32 = 0.0;
+        for note in self.notes.iter() {
+            duration = duration.max((*note.sound_source).duration() + note.start_time)
+        }
+        duration
     }
 }
 
 impl SoundSource for Sequence {
-    fn next_value(&mut self, t: f32) -> (f32, f32) {
+    fn next_value(&self, t: f32) -> (f32, f32) {
         let mut res1: f32 = 0.0;
         let mut res2: f32 = 0.0;
-        for note in self.notes.iter_mut() {
-            if t >= note.start_time {
-                let (v1, v2) = (*note.sound_source).next_value(t - note.start_time);
-                res1 += v1;
-                res2 += v2;
+        let duration = self.single_duration();
+        let mut time_offset: f32 = 0.0;
+        let mut repeat_count: u32 = 0;
+        while t - time_offset > duration {
+            time_offset += duration;
+            repeat_count += 1;
+        }
+        if repeat_count < self.repeat {
+            for note in self.notes.iter() {
+                if t - time_offset >= note.start_time {
+                    let (v1, v2) = (*note.sound_source).next_value(t - note.start_time - time_offset);
+                    res1 += v1;
+                    res2 += v2;
+                }
             }
         }
         (res1, res2)
     }
-    fn is_done(&self, t: f32) -> bool {
-        let note = &self.notes[self.notes.len() - 1];
-        (*note.sound_source).is_done(t - note.start_time)
+    fn duration(&self) -> f32 {
+        self.single_duration() * self.repeat as f32
     }
 }
 
 fn vibraphone(octave: u8, pitch: u8, duration: f32) -> DynSoundSource {
-    Box::new(
-        Tremolo::new(
-            5.0,
-            0.5,
-            Box::new(
-                DingEnvelope::new(
-                    2.0,
-                    duration,
-                    Box::new(
-                        PureTone::new(note2freq(octave, pitch), 0.5, duration * 2.0)
+    if octave == 0 && pitch == 0 {
+        // rest
+        Box::new(
+            PureTone::new(1.0, 0.0, duration)
+        )
+    } else {
+        Box::new(
+            Tremolo::new(
+                5.0,
+                0.5,
+                Box::new(
+                    DingEnvelope::new(
+                        2.0,
+                        duration,
+                        Box::new(
+                            PureTone::new(note2freq(octave, pitch), 0.5, duration * 2.0)
+                        )
                     )
                 )
             )
         )
-    )
+    }
 }
 
 fn run<T>(device: &cpal::Device, config: &cpal::StreamConfig) -> Result<(), anyhow::Error>
@@ -356,21 +389,30 @@ where
     let channels = config.channels as usize;
 
     let mut sample_clock = 0f32;
-    let bpm = 160.0;
+    let bpm = 160.0 * 2.0;
     let note_duration = 60.0 / bpm * 0.9;
     let mut vec = Vec::<DynSoundSource>::new();
     vec.push(vibraphone(4, MIDI_OFFSET_C, note_duration));
     vec.push(vibraphone(4, MIDI_OFFSET_E, note_duration));
     vec.push(vibraphone(4, MIDI_OFFSET_G, note_duration));
-    vec.push(vibraphone(5, MIDI_OFFSET_C, 5.0));
-    let mut sound_source = Sequence::new(bpm, vec);
+    vec.push(vibraphone(5, MIDI_OFFSET_C, note_duration));
+    let sound_source1 = Sequence::new_with_sequence(bpm, vec, 4);
+    let mut vec2 = Vec::<DynSoundSource>::new();
+    vec2.push(vibraphone(5, MIDI_OFFSET_C, note_duration));
+    vec2.push(vibraphone(5, MIDI_OFFSET_E, note_duration));
+    vec2.push(vibraphone(5, MIDI_OFFSET_G, note_duration));
+    vec2.push(vibraphone(6, MIDI_OFFSET_C, 5.0));
+    let sound_source2 = Sequence::new_with_sequence(bpm, vec2, 1);
+    let mut sound_source = Sequence::new();
+    sound_source.add(0.0, Box::new(sound_source1));
+    sound_source.add(sound_source.duration(), Box::new(sound_source2));
     let pair = Arc::new((Mutex::new(false), Condvar::new()));
     let pair2 = Arc::clone(&pair);
     let mut next_value = move || -> (f32, f32) {
         let (lock, cvar) = &*pair2;
         sample_clock = sample_clock + 1.0;
         let t: f32 = sample_clock / sample_rate;
-        if sound_source.is_done(t) {
+        if t > sound_source.duration() {
             let mut done = lock.lock().unwrap();
             *done = true;
             cvar.notify_one();
