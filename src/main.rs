@@ -1,5 +1,6 @@
 use anyhow;
 use std::sync::{Arc, Mutex, Condvar};
+use std::env;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{FromSample, Sample, SampleFormat, SizedSample};
 
@@ -10,23 +11,24 @@ mod tremolo;
 mod ding_envelope;
 mod sequence;
 mod songs;
+mod instruments;
 
 use sound_source::sound_source::DynSoundSource;
 
-
-fn get_song() -> DynSoundSource {
-    songs::arpeggios::arpeggios::arpeggios()
+// todo make command line args select the song to play
+fn get_song(songname: &String) -> DynSoundSource {
+    if songname == "arpeggios" {
+        songs::arpeggios::arpeggios::arpeggios(Box::new(instruments::vibraphone::vibraphone::Vibraphone{}))
+    } else {
+        panic!("Unkown song: '{}'", songname)
+    }
 }
 
 
 fn main() -> anyhow::Result<()> {
-
     let host = cpal::default_host();
     let device = host.default_output_device().expect("no output device available");
-
-    
     let config = device.default_output_config().unwrap();
-
     match config.sample_format() {
         SampleFormat::F32 => run::<f32>(&device, &config.into()),
         SampleFormat::I16 => run::<i16>(&device, &config.into()),
@@ -39,10 +41,16 @@ fn run<T>(device: &cpal::Device, config: &cpal::StreamConfig) -> Result<(), anyh
 where
     T: SizedSample + FromSample<f32>,
 {
+    let args: Vec<String> = env::args().collect();
+    if args.len() < 2 {
+        panic!("Specify name of song: arpeggios");
+    }
+    let songname = &args[1];
+    let song = get_song(songname);
+
     let sample_rate = config.sample_rate.0 as f32;
     let channels = config.channels as usize;
     let mut sample_clock = 0f32;
-    let song = get_song();
     let pair = Arc::new((Mutex::new(false), Condvar::new()));
     let pair2 = Arc::clone(&pair);
     let mut next_value = move || -> (f32, f32) {
