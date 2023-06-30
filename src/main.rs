@@ -10,15 +10,28 @@ mod midi_notes;
 mod tremolo;
 mod ding_envelope;
 mod sequence;
+mod mix;
 mod songs;
 mod instruments;
+mod generative_waveform;
+mod square;
 
-use sound_source::sound_source::DynSoundSource;
+use sound_source::sound_source::{DynSoundSource, DynInstrument};
 
 // todo make command line args select the song to play
-fn get_song(songname: &String) -> DynSoundSource {
+fn get_song(songname: &String, instrument_name: &String, sample_rate: f32) -> DynSoundSource {
+    let instrument: DynInstrument;
+    if instrument_name == "vibraphone" {
+        instrument = Box::new(instruments::vibraphone::vibraphone::Vibraphone{});
+    } else if instrument_name == "kick" {
+        instrument = Box::new(instruments::kick::kick::Kick::new(sample_rate));
+    } else if instrument_name == "fuzzy" {
+        instrument = Box::new(instruments::fuzzy::fuzzy::Fuzzy::new(sample_rate));
+    } else {
+        panic!("Unkown instrument: '{}'", songname)
+    }
     if songname == "arpeggios" {
-        songs::arpeggios::arpeggios::arpeggios(Box::new(instruments::vibraphone::vibraphone::Vibraphone{}))
+        songs::arpeggios::arpeggios::arpeggios(instrument)
     } else {
         panic!("Unkown song: '{}'", songname)
     }
@@ -42,13 +55,14 @@ where
     T: SizedSample + FromSample<f32>,
 {
     let args: Vec<String> = env::args().collect();
-    if args.len() < 2 {
-        panic!("Specify name of song: arpeggios");
+    if args.len() < 3 {
+        panic!("Specify name of song and instrument: arpeggios vibraphone");
     }
     let songname = &args[1];
-    let song = get_song(songname);
+    let instrument_name = &args[2];
 
     let sample_rate = config.sample_rate.0 as f32;
+    let song = get_song(songname, instrument_name, sample_rate);
     let channels = config.channels as usize;
     let mut sample_clock = 0f32;
     let pair = Arc::new((Mutex::new(false), Condvar::new()));
@@ -84,12 +98,11 @@ where
 
         for frame in output.chunks_mut(channels) {
             let nexts = next_sample();
-            let value: (T, T) = (T::from_sample(nexts.0), T::from_sample(nexts.1));
             for sample in frame.iter_mut() {
                 *sample = T::from_sample(0.0);
             }
-            frame[0] = value.0;
-            frame[1] = value.1;
+            frame[0] = T::from_sample(nexts.0);
+            frame[1] = T::from_sample(nexts.1);
         }
     }
 
