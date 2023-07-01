@@ -22,7 +22,7 @@ impl Instrument for TriangleDing {
         Box::new(
         Tremolo::new(5.0, 0.5, Box::new(
             DingEnvelope::new(2.0, duration, Box::new(
-                Triangle::new(self.sample_rate, Knob::new_dc(freq), Knob::new_dc(strength), duration * 2.0)
+                Triangle::new(self.sample_rate, Knob::dc(freq), Knob::dc(strength), duration * 2.0)
             ))
         )))
     }

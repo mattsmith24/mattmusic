@@ -1,22 +1,20 @@
 pub mod pure_tone {
 
 use crate::traits::traits::SoundSource;
+use crate::knob::knob::Knob;
 
 pub struct PureTone {
-    freq: f32,
-    gain: f32,
+    freq: Knob,
+    gain: Knob,
     duration: f32,
 }
 
 impl PureTone {
     pub fn new(
-        freq: f32,
-        gain: f32,
+        freq: Knob,
+        gain: Knob,
         duration: f32
     ) -> Self {
-        if freq <= 0.0 {
-            panic!("freq must be greater than 0.0");
-        }
         PureTone{
             freq: freq,
             gain: gain,
@@ -30,7 +28,8 @@ impl SoundSource for PureTone {
         if t > self.duration {
             (0.0, 0.0)
         } else {
-            let val = (t * self.freq * 2.0 * std::f32::consts::PI).sin() * self.gain;
+            let val = (t * self.freq.next_value(t) * 2.0 * std::f32::consts::PI).sin()
+                * self.gain.next_value(t);
             (val, val)
         }
     }

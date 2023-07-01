@@ -12,7 +12,7 @@ impl Knob {
     pub fn new(input: DynSoundSource) -> Self {
         Knob { input: input, debug: false }
     }
-    pub fn new_dc(value: f32) -> Self {
+    pub fn dc(value: f32) -> Self {
         Knob { input: Box::new(DC::new(value, core::f32::MAX)), debug: false }
     }
     pub fn next_value(&self, t: f32) -> f32 {

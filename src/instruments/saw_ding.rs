@@ -22,7 +22,7 @@ impl Instrument for SawDing {
         Box::new(
         Tremolo::new(5.0, 0.5, Box::new(
             DingEnvelope::new(2.0, duration, Box::new(
-                Saw::new(self.sample_rate, Knob::new_dc(freq), Knob::new_dc(strength), duration * 2.0)
+                Saw::new(self.sample_rate, Knob::dc(freq), Knob::dc(strength), duration * 2.0)
             ))
         )))
     }

@@ -19,6 +19,7 @@ mod triangle;
 mod saw;
 mod dc;
 mod knob;
+mod lfo;
 
 use traits::traits::{DynSoundSource, DynInstrument};
 
