@@ -17,6 +17,8 @@ mod generative_waveform;
 mod square;
 mod triangle;
 mod saw;
+mod dc;
+mod knob;
 
 use traits::traits::{DynSoundSource, DynInstrument};
 
@@ -33,11 +35,15 @@ fn get_song(songname: &String, instrument_name: &String, sample_rate: f32) -> Dy
         instrument = Box::new(instruments::triangle_ding::triangle_ding::TriangleDing::new(sample_rate));
     } else if instrument_name == "saw_ding" {
         instrument = Box::new(instruments::saw_ding::saw_ding::SawDing::new(sample_rate));
+    } else if instrument_name == "experiment" {
+        instrument = Box::new(instruments::experiment::experiment::Experiment::new(sample_rate));
     } else {
         panic!("Unkown instrument: '{}'", songname)
     }
     if songname == "arpeggios" {
         songs::arpeggios::arpeggios::arpeggios(instrument)
+    } else if songname == "long_note" {
+        songs::long_note::long_note::long_note(instrument)
     } else {
         panic!("Unkown song: '{}'", songname)
     }

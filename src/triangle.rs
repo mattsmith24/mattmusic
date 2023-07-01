@@ -1,6 +1,7 @@
 pub mod triangle {
 
 use crate::traits::traits::SoundSource;
+use crate::knob::knob::Knob;
 use crate::generative_waveform::generative_waveform::GenerativeWaveform;
 
 pub struct Triangle {
@@ -10,8 +11,8 @@ pub struct Triangle {
 impl Triangle {
     pub fn new(
         sample_rate: f32,
-        freq: f32,
-        gain: f32,
+        freq: Knob,
+        gain: Knob,
         duration: f32
     ) -> Self {
         Triangle { generative_waveform: GenerativeWaveform::new(

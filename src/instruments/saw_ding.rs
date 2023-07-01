@@ -1,6 +1,7 @@
 pub mod saw_ding {
 
 use crate::traits::traits::{DynSoundSource, Instrument} ;
+use crate::knob::knob::Knob;
 use crate::saw::saw::Saw;
 use crate::tremolo::tremolo::Tremolo;
 use crate::ding_envelope::ding_envelope::DingEnvelope;
@@ -21,7 +22,7 @@ impl Instrument for SawDing {
         Box::new(
         Tremolo::new(5.0, 0.5, Box::new(
             DingEnvelope::new(2.0, duration, Box::new(
-                Saw::new(self.sample_rate, freq, strength, duration * 2.0)
+                Saw::new(self.sample_rate, Knob::new_dc(freq), Knob::new_dc(strength), duration * 2.0)
             ))
         )))
     }
