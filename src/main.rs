@@ -20,6 +20,7 @@ mod saw;
 mod dc;
 mod knob;
 mod lfo;
+mod envelope;
 
 use traits::traits::{DynSoundSource, DynInstrument};
 

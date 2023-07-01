@@ -1,24 +1,18 @@
 pub mod lfo {
 
-use crate::traits::traits::{SoundSource, DynSoundSource};
-use crate::knob::knob::Knob;
-use crate::mix::mix::Mix;
-use crate::pure_tone::pure_tone::PureTone;
-use crate::dc::dc::DC;
+use crate::traits::traits::SoundSource;
 
 pub struct LFO {
-    duration: f32,
-    source: Mix
+    dc_offset: f32,
+    freq: f32,
+    phase: f32,
+    depth: f32,
+    duration: f32
 }
 
 impl LFO {
-    pub fn new(dc_offset: f32, freq: f32, depth: f32, duration: f32,) -> Self {
-        let mut mix = Mix::new();
-        let dc = Box::new(DC::new(dc_offset, duration));
-        let wave = Box::new(PureTone::new(Knob::dc(freq), Knob::dc(depth), duration));
-        mix.add(dc);
-        mix.add(wave);
-        LFO { duration: duration, source: mix }
+    pub fn new(dc_offset: f32, freq: f32, phase: f32, depth: f32, duration: f32) -> Self {
+        LFO { dc_offset: dc_offset, freq: freq, phase: phase, depth: depth, duration: duration }
     }
 }
 impl SoundSource for LFO {
@@ -26,9 +20,13 @@ impl SoundSource for LFO {
         if t > self.duration {
             (0.0, 0.0)
         } else {
-            self.source.next_value(t)
+            let val = self.dc_offset
+                + ((t * self.freq + self.phase) * 2.0 * std::f32::consts::PI).sin()
+                    * self.depth;
+            (val, val)
         }
     }
+
     fn duration(&self) -> f32 {
         self.duration
     }
