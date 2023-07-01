@@ -4,7 +4,7 @@ pub mod generative_waveform {
 // https://github.com/RustAudio/cpal/blob/master/examples/synth_tones.rs
 // Apache License applies
 
-use crate::sound_source::sound_source::SoundSource;
+use crate::traits::traits::SoundSource;
         
 pub struct GenerativeWaveform {
     sample_rate: f32,

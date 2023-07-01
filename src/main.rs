@@ -4,7 +4,7 @@ use std::env;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{FromSample, Sample, SampleFormat, SizedSample};
 
-mod sound_source;
+mod traits;
 mod pure_tone;
 mod midi_notes;
 mod tremolo;
@@ -15,8 +15,10 @@ mod songs;
 mod instruments;
 mod generative_waveform;
 mod square;
+mod triangle;
+mod saw;
 
-use sound_source::sound_source::{DynSoundSource, DynInstrument};
+use traits::traits::{DynSoundSource, DynInstrument};
 
 // todo make command line args select the song to play
 fn get_song(songname: &String, instrument_name: &String, sample_rate: f32) -> DynSoundSource {
@@ -25,8 +27,12 @@ fn get_song(songname: &String, instrument_name: &String, sample_rate: f32) -> Dy
         instrument = Box::new(instruments::vibraphone::vibraphone::Vibraphone{});
     } else if instrument_name == "kick" {
         instrument = Box::new(instruments::kick::kick::Kick::new(sample_rate));
-    } else if instrument_name == "fuzzy" {
-        instrument = Box::new(instruments::fuzzy::fuzzy::Fuzzy::new(sample_rate));
+    } else if instrument_name == "square_ding" {
+        instrument = Box::new(instruments::square_ding::square_ding::SquareDing::new(sample_rate));
+    } else if instrument_name == "triangle_ding" {
+        instrument = Box::new(instruments::triangle_ding::triangle_ding::TriangleDing::new(sample_rate));
+    } else if instrument_name == "saw_ding" {
+        instrument = Box::new(instruments::saw_ding::saw_ding::SawDing::new(sample_rate));
     } else {
         panic!("Unkown instrument: '{}'", songname)
     }

@@ -1,6 +1,6 @@
 pub mod sequence {
 
-use crate::sound_source::sound_source::{SoundSource, DynSoundSource};
+use crate::traits::traits::{SoundSource, DynSoundSource};
 
 struct SequenceMember {
     sound_source: DynSoundSource,

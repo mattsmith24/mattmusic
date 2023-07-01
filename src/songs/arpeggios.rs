@@ -1,6 +1,6 @@
 pub mod arpeggios {
 
-use crate::sound_source::sound_source::{SoundSource, DynSoundSource, DynInstrument};
+use crate::traits::traits::{SoundSource, DynSoundSource, DynInstrument};
 use crate::midi_notes::midi_notes::note2freq;
 use crate::midi_notes::midi_notes as mn;
 use crate::sequence::sequence::Sequence;

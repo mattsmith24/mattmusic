@@ -1,6 +1,6 @@
 pub mod mix {
 
-    use crate::sound_source::sound_source::{SoundSource, DynSoundSource};
+    use crate::traits::traits::{SoundSource, DynSoundSource};
     use crate::sequence::sequence::Sequence;
     
     pub struct Mix

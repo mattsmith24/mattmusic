@@ -1,6 +1,6 @@
 pub mod kick {
 
-use crate::sound_source::sound_source::{DynSoundSource, Instrument} ;
+use crate::traits::traits::{DynSoundSource, Instrument} ;
 use crate::square::square::Square;
 use crate::pure_tone::pure_tone::PureTone;
 use crate::mix::mix::Mix;

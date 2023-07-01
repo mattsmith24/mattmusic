@@ -1,4 +1,4 @@
-pub mod sound_source {
+pub mod traits {
 pub trait SoundSource {
     fn next_value(&self, t: f32) -> (f32, f32);
     fn duration(&self) -> f32;

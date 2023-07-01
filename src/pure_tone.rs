@@ -1,6 +1,6 @@
 pub mod pure_tone {
 
-use crate::sound_source::sound_source::SoundSource;
+use crate::traits::traits::SoundSource;
 
 pub struct PureTone {
     freq: f32,

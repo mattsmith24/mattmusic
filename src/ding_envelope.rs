@@ -1,6 +1,6 @@
 pub mod ding_envelope {
 
-use crate::sound_source::sound_source::{SoundSource, DynSoundSource};
+use crate::traits::traits::{SoundSource, DynSoundSource};
 
 pub struct DingEnvelope {
     decay: f32,
