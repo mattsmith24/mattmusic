@@ -1,17 +1,18 @@
 pub mod lfo {
 
 use crate::traits::traits::SoundSource;
+use crate::knob::knob::Knob;
 
 pub struct LFO {
     dc_offset: f32,
     freq: f32,
     phase: f32,
-    depth: f32,
+    depth: Knob,
     duration: f32
 }
 
 impl LFO {
-    pub fn new(dc_offset: f32, freq: f32, phase: f32, depth: f32, duration: f32) -> Self {
+    pub fn new(dc_offset: f32, freq: f32, phase: f32, depth: Knob, duration: f32) -> Self {
         LFO { dc_offset: dc_offset, freq: freq, phase: phase, depth: depth, duration: duration }
     }
 }
@@ -22,7 +23,7 @@ impl SoundSource for LFO {
         } else {
             let val = self.dc_offset
                 + ((t * self.freq + self.phase) * 2.0 * std::f32::consts::PI).sin()
-                    * self.depth;
+                    * self.depth.next_value(t);
             (val, val)
         }
     }

@@ -21,6 +21,7 @@ mod dc;
 mod knob;
 mod lfo;
 mod envelope;
+mod multiply;
 
 use traits::traits::{DynSoundSource, DynInstrument};
 
