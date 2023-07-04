@@ -22,6 +22,7 @@ mod knob;
 mod lfo;
 mod envelope;
 mod multiply;
+mod low_pass_filter;
 
 use traits::traits::{DynSoundSource, DynInstrument};
 

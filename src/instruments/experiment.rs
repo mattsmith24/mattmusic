@@ -10,18 +10,19 @@ pub mod experiment {
     //use crate::mix::mix::Mix;
     use crate::envelope::envelope::{Envelope, EnvelopePoint};
     use crate::multiply::multiply::Multiply;
-    
-    
+    use crate::low_pass_filter::low_pass_filter::LowPassFilter;
+
+
     pub struct Experiment {
         sample_rate: f32,
     }
-    
+
     impl Experiment {
         pub fn new(sample_rate: f32) -> Self {
             Experiment { sample_rate: sample_rate }
         }
     }
-    
+
     impl Instrument for Experiment {
         fn play(&self, freq: f32, duration: f32, strength: f32) -> DynSoundSource {
             // A long volume envelope that strengthens in the middle then trails off
@@ -42,7 +43,7 @@ pub mod experiment {
             let mut multiplier = Multiply::new();
             multiplier.add(Box::new(envelope));
             multiplier.add(Box::new(clip_off));
-            
+
             // Apparently brass sounds can be made by frequency modulation proportional to the amplitude
             let mut points = Vec::<EnvelopePoint>::new();
             points.push(EnvelopePoint::new( 0.05,  1.0 ));
@@ -50,16 +51,22 @@ pub mod experiment {
             points.push(EnvelopePoint::new( 1.0,  1.0 ));
             points.push(EnvelopePoint::new( 3.85,  0.0 ));
             let envelope = Envelope::new(points);
+            //
             let freq_knob = Knob::new(Box::new(LFO::new(freq, freq, 0.0, Knob::new(Box::new(envelope)), duration)));
             //let freq_knob = Knob::dc(freq);
             // strength is the gain for oscillators
             let strength_knob = Knob::new(Box::new(multiplier));
-            Box::new(PureTone::new(
+            Box::new(LowPassFilter::new(
+                self.sample_rate,
+                Knob::dc(440.0),
+                6400.0,
+                Box::new(PureTone::new(
                 //self.sample_rate,
                 freq_knob,
                 strength_knob,
                 duration))
+            ))
         }
     }
-    
+
     }
