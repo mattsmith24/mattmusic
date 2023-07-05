@@ -18,6 +18,9 @@ pub struct LowPassFilter {
 
 impl LowPassFilter {
     pub fn new(sample_rate: f32, frequency_cutoff_hz: f32, transition_bandwidth_hz: f32, source: DynSoundSource) -> Self {
+        if transition_bandwidth_hz < frequency_cutoff_hz {
+            panic!("transition_bandwidth_hz should be greater than frequency_cutoff_hz");
+        }
         let b = transition_bandwidth_hz / sample_rate; // Transition band, as a fraction of the sampling rate (in (0, 0.5)).
         let mut filter_length: usize = (4.0 / b).ceil() as usize; // number of samples in filter
         if filter_length % 2 == 0 {
@@ -122,7 +125,7 @@ fn convolve(slices_a: (&[f32], &[f32]), slice_b: &[f32]) -> f32 {
         let b1 = slice_b[slices_a_full_len - n - 1];
         val += a1 * b1;
     }
-    val / slices_a_full_len as f32
+    val
 }
 
 impl SoundSource for LowPassFilter {
