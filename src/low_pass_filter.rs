@@ -28,25 +28,41 @@ impl LowPassFilter {
         let fc = frequency_cutoff_hz / sample_rate; // Cutoff frequency as a fraction of the sampling rate (in (0, 0.5)).
 
         // Compute sinc filter.
-        let mut h = Vec::<f32>::with_capacity(filter_length);
-        for i in 0..filter_length {
-            h.push(sinc(2.0 * fc * (i as i32 - (filter_length as i32 - 1) / 2) as f32));
-        }
+        // let mut h = Vec::<f32>::with_capacity(filter_length);
+        // for i in 0..filter_length {
+        //     // shift sinc function to fit array
+        //     let n = (i as i32 - (filter_length as i32 - 1) / 2) as f32;
+        //     h.push(sinc(2.0 * fc * n));
+        // }
 
         // Compute Blackman window.
-        let twopi = 2.0 * std::f32::consts::PI;
-        let mut w = Vec::<f32>::with_capacity(filter_length);
-        for i in 0..filter_length {
-            w.push(0.42 - 0.5 * (twopi * i as f32 / (filter_length - 1) as f32).cos()
-                + 0.08 * (2.0 * twopi * i as f32 / (filter_length - 1) as f32).cos());
-        }
+        // let twopi = 2.0 * std::f32::consts::PI;
+        // let len_minus_1 = (filter_length - 1) as f32;
+        // let mut w = Vec::<f32>::with_capacity(filter_length);
+        // for i in 0..filter_length {
+        //     len n = i as f32;
+        //     w.push(0.42 - 0.5 * (twopi * n / len_minus_1).cos()
+        //         + 0.08 * (2.0 * twopi * n / len_minus_1).cos());
+        // }
 
         // Multiply sinc filter by window.
-        h = vec_multiply_vec(&h, &w);
+        // h = vec_multiply_vec(&h, &w);
 
+        // Windowed Sinc Filter
+        let twopi = 2.0 * std::f32::consts::PI;
+        let len_minus_1 = (filter_length - 1) as f32;
+        let mut h = Vec::<f32>::with_capacity(filter_length);
+        for i in 0..filter_length {
+            let n = i as f32;
+            h.push(sinc(2.0 * fc * (n - len_minus_1 / 2.0))
+                * (0.42 - 0.5 * (twopi * n / len_minus_1).cos()
+                     + 0.08 * (2.0 * twopi * n / len_minus_1).cos()))
+        }
         // Normalize to get unity gain.
         let sum_h: f32 = h.iter().sum();
         h = vec_multiply_scalar(&h, 1.0 / sum_h);
+
+        // deques for samples (should be efficient way to store the last filter_length samples)
         let mut samples_left = VecDeque::<f32>::from(vec![0.0; filter_length]);
         let mut samples_right = VecDeque::<f32>::from(vec![0.0; filter_length]);
 
@@ -94,23 +110,19 @@ fn slices_get(slices: (&[f32], &[f32]), i: usize) -> f32 {
     }
 }
 
+// This is continuous convolution so we only calculate the window for the current sample.
 // slices_a: (&[f32], &[f32]) is designed to be the result of a DequeVec::as_slices()
+// slices_a assumed to equal same length as slice_b.
 // which returns a pair of slices which contain, in order, the contents of the deque
-fn convolve(slices_a: (&[f32], &[f32]), slice_b: &[f32]) -> Vec::<f32> {
+fn convolve(slices_a: (&[f32], &[f32]), slice_b: &[f32]) -> f32 {
     let slices_a_full_len = slices_a.0.len() + slices_a.1.len();
-    let mut output = Vec::<f32>::with_capacity(slices_a_full_len);
-    for shift in 0 .. slices_a_full_len + slice_b.len() - 1 {
-        let mut val = 0.0;
-        for n in 0 .. slices_a_full_len {
-            if shift as i32 - n as i32 >= 0 && shift as i32 - (n as i32) < slice_b.len() as i32 {
-                let a1 = slices_get(slices_a, n);
-                let b1 = slice_b[shift-n];
-                val += a1 * b1;
-            }
-        }
-        output.push(val);
+    let mut val = 0.0;
+    for n in 0 .. slices_a_full_len {
+        let a1 = slices_get(slices_a, n);
+        let b1 = slice_b[slices_a_full_len - n - 1];
+        val += a1 * b1;
     }
-    output
+    val / slices_a_full_len as f32
 }
 
 impl SoundSource for LowPassFilter {
@@ -124,7 +136,7 @@ impl SoundSource for LowPassFilter {
         // convolution
         let output_left = convolve(self.samples_left.as_slices(), &self.filter[..]);
         let output_right = convolve(self.samples_right.as_slices(), &self.filter[..]);
-        (output_left[self.filter.len() as usize], output_right[self.filter.len() as usize])
+        (output_left, output_right)
     }
 
     fn duration(&self) -> f32 {
