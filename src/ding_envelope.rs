@@ -23,7 +23,7 @@ impl DingEnvelope {
 }
 
 impl SoundSource for DingEnvelope {
-    fn next_value(&self, t: f32) -> (f32, f32) {
+    fn next_value(&mut self, t: f32) -> (f32, f32) {
         let source_val = (*self.source).next_value(t);
         let mut gain;
         const IMPULSE: f32 = 0.05;

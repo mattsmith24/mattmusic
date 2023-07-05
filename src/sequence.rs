@@ -45,7 +45,7 @@ impl Sequence {
 }
 
 impl SoundSource for Sequence {
-    fn next_value(&self, t: f32) -> (f32, f32) {
+    fn next_value(&mut self, t: f32) -> (f32, f32) {
         let mut res1: f32 = 0.0;
         let mut res2: f32 = 0.0;
         let duration = self.single_duration();
@@ -56,7 +56,7 @@ impl SoundSource for Sequence {
             repeat_count += 1;
         }
         if repeat_count < self.repeat {
-            for note in self.notes.iter() {
+            for note in self.notes.iter_mut() {
                 if t - time_offset >= note.start_time {
                     let (v1, v2) = (*note.sound_source).next_value(t - note.start_time - time_offset);
                     res1 += v1;

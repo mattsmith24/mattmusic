@@ -78,7 +78,7 @@ where
     let instrument_name = &args[2];
 
     let sample_rate = config.sample_rate.0 as f32;
-    let song = get_song(songname, instrument_name, sample_rate);
+    let mut song = get_song(songname, instrument_name, sample_rate);
     let channels = config.channels as usize;
     let mut sample_clock = 0f32;
     let pair = Arc::new((Mutex::new(false), Condvar::new()));

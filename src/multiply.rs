@@ -23,10 +23,10 @@ impl Multiply {
 }
 
 impl SoundSource for Multiply {
-    fn next_value(&self, t: f32) -> (f32, f32) {
+    fn next_value(&mut self, t: f32) -> (f32, f32) {
         let mut res1: f32 = 1.0;
         let mut res2: f32 = 1.0;
-        for source in self.sources.iter() {
+        for source in self.sources.iter_mut() {
             let (v1, v2) = (*source).next_value(t);
             res1 *= v1;
             res2 *= v2;

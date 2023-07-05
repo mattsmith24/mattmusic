@@ -27,7 +27,7 @@ impl Triangle {
 }
 
 impl SoundSource for Triangle {
-    fn next_value(&self, t: f32) -> (f32, f32) {
+    fn next_value(&mut self, t: f32) -> (f32, f32) {
         self.generative_waveform.next_value(t)
     }
 

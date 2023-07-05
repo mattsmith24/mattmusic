@@ -58,7 +58,7 @@ pub mod experiment {
             let strength_knob = Knob::new(Box::new(multiplier));
             Box::new(LowPassFilter::new(
                 self.sample_rate,
-                Knob::dc(440.0),
+                440.0,
                 6400.0,
                 Box::new(PureTone::new(
                 //self.sample_rate,

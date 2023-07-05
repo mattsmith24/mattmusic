@@ -17,7 +17,7 @@ impl LFO {
     }
 }
 impl SoundSource for LFO {
-    fn next_value(&self, t: f32) -> (f32, f32) {
+    fn next_value(&mut self, t: f32) -> (f32, f32) {
         if t > self.duration {
             (0.0, 0.0)
         } else {

@@ -23,7 +23,7 @@ impl Envelope {
     }
 }
 impl SoundSource for Envelope {
-    fn next_value(&self, t: f32) -> (f32, f32) {
+    fn next_value(&mut self, t: f32) -> (f32, f32) {
         let mut duration_sum = 0.0;
         let mut prev_value = 0.0;
         let mut output = 0.0;
