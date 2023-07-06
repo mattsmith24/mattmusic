@@ -23,6 +23,7 @@ mod lfo;
 mod envelope;
 mod multiply;
 mod low_pass_filter;
+mod pre_render;
 
 use traits::traits::{DynSoundSource, DynInstrument};
 

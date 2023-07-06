@@ -143,7 +143,8 @@ impl SoundSource for LowPassFilter {
     }
 
     fn duration(&self) -> f32 {
-        (*self.source).duration()
+        // add the filter delay to the duration
+        (*self.source).duration() + (self.filter.len() - 1 / 2) as f32 / self.sample_rate
     }
 }
 

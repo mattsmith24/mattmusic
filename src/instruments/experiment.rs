@@ -11,6 +11,7 @@ pub mod experiment {
     use crate::envelope::envelope::{Envelope, EnvelopePoint};
     use crate::multiply::multiply::Multiply;
     use crate::low_pass_filter::low_pass_filter::LowPassFilter;
+    use crate::pre_render::pre_render::PreRender;
 
 
     pub struct Experiment {
@@ -56,16 +57,18 @@ pub mod experiment {
             //let freq_knob = Knob::dc(freq);
             // strength is the gain for oscillators
             let strength_knob = Knob::new(Box::new(multiplier));
-            Box::new(LowPassFilter::new(
-                self.sample_rate,
-                800.0,
-                880.0,
-                Box::new(PureTone::new(
-                //self.sample_rate,
+            let pure_tone = PureTone::new(
                 freq_knob,
                 strength_knob,
-                duration))
-            ))
+                duration);
+            let low_pass = LowPassFilter::new(
+                self.sample_rate,
+                2000.0,
+                2110.0,
+                Box::new(pure_tone)
+            );
+            Box::new(PreRender::new(self.sample_rate, Box::new(low_pass)))
+            //Box::new(pure_tone)
         }
     }
 
