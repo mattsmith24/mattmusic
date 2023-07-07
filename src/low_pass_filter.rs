@@ -26,30 +26,9 @@ impl LowPassFilter {
         if filter_length % 2 == 0 {
             filter_length += 1  // Make sure that N is odd.
         }
-        println!("filter_length = {} samples ({} seconds)", filter_length, filter_length as f32 / sample_rate);
+        //println!("filter_length = {} samples ({} seconds)", filter_length, filter_length as f32 / sample_rate);
 
         let fc = frequency_cutoff_hz / sample_rate; // Cutoff frequency as a fraction of the sampling rate (in (0, 0.5)).
-
-        // Compute sinc filter.
-        // let mut h = Vec::<f32>::with_capacity(filter_length);
-        // for i in 0..filter_length {
-        //     // shift sinc function to fit array
-        //     let n = (i as i32 - (filter_length as i32 - 1) / 2) as f32;
-        //     h.push(sinc(2.0 * fc * n));
-        // }
-
-        // Compute Blackman window.
-        // let twopi = 2.0 * std::f32::consts::PI;
-        // let len_minus_1 = (filter_length - 1) as f32;
-        // let mut w = Vec::<f32>::with_capacity(filter_length);
-        // for i in 0..filter_length {
-        //     len n = i as f32;
-        //     w.push(0.42 - 0.5 * (twopi * n / len_minus_1).cos()
-        //         + 0.08 * (2.0 * twopi * n / len_minus_1).cos());
-        // }
-
-        // Multiply sinc filter by window.
-        // h = vec_multiply_vec(&h, &w);
 
         // Windowed Sinc Filter
         let twopi = 2.0 * std::f32::consts::PI;
@@ -66,8 +45,8 @@ impl LowPassFilter {
         h = vec_multiply_scalar(&h, 1.0 / sum_h);
 
         // deques for samples (should be efficient way to store the last filter_length samples)
-        let mut samples_left = VecDeque::<f32>::from(vec![0.0; filter_length]);
-        let mut samples_right = VecDeque::<f32>::from(vec![0.0; filter_length]);
+        let samples_left = VecDeque::<f32>::from(vec![0.0; filter_length]);
+        let samples_right = VecDeque::<f32>::from(vec![0.0; filter_length]);
 
         LowPassFilter {
             sample_rate: sample_rate,
@@ -91,14 +70,6 @@ fn vec_multiply_scalar(slice_a: &[f32], b:f32) -> Vec::<f32> {
     let mut output = Vec::<f32>::with_capacity(slice_a.len());
     for a in slice_a.iter() {
         output.push(a * b);
-    }
-    output
-}
-
-fn vec_multiply_vec(slice_a: &[f32], slice_b: &[f32]) -> Vec::<f32> {
-    let mut output = Vec::<f32>::with_capacity(slice_a.len());
-    for i in 0..slice_a.len() {
-        output.push(slice_a[i] * slice_b[i]);
     }
     output
 }

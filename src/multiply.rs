@@ -15,11 +15,6 @@ impl Multiply {
         self.sources.push(source);
         self
     }
-    
-    pub fn from_vec(sources: Vec::<DynSoundSource>) -> Self {
-        Multiply{ sources: sources }
-    }
-
 }
 
 impl SoundSource for Multiply {
@@ -36,7 +31,7 @@ impl SoundSource for Multiply {
     fn duration(&self) -> f32 {
         let mut duration: f32 = 0.0;
         for source in self.sources.iter() {
-            duration += (*source).duration();
+            duration = duration.max((*source).duration());
         }
         duration
     }

@@ -1,7 +1,7 @@
 pub mod envelope {
 
 use crate::traits::traits::SoundSource;
-    
+
 pub struct EnvelopePoint {
     time_offset: f32, // each time offset is relative to the previous point
     value: f32
@@ -24,16 +24,15 @@ impl Envelope {
 }
 impl SoundSource for Envelope {
     fn next_value(&mut self, t: f32) -> (f32, f32) {
-        let mut duration_sum = 0.0;
-        let mut prev_value = 0.0;
+        let mut point_start_time = 0.0;
         let mut output = 0.0;
         for point in &self.points {
-            if t < duration_sum + point.time_offset {
-                output = (t - duration_sum) / point.time_offset * (point.value - prev_value) + prev_value;
+            if t < point_start_time + point.time_offset {
+                output = (t - point_start_time) / point.time_offset * (point.value - output) + output;
                 break;
             } else {
-                duration_sum += point.time_offset;
-                prev_value = point.value;
+                point_start_time += point.time_offset;
+                output = point.value;
             }
         }
         (output, output)

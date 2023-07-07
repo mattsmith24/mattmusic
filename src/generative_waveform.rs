@@ -15,7 +15,7 @@ pub struct GenerativeWaveform {
     gain: Knob,
     duration: f32,
 }
-        
+
 impl GenerativeWaveform {
     pub fn new(
         sample_rate: f32,
@@ -42,7 +42,7 @@ impl GenerativeWaveform {
         (t * freq * two_pi).sin()
     }
 }
-        
+
 impl SoundSource for GenerativeWaveform {
     fn next_value(&mut self, t: f32) -> (f32, f32) {
         if t > self.duration {

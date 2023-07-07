@@ -22,7 +22,7 @@ impl Sequence {
         self.notes.push( SequenceMember { sound_source: note, start_time: start_time } );
         self
     }
-    
+
     // Use new for evenly spaced notes (or pass empty notes vector)
     pub fn new_with_sequence(bpm: f32, mut notes: Vec<DynSoundSource>, repeat: u32) -> Self {
         let mut seq = Sequence::new();

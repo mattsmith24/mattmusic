@@ -1,17 +1,22 @@
 pub mod experiment {
 
+    use std::path::Path;
+
     use crate::traits::traits::{DynSoundSource, Instrument} ;
     use crate::knob::knob::Knob;
-    //use crate::square::square::Square;
+    use crate::square::square::Square;
     //use crate::triangle::triangle::Triangle;
     use crate::pure_tone::pure_tone::PureTone;
-    //use crate::dc::dc::DC;
+    use crate::dc::dc::DC;
     use crate::lfo::lfo::LFO;
     //use crate::mix::mix::Mix;
     use crate::envelope::envelope::{Envelope, EnvelopePoint};
     use crate::multiply::multiply::Multiply;
     use crate::low_pass_filter::low_pass_filter::LowPassFilter;
     use crate::pre_render::pre_render::PreRender;
+    use crate::midi_notes::midi_notes::note2freq;
+    use crate::midi_notes::midi_notes as mn;
+
 
 
     pub struct Experiment {
@@ -26,49 +31,39 @@ pub mod experiment {
 
     impl Instrument for Experiment {
         fn play(&self, freq: f32, duration: f32, strength: f32) -> DynSoundSource {
-            // A long volume envelope that strengthens in the middle then trails off
+            let decay = 0.500;
             let mut points = Vec::<EnvelopePoint>::new();
-            points.push(EnvelopePoint::new( 0.05,  strength ));
-            points.push(EnvelopePoint::new( 0.1,  strength * 0.5 ));
-            points.push(EnvelopePoint::new( 1.0,  strength ));
-            points.push(EnvelopePoint::new( 3.85,  0.0 ));
+            points.push(EnvelopePoint::new( 0.001,  strength * 0.5 ));
+            points.push(EnvelopePoint::new( 0.005,  strength ));
+            points.push(EnvelopePoint::new( 0.060,  strength * 0.5 ));
+            points.push(EnvelopePoint::new( decay,  0.0 ));
             let envelope = Envelope::new(points);
-            // An envelope to ensure the start and end of the notes aren't discontinuities
-            // (avoids a pop sound at the start and end of notes)
-            let mut points2 = Vec::<EnvelopePoint>::new();
-            points2.push(EnvelopePoint::new( 0.001, 1.0 ));
-            points2.push(EnvelopePoint::new( duration - 0.002, 1.0 ));
-            points2.push(EnvelopePoint::new( 0.001, 0.0 ));
-            let clip_off = Envelope::new(points2);
-            // multiply the two envelopes to make them work together
-            let mut multiplier = Multiply::new();
-            multiplier.add(Box::new(envelope));
-            multiplier.add(Box::new(clip_off));
 
-            // Apparently brass sounds can be made by frequency modulation proportional to the amplitude
+            let upper = note2freq(5, mn::MIDI_OFFSET_G_SHARP);
+            let lower = note2freq(1, mn::MIDI_OFFSET_F);
+            let grad = upper - lower;
             let mut points = Vec::<EnvelopePoint>::new();
-            points.push(EnvelopePoint::new( 0.05,  1.0 ));
-            points.push(EnvelopePoint::new( 0.1,  0.5 ));
-            points.push(EnvelopePoint::new( 1.0,  1.0 ));
-            points.push(EnvelopePoint::new( 3.85,  0.0 ));
-            let envelope = Envelope::new(points);
-            //
-            let freq_knob = Knob::new(Box::new(LFO::new(freq, freq, 0.0, Knob::new(Box::new(envelope)), duration)));
-            //let freq_knob = Knob::dc(freq);
-            // strength is the gain for oscillators
-            let strength_knob = Knob::new(Box::new(multiplier));
-            let pure_tone = PureTone::new(
-                freq_knob,
-                strength_knob,
-                duration);
-            let low_pass = LowPassFilter::new(
+            points.push(EnvelopePoint::new( 0.001,  1.0 * grad + lower ));
+            points.push(EnvelopePoint::new( 0.005,  0.5 * grad + lower ));
+            points.push(EnvelopePoint::new( decay,  0.0 * grad + lower ));
+            let pitch_envelope = Envelope::new(points);
+
+            let mut pitch_scale = Multiply::new();
+            pitch_scale.add(Box::new(pitch_envelope));
+            pitch_scale.add(Box::new(DC::new(1.0, duration)));
+            let square = Square::new(
                 self.sample_rate,
-                2000.0,
-                2110.0,
-                Box::new(pure_tone)
-            );
-            Box::new(PreRender::new(self.sample_rate, Box::new(low_pass)))
-            //Box::new(pure_tone)
+                Knob::new(Box::new(pitch_scale)),
+                Knob::dc(1.0),
+                duration);
+            let mut multiply = Multiply::new();
+            multiply.add(Box::new(square));
+            multiply.add(Box::new(envelope));
+            // let multiply = PreRender::new(self.sample_rate, Box::new(multiply));
+            // if !Path::new("multiply.csv").exists() {
+            //     multiply.debug("multiply.csv");
+            // }
+            Box::new(multiply)
         }
     }
 

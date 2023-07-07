@@ -133,5 +133,5 @@ pub fn note2freq(octave: u8, pitch: u8) -> f32 {
     }
     MIDI_NOTES[offset as usize].3
 }
-    
+
 }

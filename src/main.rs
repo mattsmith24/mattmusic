@@ -42,6 +42,8 @@ fn get_song(songname: &String, instrument_name: &String, sample_rate: f32) -> Dy
         instrument = Box::new(instruments::saw_ding::saw_ding::SawDing::new(sample_rate));
     } else if instrument_name == "experiment" {
         instrument = Box::new(instruments::experiment::experiment::Experiment::new(sample_rate));
+    } else if instrument_name == "uphonium" {
+        instrument = Box::new(instruments::uphonium::uphonium::Uphonium::new(sample_rate));
     } else {
         panic!("Unkown instrument: '{}'", songname)
     }
@@ -49,6 +51,8 @@ fn get_song(songname: &String, instrument_name: &String, sample_rate: f32) -> Dy
         songs::arpeggios::arpeggios::arpeggios(instrument)
     } else if songname == "long_note" {
         songs::long_note::long_note::long_note(instrument)
+    } else if songname == "beats" {
+        songs::beats::beats::beats(instrument)
     } else {
         panic!("Unkown song: '{}'", songname)
     }
