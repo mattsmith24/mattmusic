@@ -10,16 +10,14 @@ pub struct Saw {
 
 impl Saw {
     pub fn new(
-        sample_rate: f32,
         freq: Knob,
         gain: Knob,
-        duration: f32
+        duration: i32
     ) -> Self {
         Saw { generative_waveform: GenerativeWaveform::new(
-            sample_rate,
             freq,
             1,
-            1.0,
+            1,
             gain,
             duration
         ) }
@@ -27,11 +25,11 @@ impl Saw {
 }
 
 impl SoundSource for Saw {
-    fn next_value(&mut self, t: f32) -> (f32, f32) {
-        self.generative_waveform.next_value(t)
+    fn next_value(&mut self, n: i32) -> (f32, f32) {
+        self.generative_waveform.next_value(n)
     }
 
-    fn duration(&self) -> f32 {
+    fn duration(&self) -> i32 {
         self.generative_waveform.duration()
     }
 }

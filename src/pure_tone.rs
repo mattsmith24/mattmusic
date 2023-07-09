@@ -6,14 +6,14 @@ use crate::knob::knob::Knob;
 pub struct PureTone {
     freq: Knob,
     gain: Knob,
-    duration: f32,
+    duration: i32,
 }
 
 impl PureTone {
     pub fn new(
         freq: Knob,
         gain: Knob,
-        duration: f32
+        duration: i32
     ) -> Self {
         PureTone{
             freq: freq,
@@ -24,17 +24,17 @@ impl PureTone {
 }
 
 impl SoundSource for PureTone {
-    fn next_value(&mut self, t: f32) -> (f32, f32) {
-        if t > self.duration {
+    fn next_value(&mut self, n: i32) -> (f32, f32) {
+        if n > self.duration {
             (0.0, 0.0)
         } else {
-            let val = (t * self.freq.next_value(t) * 2.0 * std::f32::consts::PI).sin()
-                * self.gain.next_value(t);
+            let val = (n as f32 * self.freq.next_value(n) * 2.0 * std::f32::consts::PI).sin()
+                * self.gain.next_value(n);
             (val, val)
         }
     }
 
-    fn duration(&self) -> f32 {
+    fn duration(&self) -> i32 {
         self.duration
     }
 }

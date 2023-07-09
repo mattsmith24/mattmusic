@@ -9,7 +9,6 @@ use std::collections::VecDeque;
 use crate::traits::traits::{SoundSource, DynSoundSource};
 
 pub struct LowPassFilter {
-    sample_rate: f32,
     filter: Vec::<f32>,
     source: DynSoundSource,
     samples_left: VecDeque::<f32>,
@@ -17,18 +16,18 @@ pub struct LowPassFilter {
 }
 
 impl LowPassFilter {
-    pub fn new(sample_rate: f32, frequency_cutoff_hz: f32, transition_bandwidth_hz: f32, source: DynSoundSource) -> Self {
+    pub fn new(sample_rate: i32, frequency_cutoff_hz: f32, transition_bandwidth_hz: f32, source: DynSoundSource) -> Self {
         if transition_bandwidth_hz < frequency_cutoff_hz {
             panic!("transition_bandwidth_hz should be greater than frequency_cutoff_hz");
         }
-        let b = transition_bandwidth_hz / sample_rate; // Transition band, as a fraction of the sampling rate (in (0, 0.5)).
+        let b = transition_bandwidth_hz / sample_rate as f32; // Transition band, as a fraction of the sampling rate (in (0, 0.5)).
         let mut filter_length: usize = (4.0 / b).ceil() as usize; // number of samples in filter
         if filter_length % 2 == 0 {
             filter_length += 1  // Make sure that N is odd.
         }
         //println!("filter_length = {} samples ({} seconds)", filter_length, filter_length as f32 / sample_rate);
 
-        let fc = frequency_cutoff_hz / sample_rate; // Cutoff frequency as a fraction of the sampling rate (in (0, 0.5)).
+        let fc = frequency_cutoff_hz / sample_rate as f32; // Cutoff frequency as a fraction of the sampling rate (in (0, 0.5)).
 
         // Windowed Sinc Filter
         let twopi = 2.0 * std::f32::consts::PI;
@@ -49,7 +48,6 @@ impl LowPassFilter {
         let samples_right = VecDeque::<f32>::from(vec![0.0; filter_length]);
 
         LowPassFilter {
-            sample_rate: sample_rate,
             filter: h,
             source: source,
             samples_left: samples_left,
@@ -100,8 +98,8 @@ fn convolve(slices_a: (&[f32], &[f32]), slice_b: &[f32]) -> f32 {
 }
 
 impl SoundSource for LowPassFilter {
-    fn next_value(&mut self, t: f32) -> (f32, f32) {
-        let s = (*self.source).next_value(t);
+    fn next_value(&mut self, n: i32) -> (f32, f32) {
+        let s = (*self.source).next_value(n);
         self.samples_left.push_back(s.0);
         self.samples_right.push_back(s.1);
         self.samples_left.pop_front();
@@ -113,9 +111,9 @@ impl SoundSource for LowPassFilter {
         (output_left, output_right)
     }
 
-    fn duration(&self) -> f32 {
+    fn duration(&self) -> i32 {
         // add the filter delay to the duration
-        (*self.source).duration() + (self.filter.len() - 1 / 2) as f32 / self.sample_rate
+        (*self.source).duration() + (self.filter.len() as i32 - 1 / 2)
     }
 }
 

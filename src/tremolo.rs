@@ -30,13 +30,13 @@ impl Tremolo {
 }
 
 impl SoundSource for Tremolo {
-    fn next_value(&mut self, t: f32) -> (f32, f32) {
-        let source_val = (*self.source).next_value(t);
-        let tremolo_gain = 1.0 - ((t * self.freq * 2.0 * std::f32::consts::PI).sin() + 1.0) * 0.5 * self.depth;
+    fn next_value(&mut self, n: i32) -> (f32, f32) {
+        let source_val = (*self.source).next_value(n);
+        let tremolo_gain = 1.0 - ((n as f32 * self.freq * 2.0 * std::f32::consts::PI).sin() + 1.0) * 0.5 * self.depth;
         (source_val.0 * tremolo_gain, source_val.1 * tremolo_gain)
     }
 
-    fn duration(&self) -> f32 {
+    fn duration(&self) -> i32 {
         (*self.source).duration()
     }
 }

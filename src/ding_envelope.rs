@@ -3,15 +3,15 @@ pub mod ding_envelope {
 use crate::traits::traits::{SoundSource, DynSoundSource};
 
 pub struct DingEnvelope {
-    decay: f32,
-    duration: f32,
+    decay: i32,
+    duration: i32,
     source: DynSoundSource,
 }
 
 impl DingEnvelope {
     pub fn new(
-        decay: f32,
-        duration: f32,
+        decay: i32,
+        duration: i32,
         source: DynSoundSource
     ) -> Self {
         DingEnvelope{
@@ -23,32 +23,32 @@ impl DingEnvelope {
 }
 
 impl SoundSource for DingEnvelope {
-    fn next_value(&mut self, t: f32) -> (f32, f32) {
-        let source_val = (*self.source).next_value(t);
+    fn next_value(&mut self, n: i32) -> (f32, f32) {
+        let source_val = (*self.source).next_value(n);
         let mut gain;
-        const IMPULSE: f32 = 0.05;
-        const FALLOFF: f32 = 0.1;
-        if t < IMPULSE {
+        const IMPULSE: i32 = 220;
+        const FALLOFF: i32 = 4400;
+        if n < IMPULSE {
             gain = 1.0;
-        } else if t < FALLOFF {
+        } else if n < FALLOFF {
             // IMPULSE < t < FALLOFF, gain from 1.0 to 0.5
-            gain = 1.0 + (t - IMPULSE) * -0.5 / (FALLOFF - IMPULSE);
+            gain = 1.0 + (n - IMPULSE) as f32 * -0.5 / (FALLOFF - IMPULSE) as f32;
         } else {
             // FALLOFF < t < decay, gain from 0.5 to 0
-            gain = 0.5 + (t - FALLOFF) * -0.5 / (self.decay - FALLOFF);
+            gain = 0.5 + (n - FALLOFF) as f32 * -0.5 / (self.decay - FALLOFF) as f32;
         }
-        const LIFT: f32 = 0.001;
-        if t > self.duration - LIFT {
+        const LIFT: i32 = 44;
+        if n > self.duration - LIFT {
             // ramp down to end of note to avoid discontinuity
-            gain *= 1.0 - (t - (self.duration - LIFT)) / LIFT;
+            gain *= 1.0 - (n - (self.duration - LIFT)) as f32 / LIFT as f32;
         }
-        if gain < 0.0 || t > self.duration {
+        if gain < 0.0 || n > self.duration {
             gain = 0.0;
         }
         (source_val.0 * gain, source_val.1 * gain)
     }
 
-    fn duration(&self) -> f32 {
+    fn duration(&self) -> i32 {
         self.decay.min(self.duration).min((*self.source).duration())
     }
 }

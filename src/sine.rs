@@ -1,22 +1,23 @@
-pub mod square {
+pub mod sine {
 
 use crate::traits::traits::SoundSource;
 use crate::knob::knob::Knob;
 use crate::generative_waveform::generative_waveform::GenerativeWaveform;
 
-pub struct Square {
+pub struct Sine {
     generative_waveform: GenerativeWaveform
 }
 
-impl Square {
+impl Sine {
     pub fn new(
+        sample_rate: i32,
         freq: Knob,
         gain: Knob,
         duration: i32
     ) -> Self {
-        Square { generative_waveform: GenerativeWaveform::new(
+        Sine { generative_waveform: GenerativeWaveform::new(
             freq,
-            2,
+            sample_rate,
             1,
             gain,
             duration
@@ -24,7 +25,7 @@ impl Square {
     }
 }
 
-impl SoundSource for Square {
+impl SoundSource for Sine {
     fn next_value(&mut self, n: i32) -> (f32, f32) {
         self.generative_waveform.next_value(n)
     }

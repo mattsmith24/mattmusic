@@ -11,30 +11,34 @@ pub mod uphonium {
 
 
     pub struct Uphonium {
-        sample_rate: f32,
+        sample_rate: i32,
     }
 
     impl Uphonium {
-        pub fn new(sample_rate: f32) -> Self {
+        pub fn new(sample_rate: i32) -> Self {
             Uphonium { sample_rate: sample_rate }
+        }
+
+        fn t2n(&self, t: f32) -> i32 {
+            (t * self.sample_rate as f32).round() as i32
         }
     }
 
     impl Instrument for Uphonium {
-        fn play(&self, freq: f32, duration: f32, strength: f32) -> DynSoundSource {
+        fn play(&self, freq: f32, duration: i32, strength: f32) -> DynSoundSource {
             // A long volume envelope that strengthens in the middle then trails off
             let mut points = Vec::<EnvelopePoint>::new();
-            points.push(EnvelopePoint::new( 0.05,  strength ));
-            points.push(EnvelopePoint::new( 0.1,  strength * 0.5 ));
-            points.push(EnvelopePoint::new( 1.0,  strength ));
-            points.push(EnvelopePoint::new( 3.85,  0.0 ));
+            points.push(EnvelopePoint::new( self.t2n(0.05),  strength ));
+            points.push(EnvelopePoint::new( self.t2n(0.1),  strength * 0.5 ));
+            points.push(EnvelopePoint::new( self.t2n(1.0),  strength ));
+            points.push(EnvelopePoint::new( self.t2n(3.85),  0.0 ));
             let envelope = Envelope::new(points);
             // An envelope to ensure the start and end of the notes aren't discontinuities
             // (avoids a pop sound at the start and end of notes)
             let mut points2 = Vec::<EnvelopePoint>::new();
-            points2.push(EnvelopePoint::new( 0.001, 1.0 ));
-            points2.push(EnvelopePoint::new( duration - 0.002, 1.0 ));
-            points2.push(EnvelopePoint::new( 0.001, 0.0 ));
+            points2.push(EnvelopePoint::new( self.t2n(0.001), 1.0 ));
+            points2.push(EnvelopePoint::new( duration - self.t2n(0.002), 1.0 ));
+            points2.push(EnvelopePoint::new( self.t2n(0.001), 0.0 ));
             let clip_off = Envelope::new(points2);
             // multiply the two envelopes to make them work together
             let mut multiplier = Multiply::new();
@@ -42,11 +46,12 @@ pub mod uphonium {
             multiplier.add(Box::new(clip_off));
 
             // Apparently brass sounds can be made by frequency modulation proportional to the amplitude
+            let pitch_envelope_gain = 1.0 / self.sample_rate as f32;
             let mut points = Vec::<EnvelopePoint>::new();
-            points.push(EnvelopePoint::new( 0.05,  1.0 ));
-            points.push(EnvelopePoint::new( 0.1,  0.5 ));
-            points.push(EnvelopePoint::new( 1.0,  1.0 ));
-            points.push(EnvelopePoint::new( 3.85,  0.0 ));
+            points.push(EnvelopePoint::new( self.t2n(0.05),  1.0 * pitch_envelope_gain ));
+            points.push(EnvelopePoint::new( self.t2n(0.1),  0.5 * pitch_envelope_gain ));
+            points.push(EnvelopePoint::new( self.t2n(1.0),  1.0 * pitch_envelope_gain ));
+            points.push(EnvelopePoint::new( self.t2n(3.85),  0.0 ));
             let envelope = Envelope::new(points);
             //
             let freq_knob = Knob::new(Box::new(LFO::new(freq, freq, 0.0, Knob::new(Box::new(envelope)), duration)));
@@ -62,7 +67,7 @@ pub mod uphonium {
                 2110.0,
                 Box::new(pure_tone)
             );
-            Box::new(PreRender::new(self.sample_rate, Box::new(low_pass)))
+            Box::new(PreRender::new(Box::new(low_pass)))
         }
     }
 

@@ -24,14 +24,15 @@ mod envelope;
 mod multiply;
 mod low_pass_filter;
 mod pre_render;
+mod sine;
 
 use traits::traits::{DynSoundSource, DynInstrument};
 
 // todo make command line args select the song to play
-fn get_song(songname: &String, instrument_name: &String, sample_rate: f32) -> DynSoundSource {
+fn get_song(songname: &String, instrument_name: &String, sample_rate: i32) -> DynSoundSource {
     let instrument: DynInstrument;
     if instrument_name == "vibraphone" {
-        instrument = Box::new(instruments::vibraphone::vibraphone::Vibraphone{});
+        instrument = Box::new(instruments::vibraphone::vibraphone::Vibraphone::new(sample_rate));
     } else if instrument_name == "kick" {
         instrument = Box::new(instruments::kick::kick::Kick::new(sample_rate));
     } else if instrument_name == "square_ding" {
@@ -48,11 +49,11 @@ fn get_song(songname: &String, instrument_name: &String, sample_rate: f32) -> Dy
         panic!("Unkown instrument: '{}'", songname)
     }
     if songname == "arpeggios" {
-        songs::arpeggios::arpeggios::arpeggios(instrument)
+        songs::arpeggios::arpeggios::arpeggios(sample_rate, instrument)
     } else if songname == "long_note" {
-        songs::long_note::long_note::long_note(instrument)
+        songs::long_note::long_note::long_note(sample_rate, instrument)
     } else if songname == "beats" {
-        songs::beats::beats::beats(instrument)
+        songs::beats::beats::beats(sample_rate, instrument)
     } else {
         panic!("Unkown song: '{}'", songname)
     }
@@ -82,23 +83,22 @@ where
     let songname = &args[1];
     let instrument_name = &args[2];
 
-    let sample_rate = config.sample_rate.0 as f32;
+    let sample_rate = config.sample_rate.0 as i32;
     let mut song = get_song(songname, instrument_name, sample_rate);
     let channels = config.channels as usize;
-    let mut sample_clock = 0f32;
+    let mut sample_clock = 0i32;
     let pair = Arc::new((Mutex::new(false), Condvar::new()));
     let pair2 = Arc::clone(&pair);
     let mut next_value = move || -> (f32, f32) {
         let (lock, cvar) = &*pair2;
-        sample_clock = sample_clock + 1.0;
-        let t: f32 = sample_clock / sample_rate;
-        if t > (*song).duration() {
+        sample_clock = sample_clock + 1;
+        if sample_clock > (*song).duration() {
             let mut done = lock.lock().unwrap();
             *done = true;
             cvar.notify_one();
             (0.0, 0.0)
         } else {
-            (*song).next_value(t)
+            (*song).next_value(sample_clock)
         }
     };
 
@@ -112,8 +112,8 @@ where
         err_fn,
         None
     )?;
-    
-    fn write_data<T>(output: &mut [T], channels: usize, next_sample: &mut dyn FnMut() -> (f32, f32)) 
+
+    fn write_data<T>(output: &mut [T], channels: usize, next_sample: &mut dyn FnMut() -> (f32, f32))
     where T: Sample + FromSample<f32>,
     {
 

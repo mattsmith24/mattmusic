@@ -12,10 +12,10 @@ impl Knob {
         Knob { input: input }
     }
     pub fn dc(value: f32) -> Self {
-        Knob { input: Box::new(DC::new(value, core::f32::MAX)) }
+        Knob { input: Box::new(DC::new(value, core::i32::MAX)) }
     }
-    pub fn next_value(&mut self, t: f32) -> f32 {
-        (*self.input).next_value(t).0
+    pub fn next_value(&mut self, n: i32) -> f32 {
+        (*self.input).next_value(n).0
     }
 }
 
