@@ -13,9 +13,9 @@ pub struct GenerativeWaveform {
     gain_exponent: i32,
     gain: Knob,
     duration: i32,
-    // next_clock: u32,
-    // period_lock: u32,
-    // phase_adjusn: i32
+    next_clock: i32,
+    freq_lock: f32,
+    phase_adjust: f32
 }
 
 impl GenerativeWaveform {
@@ -32,17 +32,17 @@ impl GenerativeWaveform {
             gain_exponent: gain_exponent,
             gain: gain,
             duration: duration,
-            // next_clock: 0,
-            // period_lock: 0,
-            // phase_adjust: 0.0
+            next_clock: 0,
+            freq_lock: 0.0,
+            phase_adjust: 0.0
         }
     }
     fn is_freq_above_nyquist(&self, freq: f32) -> bool {
         freq > 0.5
     }
-    fn calculate_sine_output_from_freq(&self, freq: f32, n:i32) -> f32 {
+    fn calculate_sine_output_from_freq(&self, freq: f32, phase: f32, n:i32) -> f32 {
         let two_pi = 2.0 * std::f32::consts::PI;
-        (n as f32 * freq * two_pi).sin()
+        ((n as f32 * freq + phase) * two_pi).sin()
     }
 }
 
@@ -52,13 +52,27 @@ impl SoundSource for GenerativeWaveform {
             (0.0, 0.0)
         } else {
             let mut output = 0.0;
-            let freq = self.freq.next_value(n);
             let base_gain = self.gain.next_value(n);
+            // Use a clock to lock the frequency for each cycle. This prevents phase artifacts
+            // resulting from a constantly varying frequency input.
+            // n == 0 is used to reset when replaying the sound
+            if n == 0 {
+                self.next_clock = 0;
+            }
+            if n >= self.next_clock {
+                let freq = self.freq.next_value(n);
+                // calc period from desired frequency
+                self.next_clock += (1.0 / freq).round() as i32;
+                // lock the frequency until the next clock
+                self.freq_lock = freq;
+                // subtract any phase at this value of n so that we start the waveform at 0
+                self.phase_adjust = -freq * n as f32;
+            }
             let mut i = 1;
-            while !self.is_freq_above_nyquist(i as f32 * freq) {
+            while !self.is_freq_above_nyquist(i as f32 * self.freq_lock) {
                 let gain = 1.0 / (i as f32).powf(self.gain_exponent as f32);
                 output += base_gain * gain * self.calculate_sine_output_from_freq(
-                    freq * i as f32, n);
+                    self.freq_lock * i as f32, self.phase_adjust * i as f32, n);
                 i += self.harmonic_index_increment;
             }
             (output, output)

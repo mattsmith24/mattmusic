@@ -34,7 +34,7 @@ pub mod experiment {
 
     impl Instrument for Experiment {
         fn play(&self, _freq: f32, duration: i32, strength: f32) -> DynSoundSource {
-            let decay = 0.500;
+            let decay = 0.250;
             let mut points = Vec::<EnvelopePoint>::new();
             points.push(EnvelopePoint::new( self.t2n(0.000),  strength * 0.5 ));
             points.push(EnvelopePoint::new( self.t2n(0.005),  strength ));
@@ -42,8 +42,8 @@ pub mod experiment {
             points.push(EnvelopePoint::new( self.t2n(decay),  0.0 ));
             let envelope = Envelope::new(points);
 
-            let upper = note2freq(5, mn::MIDI_OFFSET_G_SHARP) / self.sample_rate as f32;
-            let lower = note2freq(1, mn::MIDI_OFFSET_F) / self.sample_rate as f32;
+            let upper = note2freq(5, mn::MIDI_OFFSET_G_SHARP) * 0.25 / self.sample_rate as f32;
+            let lower = note2freq(1, mn::MIDI_OFFSET_F) * 0.25 / self.sample_rate as f32;
             let grad = upper - lower;
             let mut points = Vec::<EnvelopePoint>::new();
             points.push(EnvelopePoint::new( self.t2n(0.000),  1.0 * grad + lower ));
@@ -61,7 +61,7 @@ pub mod experiment {
             let mut multiply = Multiply::new();
             multiply.add(Box::new(square));
             multiply.add(Box::new(envelope));
-            // let multiply = PreRender::new(Box::new(multiply));
+            let multiply = PreRender::new(Box::new(multiply));
             // if !Path::new("multiply.csv").exists() {
             //     let _ = multiply.debug("multiply.csv");
             // }

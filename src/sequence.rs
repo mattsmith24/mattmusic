@@ -51,7 +51,7 @@ impl SoundSource for Sequence {
         let duration = self.single_duration();
         let mut time_offset: i32 = 0;
         let mut repeat_count: u32 = 0;
-        while n - time_offset > duration {
+        while n - time_offset >= duration {
             time_offset += duration;
             repeat_count += 1;
         }
