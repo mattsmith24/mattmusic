@@ -62,9 +62,8 @@ pub mod uphonium {
                 strength_knob,
                 duration);
             let low_pass = LowPassFilter::new(
-                self.sample_rate,
-                2000.0,
-                2110.0,
+                Knob::dc(2000.0/self.sample_rate as f32),
+                100,
                 Box::new(pure_tone)
             );
             Box::new(PreRender::new(Box::new(low_pass)))

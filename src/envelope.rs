@@ -2,6 +2,7 @@ pub mod envelope {
 
 use crate::traits::traits::SoundSource;
 
+#[derive(Clone)]
 pub struct EnvelopePoint {
     time_offset: i32, // each time offset is relative to the previous point
     value: f32
@@ -13,6 +14,7 @@ impl EnvelopePoint {
     }
 }
 
+#[derive(Clone)]
 pub struct Envelope {
     points: Vec::<EnvelopePoint>
 }

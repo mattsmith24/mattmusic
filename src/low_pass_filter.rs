@@ -7,48 +7,31 @@ pub mod low_pass_filter {
 //b = 0.08
 use std::collections::VecDeque;
 use crate::traits::traits::{SoundSource, DynSoundSource};
+use crate::knob::knob::Knob;
 
 pub struct LowPassFilter {
-    filter: Vec::<f32>,
+    filter_length: usize,
+    frequency_cutoff: Knob,
     source: DynSoundSource,
     samples_left: VecDeque::<f32>,
     samples_right: VecDeque::<f32>,
 }
 
 impl LowPassFilter {
-    pub fn new(sample_rate: i32, frequency_cutoff_hz: f32, transition_bandwidth_hz: f32, source: DynSoundSource) -> Self {
-        if transition_bandwidth_hz < frequency_cutoff_hz {
-            panic!("transition_bandwidth_hz should be greater than frequency_cutoff_hz");
-        }
-        let b = transition_bandwidth_hz / sample_rate as f32; // Transition band, as a fraction of the sampling rate (in (0, 0.5)).
-        let mut filter_length: usize = (4.0 / b).ceil() as usize; // number of samples in filter
+    pub fn new(frequency_cutoff: Knob, filter_length: usize, source: DynSoundSource) -> Self {
+        let mut fl = filter_length;
         if filter_length % 2 == 0 {
-            filter_length += 1  // Make sure that N is odd.
+            fl += 1  // Make sure that N is odd.
         }
         //println!("filter_length = {} samples ({} seconds)", filter_length, filter_length as f32 / sample_rate);
-
-        let fc = frequency_cutoff_hz / sample_rate as f32; // Cutoff frequency as a fraction of the sampling rate (in (0, 0.5)).
-
-        // Windowed Sinc Filter
-        let twopi = 2.0 * std::f32::consts::PI;
-        let len_minus_1 = (filter_length - 1) as f32;
-        let mut h = Vec::<f32>::with_capacity(filter_length);
-        for i in 0..filter_length {
-            let n = i as f32;
-            h.push(sinc(2.0 * fc * (n - len_minus_1 / 2.0))
-                * (0.42 - 0.5 * (twopi * n / len_minus_1).cos()
-                     + 0.08 * (2.0 * twopi * n / len_minus_1).cos()))
-        }
-        // Normalize to get unity gain.
-        let sum_h: f32 = h.iter().sum();
-        h = vec_multiply_scalar(&h, 1.0 / sum_h);
 
         // deques for samples (should be efficient way to store the last filter_length samples)
         let samples_left = VecDeque::<f32>::from(vec![0.0; filter_length]);
         let samples_right = VecDeque::<f32>::from(vec![0.0; filter_length]);
 
         LowPassFilter {
-            filter: h,
+            filter_length: fl,
+            frequency_cutoff: frequency_cutoff,
             source: source,
             samples_left: samples_left,
             samples_right: samples_right
@@ -105,15 +88,31 @@ impl SoundSource for LowPassFilter {
         self.samples_left.pop_front();
         self.samples_right.pop_front();
 
+        let fc = self.frequency_cutoff.next_value(n);
+
+        // Windowed Sinc Filter
+        let twopi = 2.0 * std::f32::consts::PI;
+        let len_minus_1 = (self.filter_length - 1) as f32;
+        let mut h = Vec::<f32>::with_capacity(self.filter_length);
+        for i in 0..self.filter_length {
+            let n = i as f32;
+            h.push(sinc(2.0 * fc * (n - len_minus_1 / 2.0))
+                * (0.42 - 0.5 * (twopi * n / len_minus_1).cos()
+                     + 0.08 * (2.0 * twopi * n / len_minus_1).cos()))
+        }
+        // Normalize to get unity gain.
+        let sum_h: f32 = h.iter().sum();
+        h = vec_multiply_scalar(&h, 1.0 / sum_h);
+
         // convolution
-        let output_left = convolve(self.samples_left.as_slices(), &self.filter[..]);
-        let output_right = convolve(self.samples_right.as_slices(), &self.filter[..]);
+        let output_left = convolve(self.samples_left.as_slices(), &h[..]);
+        let output_right = convolve(self.samples_right.as_slices(), &h[..]);
         (output_left, output_right)
     }
 
     fn duration(&self) -> i32 {
         // add the filter delay to the duration
-        (*self.source).duration() + (self.filter.len() as i32 - 1 / 2)
+        (*self.source).duration() + (self.filter_length as i32 - 1 / 2)
     }
 }
 

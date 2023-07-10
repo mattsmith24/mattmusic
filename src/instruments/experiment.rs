@@ -12,10 +12,11 @@ pub mod experiment {
     //use crate::mix::mix::Mix;
     use crate::envelope::envelope::{Envelope, EnvelopePoint};
     use crate::multiply::multiply::Multiply;
-    //use crate::low_pass_filter::low_pass_filter::LowPassFilter;
+    use crate::low_pass_filter::low_pass_filter::LowPassFilter;
     use crate::pre_render::pre_render::PreRender;
     use crate::midi_notes::midi_notes::note2freq;
     use crate::midi_notes::midi_notes as mn;
+    use crate::time_box::time_box::TimeBox;
 
 
 
@@ -33,8 +34,8 @@ pub mod experiment {
     }
 
     impl Instrument for Experiment {
-        fn play(&self, _freq: f32, duration: i32, strength: f32) -> DynSoundSource {
-            let decay = 0.250;
+        fn play(&self, freq: f32, duration: i32, strength: f32) -> DynSoundSource {
+            let decay = 0.100;
             let mut points = Vec::<EnvelopePoint>::new();
             points.push(EnvelopePoint::new( self.t2n(0.000),  strength * 0.5 ));
             points.push(EnvelopePoint::new( self.t2n(0.005),  strength ));
@@ -42,30 +43,40 @@ pub mod experiment {
             points.push(EnvelopePoint::new( self.t2n(decay),  0.0 ));
             let envelope = Envelope::new(points);
 
-            let upper = note2freq(5, mn::MIDI_OFFSET_G_SHARP) * 0.25 / self.sample_rate as f32;
-            let lower = note2freq(1, mn::MIDI_OFFSET_F) * 0.25 / self.sample_rate as f32;
+            let upper = freq / 2.0;
+            let lower = freq / 4.0;
             let grad = upper - lower;
             let mut points = Vec::<EnvelopePoint>::new();
             points.push(EnvelopePoint::new( self.t2n(0.000),  1.0 * grad + lower ));
             points.push(EnvelopePoint::new( self.t2n(0.005),  0.5 * grad + lower ));
             points.push(EnvelopePoint::new( self.t2n(decay),  0.0 * grad + lower ));
             let pitch_envelope = Envelope::new(points);
-
+            let filter_envelope = pitch_envelope.clone();
             let mut pitch_scale = Multiply::new();
             pitch_scale.add(Box::new(pitch_envelope));
-            pitch_scale.add(Box::new(DC::new(0.5, duration)));
+            pitch_scale.add(Box::new(DC::new(1.0, duration)));
             let square = Square::new(
                 Knob::new(Box::new(pitch_scale)),
                 Knob::dc(1.0),
                 duration);
+            let mut filter_envelope_scale = Multiply::new();
+            filter_envelope_scale.add(Box::new(filter_envelope));
+            filter_envelope_scale.add(Box::new(DC::new(1.0, duration)));
+            let filter = LowPassFilter::new(
+                Knob::new(Box::new(filter_envelope_scale)),
+                300,
+                Box::new(square));
             let mut multiply = Multiply::new();
-            multiply.add(Box::new(square));
+            multiply.add(Box::new(filter));
             multiply.add(Box::new(envelope));
-            let multiply = PreRender::new(Box::new(multiply));
+
+            let timebox = TimeBox::new(duration, Box::new(multiply));
+
+            let output = PreRender::new(Box::new(timebox));
             // if !Path::new("multiply.csv").exists() {
             //     let _ = multiply.debug("multiply.csv");
             // }
-            Box::new(multiply)
+            Box::new(output)
         }
     }
 
