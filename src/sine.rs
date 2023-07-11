@@ -10,14 +10,13 @@ pub struct Sine {
 
 impl Sine {
     pub fn new(
-        sample_rate: i32,
         freq: Knob,
         gain: Knob,
         duration: i32
     ) -> Self {
         Sine { generative_waveform: GenerativeWaveform::new(
             freq,
-            sample_rate,
+            1000000000, // A really high number so we don't add any frequencies
             1,
             gain,
             duration
