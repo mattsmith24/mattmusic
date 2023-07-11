@@ -26,6 +26,7 @@ mod low_pass_filter;
 mod pre_render;
 mod sine;
 mod time_box;
+mod noise;
 
 use traits::traits::{DynSoundSource, DynInstrument};
 

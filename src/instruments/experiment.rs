@@ -1,6 +1,6 @@
 pub mod experiment {
 
-    use std::path::Path;
+    //use std::path::Path;
 
     use crate::traits::traits::{DynSoundSource, Instrument} ;
     use crate::knob::knob::Knob;
@@ -9,16 +9,15 @@ pub mod experiment {
     //use crate::pure_tone::pure_tone::PureTone;
     use crate::dc::dc::DC;
     //use crate::lfo::lfo::LFO;
-    //use crate::mix::mix::Mix;
+    use crate::mix::mix::Mix;
     use crate::envelope::envelope::{Envelope, EnvelopePoint};
     use crate::multiply::multiply::Multiply;
     use crate::low_pass_filter::low_pass_filter::LowPassFilter;
     use crate::pre_render::pre_render::PreRender;
-    use crate::midi_notes::midi_notes::note2freq;
-    use crate::midi_notes::midi_notes as mn;
+    //use crate::midi_notes::midi_notes::note2freq;
+    //use crate::midi_notes::midi_notes as mn;
     use crate::time_box::time_box::TimeBox;
-
-
+    use crate::noise::noise::Noise;
 
     pub struct Experiment {
         sample_rate: i32,
@@ -43,7 +42,7 @@ pub mod experiment {
             points.push(EnvelopePoint::new( self.t2n(decay),  0.0 ));
             let envelope = Envelope::new(points);
 
-            let upper = freq / 2.0;
+            let upper = freq / 3.0;
             let lower = freq / 4.0;
             let grad = upper - lower;
             let mut points = Vec::<EnvelopePoint>::new();
@@ -59,13 +58,19 @@ pub mod experiment {
                 Knob::new(Box::new(pitch_scale)),
                 Knob::dc(1.0),
                 duration);
+
+            let noise = Noise::new(duration);
+            let mut mix = Mix::new();
+            mix.add(Box::new(square));
+            mix.add(Box::new(noise));
+
             let mut filter_envelope_scale = Multiply::new();
             filter_envelope_scale.add(Box::new(filter_envelope));
             filter_envelope_scale.add(Box::new(DC::new(1.0, duration)));
             let filter = LowPassFilter::new(
                 Knob::new(Box::new(filter_envelope_scale)),
                 300,
-                Box::new(square));
+                Box::new(mix));
             let mut multiply = Multiply::new();
             multiply.add(Box::new(filter));
             multiply.add(Box::new(envelope));
