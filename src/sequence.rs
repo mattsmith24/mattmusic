@@ -10,16 +10,18 @@ struct SequenceMember {
 pub struct Sequence {
     notes: Vec<SequenceMember>,
     repeat: u32,
+    duration: i32
 }
 
 impl Sequence {
     pub fn new() -> Self {
-        Sequence{ notes: Vec::<SequenceMember>::new(), repeat: 1 }
+        Sequence{ notes: Vec::<SequenceMember>::new(), repeat: 1, duration: 0 }
     }
 
     // Add notes into the sequence at arbitrary time offsets
     pub fn add(&mut self, start_time: i32, note: DynSoundSource) -> &mut Sequence {
         self.notes.push( SequenceMember { sound_source: note, start_time: start_time } );
+        self.duration = self.calculate_duration();
         self
     }
 
@@ -32,10 +34,18 @@ impl Sequence {
             seq.add(t_idx, note);
             t_idx += period;
         }
+        seq.duration = seq.notes.len() as i32 * period;
         seq
     }
 
-    fn single_duration(&self) -> i32 {
+    pub fn set_duration(&mut self, duration: i32) {
+        self.duration = duration;
+    }
+
+    fn calculate_duration(&self) -> i32 {
+        // self.duration is subtly different to calculated_duration. The first case is the time
+        // we use to start repeating and doesn't include any 'ring' time of notes that overlap.
+        // This function does account for ring time of whatever notes are playing.
         let mut duration: i32 = 0;
         for note in self.notes.iter() {
             duration = duration.max((*note.sound_source).duration() + note.start_time)
@@ -48,11 +58,10 @@ impl SoundSource for Sequence {
     fn next_value(&mut self, n: i32) -> (f32, f32) {
         let mut res1: f32 = 0.0;
         let mut res2: f32 = 0.0;
-        let duration = self.single_duration();
         let mut time_offset: i32 = 0;
         let mut repeat_count: u32 = 0;
-        while n - time_offset >= duration {
-            time_offset += duration;
+        while n - time_offset >= self.duration {
+            time_offset += self.duration;
             repeat_count += 1;
         }
         if repeat_count < self.repeat {
@@ -67,7 +76,7 @@ impl SoundSource for Sequence {
         (res1, res2)
     }
     fn duration(&self) -> i32 {
-        self.single_duration() * self.repeat as i32
+        self.calculate_duration() * self.repeat as i32
     }
 }
 

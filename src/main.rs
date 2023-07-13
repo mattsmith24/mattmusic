@@ -31,33 +31,38 @@ mod noise;
 use traits::traits::{DynSoundSource, DynInstrument};
 
 // todo make command line args select the song to play
-fn get_song(songname: &String, instrument_name: &String, sample_rate: i32) -> DynSoundSource {
+fn get_song(songname: &str, instrument_name: &str, sample_rate: i32) -> DynSoundSource {
     let instrument: DynInstrument;
-    if instrument_name == "vibraphone" {
-        instrument = Box::new(instruments::vibraphone::vibraphone::Vibraphone::new(sample_rate));
-    } else if instrument_name == "kick" {
-        instrument = Box::new(instruments::kick::kick::Kick::new(sample_rate));
-    } else if instrument_name == "square_ding" {
-        instrument = Box::new(instruments::square_ding::square_ding::SquareDing::new(sample_rate));
-    } else if instrument_name == "triangle_ding" {
-        instrument = Box::new(instruments::triangle_ding::triangle_ding::TriangleDing::new(sample_rate));
-    } else if instrument_name == "saw_ding" {
-        instrument = Box::new(instruments::saw_ding::saw_ding::SawDing::new(sample_rate));
-    } else if instrument_name == "experiment" {
-        instrument = Box::new(instruments::experiment::experiment::Experiment::new(sample_rate));
-    } else if instrument_name == "uphonium" {
-        instrument = Box::new(instruments::uphonium::uphonium::Uphonium::new(sample_rate));
-    } else {
-        panic!("Unkown instrument: '{}'", songname)
+    match instrument_name {
+    "vibraphone" => {
+        instrument = Box::new(instruments::vibraphone::vibraphone::Vibraphone::new(sample_rate)); }
+    "kick" => {
+        instrument = Box::new(instruments::kick::kick::Kick::new(sample_rate)); }
+    "square_ding" => {
+        instrument = Box::new(instruments::square_ding::square_ding::SquareDing::new(sample_rate)); }
+    "triangle_ding" => {
+        instrument = Box::new(instruments::triangle_ding::triangle_ding::TriangleDing::new(sample_rate)); }
+    "saw_ding" => {
+        instrument = Box::new(instruments::saw_ding::saw_ding::SawDing::new(sample_rate)); }
+    "experiment" => {
+        instrument = Box::new(instruments::experiment::experiment::Experiment::new(sample_rate)); }
+    "uphonium" => {
+        instrument = Box::new(instruments::uphonium::uphonium::Uphonium::new(sample_rate)); }
+    _ => {
+        panic!("Unkown instrument: '{}'", songname) }
     }
-    if songname == "arpeggios" {
-        songs::arpeggios::arpeggios::arpeggios(sample_rate, instrument)
-    } else if songname == "long_note" {
-        songs::long_note::long_note::long_note(sample_rate, instrument)
-    } else if songname == "beats" {
-        songs::beats::beats::beats(sample_rate, instrument)
-    } else {
-        panic!("Unkown song: '{}'", songname)
+    match songname {
+    "arpeggios" => {
+        songs::arpeggios::arpeggios::arpeggios(sample_rate, instrument) }
+    "long_note" => {
+        songs::long_note::long_note::long_note(sample_rate, instrument) }
+    "beats" => {
+        songs::beats::beats::beats(sample_rate, instrument) }
+    "two_notes" => {
+        songs::two_notes::two_notes::TwoNotes(sample_rate, instrument) }
+    "many_notes" => {
+        songs::many_notes::many_notes::ManyNotes(sample_rate, instrument) }
+        _ => { panic!("Unkown song: '{}'", songname) }
     }
 }
 

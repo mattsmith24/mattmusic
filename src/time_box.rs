@@ -23,7 +23,7 @@ impl SoundSource for TimeBox {
     fn next_value(&mut self, n: i32) -> (f32, f32) {
         let source_val = (*self.source).next_value(n);
         let mut gain = 1.0;
-        const LIFT: i32 = 50;
+        const LIFT: i32 = 44;
         if n > self.duration - LIFT {
             // ramp down to end of note to avoid discontinuity
             gain *= 1.0 - (n - (self.duration - LIFT)) as f32 / LIFT as f32;

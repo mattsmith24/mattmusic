@@ -42,8 +42,8 @@ pub mod uphonium {
             let clip_off = Envelope::new(points2);
             // multiply the two envelopes to make them work together
             let mut multiplier = Multiply::new();
-            multiplier.add(Box::new(envelope));
-            multiplier.add(Box::new(clip_off));
+            multiplier.add(Box::new(envelope), 0.0);
+            multiplier.add(Box::new(clip_off), 0.0);
 
             // Apparently brass sounds can be made by frequency modulation proportional to the amplitude
             let pitch_envelope_gain = 1.0 / self.sample_rate as f32;
