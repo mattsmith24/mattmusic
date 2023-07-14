@@ -4,7 +4,9 @@ use crate::traits::traits::{SoundSource, DynSoundSource};
 
 struct SequenceMember {
     sound_source: DynSoundSource,
-    start_time: i32
+    start_time: i32,
+    is_playing: bool,
+    playing_start_time: i32
 }
 
 pub struct Sequence {
@@ -20,7 +22,7 @@ impl Sequence {
 
     // Add notes into the sequence at arbitrary time offsets
     pub fn add(&mut self, start_time: i32, note: DynSoundSource) -> &mut Sequence {
-        self.notes.push( SequenceMember { sound_source: note, start_time: start_time } );
+        self.notes.push( SequenceMember { sound_source: note, start_time: start_time, is_playing: false, playing_start_time: 0 } );
         self.duration = self.calculate_duration();
         self
     }
@@ -66,10 +68,22 @@ impl SoundSource for Sequence {
         }
         if repeat_count < self.repeat {
             for note in self.notes.iter_mut() {
-                if n - time_offset >= note.start_time {
-                    let (v1, v2) = (*note.sound_source).next_value(n - note.start_time - time_offset);
+                if n - time_offset >= note.start_time
+                        && n - time_offset < note.start_time + (*note.sound_source).duration()
+                        && !note.is_playing {
+                    note.is_playing = true;
+                    note.playing_start_time = time_offset + note.start_time;
+                }
+            }
+        }
+        for note in self.notes.iter_mut() {
+            if note.is_playing {
+                if n - note.playing_start_time < (*note.sound_source).duration() {
+                    let (v1, v2) = (*note.sound_source).next_value(n - note.playing_start_time);
                     res1 += v1;
                     res2 += v2;
+                } else {
+                    note.is_playing = false;
                 }
             }
         }
