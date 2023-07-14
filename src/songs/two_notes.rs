@@ -1,11 +1,11 @@
 pub mod two_notes {
 
-use crate::traits::traits::{SoundSource, DynSoundSource, DynInstrument};
+use crate::traits::traits::{ DynSoundSource, DynInstrument};
 use crate::midi_notes::midi_notes::note2freq;
 use crate::midi_notes::midi_notes as mn;
 use crate::sequence::sequence::Sequence;
 
-pub fn TwoNotes(sample_rate: i32, instrument: DynInstrument)  -> DynSoundSource {
+pub fn two_notes(sample_rate: i32, instrument: DynInstrument)  -> DynSoundSource {
     let note_duration = 2 * sample_rate / 4;
 
     let mut vec = Vec::<DynSoundSource>::new();

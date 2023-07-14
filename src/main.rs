@@ -1,7 +1,6 @@
 use anyhow;
 use std::sync::{Arc, Mutex, Condvar};
-use std::env;
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{FromSample, Sample, SampleFormat, SizedSample};
 
@@ -32,51 +31,69 @@ mod noise;
 use traits::traits::{DynSoundSource, DynInstrument};
 
 // todo make command line args select the song to play
-fn get_song(songname: &str, instrument_name: &str, sample_rate: i32) -> DynSoundSource {
+fn get_song(songname: &Song, instrument_name: &InstrumentName, sample_rate: i32) -> DynSoundSource {
     let instrument: DynInstrument;
     match instrument_name {
-    "vibraphone" => {
+    InstrumentName::Vibraphone => {
         instrument = Box::new(instruments::vibraphone::vibraphone::Vibraphone::new(sample_rate)); }
-    "kick" => {
+    InstrumentName::Kick => {
         instrument = Box::new(instruments::kick::kick::Kick::new(sample_rate)); }
-    "square_ding" => {
+    InstrumentName::SquareDing => {
         instrument = Box::new(instruments::square_ding::square_ding::SquareDing::new(sample_rate)); }
-    "triangle_ding" => {
+    InstrumentName::TriangleDing => {
         instrument = Box::new(instruments::triangle_ding::triangle_ding::TriangleDing::new(sample_rate)); }
-    "saw_ding" => {
+    InstrumentName::SawDing => {
         instrument = Box::new(instruments::saw_ding::saw_ding::SawDing::new(sample_rate)); }
-    "experiment" => {
+    InstrumentName::Experiment => {
         instrument = Box::new(instruments::experiment::experiment::Experiment::new(sample_rate)); }
-    "uphonium" => {
+    InstrumentName::Uphonium => {
         instrument = Box::new(instruments::uphonium::uphonium::Uphonium::new(sample_rate)); }
-    _ => {
-        panic!("Unkown instrument: '{}'", songname) }
     }
     match songname {
-    "arpeggios" => {
+    Song::Arpeggios => {
         songs::arpeggios::arpeggios::arpeggios(sample_rate, instrument) }
-    "long_note" => {
+    Song::LongNote => {
         songs::long_note::long_note::long_note(sample_rate, instrument) }
-    "beats" => {
+    Song::Beats => {
         songs::beats::beats::beats(sample_rate, instrument) }
-    "two_notes" => {
-        songs::two_notes::two_notes::TwoNotes(sample_rate, instrument) }
-    "many_notes" => {
-        songs::many_notes::many_notes::ManyNotes(sample_rate, instrument) }
-        _ => { panic!("Unkown song: '{}'", songname) }
+    Song::TwoNotes => {
+        songs::two_notes::two_notes::two_notes(sample_rate, instrument) }
+    Song::ManyNotes => {
+        songs::many_notes::many_notes::many_notes(sample_rate, instrument) }
     }
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum, Debug)]
+enum Song {
+    Arpeggios,
+    LongNote,
+    Beats,
+    TwoNotes,
+    ManyNotes
+}
 
-/// Simple program to greet a person
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum, Debug)]
+enum InstrumentName {
+    Vibraphone,
+    Kick,
+    SquareDing,
+    TriangleDing,
+    SawDing,
+    Experiment,
+    Uphonium
+}
+
+
+/// Mattmusic - a code driven sythesiser
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    #[arg(short, long)]
-    instrument: String,
-
-    #[arg(short, long)]
-    song: String,
+    /// Play using built-in instrument
+    #[arg(value_enum, short, long)]
+    instrument: InstrumentName,
+    /// Play built-in song
+    #[arg(value_enum, short, long)]
+    song: Song,
 }
 
 fn main() -> anyhow::Result<()> {

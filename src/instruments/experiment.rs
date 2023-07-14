@@ -4,32 +4,28 @@ pub mod experiment {
 
     use crate::traits::traits::{DynSoundSource, Instrument} ;
     use crate::knob::knob::Knob;
-    use crate::square::square::Square;
+    // use crate::square::square::Square;
     //use crate::triangle::triangle::Triangle;
     //use crate::pure_tone::pure_tone::PureTone;
-    use crate::dc::dc::DC;
+    // use crate::dc::dc::DC;
     //use crate::lfo::lfo::LFO;
-    use crate::mix::mix::Mix;
-    use crate::envelope::envelope::{Envelope, EnvelopePoint};
+    // use crate::mix::mix::Mix;
+    // use crate::envelope::envelope::{Envelope, EnvelopePoint};
     use crate::multiply::multiply::Multiply;
-    use crate::low_pass_filter::low_pass_filter::LowPassFilter;
+    // use crate::low_pass_filter::low_pass_filter::LowPassFilter;
     use crate::pre_render::pre_render::PreRender;
     //use crate::midi_notes::midi_notes::note2freq;
     //use crate::midi_notes::midi_notes as mn;
     use crate::time_box::time_box::TimeBox;
-    use crate::noise::noise::Noise;
+    // use crate::noise::noise::Noise;
     use crate::sine::sine::Sine;
 
     pub struct Experiment {
-        sample_rate: i32,
     }
 
     impl Experiment {
-        pub fn new(sample_rate: i32) -> Self {
-            Experiment { sample_rate: sample_rate }
-        }
-        fn t2n(&self, t: f32) -> i32 {
-            (t * self.sample_rate as f32).round() as i32
+        pub fn new(_sample_rate: i32) -> Self {
+            Experiment { }
         }
         fn patch(&self, freq: f32, duration: i32, strength: f32) -> DynSoundSource {
             let sine1 = Sine::new(Knob::dc(freq), Knob::dc(strength), duration);
@@ -43,6 +39,7 @@ pub mod experiment {
             mix.add(Box::new(sine2), strength);
             mix.add(Box::new(sine3), strength);
             mix.add(Box::new(sine4), strength);
+            mix.add(Box::new(sine5), strength);
             Box::new(mix)
         }
     }

@@ -1,7 +1,7 @@
 pub mod pre_render {
 
-use std::fs::File;
-use std::io::{Result, Write};
+// use std::fs::File;
+// use std::io::{Result, Write};
 use crate::traits::traits::{SoundSource, DynSoundSource};
 
 pub struct PreRender {
@@ -22,14 +22,14 @@ impl PreRender {
         }
     }
 
-    pub fn debug(&self, path: &str) -> Result<()> {
-        let mut output = File::create(path)?;
-        for n in 0..self.rendered_sound_source.len() {
-            let s = self.rendered_sound_source[n];
-            write!(output, "{}, {}\n", s.0, s.1)?;
-        }
-        Ok(())
-    }
+    // pub fn debug(&self, path: &str) -> Result<()> {
+    //     let mut output = File::create(path)?;
+    //     for n in 0..self.rendered_sound_source.len() {
+    //         let s = self.rendered_sound_source[n];
+    //         write!(output, "{}, {}\n", s.0, s.1)?;
+    //     }
+    //     Ok(())
+    // }
 }
 
 impl SoundSource for PreRender {

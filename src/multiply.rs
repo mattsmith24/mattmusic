@@ -28,8 +28,8 @@ impl SoundSource for Multiply {
         let mut res2: f32 = 1.0;
         for minput in self.inputs.iter_mut() {
             let (v1, v2) = (*minput.source).next_value(n);
-            res1 *= (v1 + minput.offset);
-            res2 *= (v2 + minput.offset);
+            res1 *= v1 + minput.offset;
+            res2 *= v2 + minput.offset;
         }
         (res1, res2)
     }
