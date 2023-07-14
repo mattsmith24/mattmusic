@@ -1,6 +1,7 @@
 use anyhow;
 use std::sync::{Arc, Mutex, Condvar};
 use std::env;
+use clap::Parser;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{FromSample, Sample, SampleFormat, SizedSample};
 
@@ -67,31 +68,36 @@ fn get_song(songname: &str, instrument_name: &str, sample_rate: i32) -> DynSound
 }
 
 
+/// Simple program to greet a person
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    #[arg(short, long)]
+    instrument: String,
+
+    #[arg(short, long)]
+    song: String,
+}
+
 fn main() -> anyhow::Result<()> {
+    let args = Args::parse();
     let host = cpal::default_host();
     let device = host.default_output_device().expect("no output device available");
     let config = device.default_output_config().unwrap();
     match config.sample_format() {
-        SampleFormat::F32 => run::<f32>(&device, &config.into()),
-        SampleFormat::I16 => run::<i16>(&device, &config.into()),
-        SampleFormat::U16 => run::<u16>(&device, &config.into()),
+        SampleFormat::F32 => run::<f32>(&args, &device, &config.into()),
+        SampleFormat::I16 => run::<i16>(&args, &device, &config.into()),
+        SampleFormat::U16 => run::<u16>(&args, &device, &config.into()),
         sample_format => panic!("Unsupported sample format '{sample_format}'")
     }
 }
 
-fn run<T>(device: &cpal::Device, config: &cpal::StreamConfig) -> Result<(), anyhow::Error>
+fn run<T>(args: &Args, device: &cpal::Device, config: &cpal::StreamConfig) -> Result<(), anyhow::Error>
 where
     T: SizedSample + FromSample<f32>,
 {
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 3 {
-        panic!("Specify name of song and instrument: arpeggios vibraphone");
-    }
-    let songname = &args[1];
-    let instrument_name = &args[2];
-
     let sample_rate = config.sample_rate.0 as i32;
-    let mut song = get_song(songname, instrument_name, sample_rate);
+    let mut song = get_song(&args.song, &args.instrument, sample_rate);
     let channels = config.channels as usize;
     let mut sample_clock = 0i32;
     let pair = Arc::new((Mutex::new(false), Condvar::new()));
