@@ -1,0 +1,9 @@
+sounds:
+  - name: sine1
+    sound_type: sine
+    params:
+      - "440.0"
+      - "0.5"
+      - "10.0"
+
+root: sine1

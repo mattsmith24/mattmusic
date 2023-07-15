@@ -27,39 +27,43 @@ mod pre_render;
 mod sine;
 mod time_box;
 mod noise;
+mod read_song;
 
 use traits::traits::{DynSoundSource, DynInstrument};
+use read_song::read_song::read_song;
 
 // todo make command line args select the song to play
-fn get_song(songname: &Song, instrument_name: &InstrumentName, sample_rate: i32) -> DynSoundSource {
+fn get_song(songname: &Option<Song>, instrument_name: &Option<InstrumentName>, sample_rate: i32) -> DynSoundSource {
     let instrument: DynInstrument;
     match instrument_name {
-    InstrumentName::Vibraphone => {
+    Some(InstrumentName::Vibraphone) => {
         instrument = Box::new(instruments::vibraphone::vibraphone::Vibraphone::new(sample_rate)); }
-    InstrumentName::Kick => {
+    Some(InstrumentName::Kick) => {
         instrument = Box::new(instruments::kick::kick::Kick::new(sample_rate)); }
-    InstrumentName::SquareDing => {
+    Some(InstrumentName::SquareDing) => {
         instrument = Box::new(instruments::square_ding::square_ding::SquareDing::new(sample_rate)); }
-    InstrumentName::TriangleDing => {
+    Some(InstrumentName::TriangleDing) => {
         instrument = Box::new(instruments::triangle_ding::triangle_ding::TriangleDing::new(sample_rate)); }
-    InstrumentName::SawDing => {
+    Some(InstrumentName::SawDing) => {
         instrument = Box::new(instruments::saw_ding::saw_ding::SawDing::new(sample_rate)); }
-    InstrumentName::Experiment => {
+    Some(InstrumentName::Experiment) => {
         instrument = Box::new(instruments::experiment::experiment::Experiment::new(sample_rate)); }
-    InstrumentName::Uphonium => {
-        instrument = Box::new(instruments::uphonium::uphonium::Uphonium::new(sample_rate)); }
+    Some(InstrumentName::Uphonium) => {
+        instrument = Box::new(instruments::uphonium::uphonium::Uphonium::new(sample_rate)); },
+    &None => todo!()
     }
     match songname {
-    Song::Arpeggios => {
+    Some(Song::Arpeggios) => {
         songs::arpeggios::arpeggios::arpeggios(sample_rate, instrument) }
-    Song::LongNote => {
+    Some(Song::LongNote) => {
         songs::long_note::long_note::long_note(sample_rate, instrument) }
-    Song::Beats => {
+    Some(Song::Beats) => {
         songs::beats::beats::beats(sample_rate, instrument) }
-    Song::TwoNotes => {
+    Some(Song::TwoNotes) => {
         songs::two_notes::two_notes::two_notes(sample_rate, instrument) }
-    Song::ManyNotes => {
-        songs::many_notes::many_notes::many_notes(sample_rate, instrument) }
+    Some(Song::ManyNotes) => {
+        songs::many_notes::many_notes::many_notes(sample_rate, instrument) },
+    &None => todo!()
     }
 }
 
@@ -89,11 +93,14 @@ enum InstrumentName {
 #[command(author, version, about, long_about = None)]
 struct Args {
     /// Play using built-in instrument
-    #[arg(value_enum, short, long)]
-    instrument: InstrumentName,
+    #[arg(value_enum, short, long, requires="song")]
+    instrument: Option<InstrumentName>,
     /// Play built-in song
-    #[arg(value_enum, short, long)]
-    song: Song,
+    #[arg(value_enum, short, long, requires="instrument")]
+    song: Option<Song>,
+    /// Read song and instrument from file (will ignore --song and --instrument)
+    #[arg(short, long)]
+    file: Option<String>,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -114,7 +121,12 @@ where
     T: SizedSample + FromSample<f32>,
 {
     let sample_rate = config.sample_rate.0 as i32;
-    let mut song = get_song(&args.song, &args.instrument, sample_rate);
+    let mut song;
+    if let Some(filename) = &args.file {
+        song = read_song(&filename, sample_rate);
+    } else {
+        song = get_song(&args.song, &args.instrument, sample_rate);
+    }
     let channels = config.channels as usize;
     let mut sample_clock = 0i32;
     let pair = Arc::new((Mutex::new(false), Condvar::new()));
