@@ -16,11 +16,12 @@ pub mod read_song {
 
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
     struct YAMLFormat {
+        patches:Vec<SoundItem>,
         sounds: Vec<SoundItem>,
         root: String
     }
 
-    fn get_knob(items: &Vec<SoundItem>, knob_val: &str, sample_rate: i32, dc_scale: f32) -> Knob {
+    fn get_knob(knob_val: &str, dc_scale: f32, yaml: &YAMLFormat, sample_rate: i32) -> Knob {
         println!("get_knob({})", knob_val);
         let char1 = knob_val.chars().nth(0).unwrap();
         let note_range = 'A'..'H'; // doesn't include H
@@ -34,48 +35,73 @@ pub mod read_song {
                     let float_parse = knob_val.parse::<f32>();
                     match float_parse {
                         Ok(f) => Knob::dc(f * dc_scale),
-                        Err(_) => Knob::new(get_sound(items, knob_val, sample_rate)),
+                        Err(_) => Knob::new(get_sound(knob_val, yaml, sample_rate)),
                     }
                 }
             }
         }
     }
 
-    fn get_sound(items: &Vec<SoundItem>, sound_name: &str, sample_rate: i32) -> DynSoundSource {
-        println!("get_sound({})", sound_name);
-        let sound_idx = items.binary_search_by_key(&sound_name, |s: &SoundItem| &s.name).unwrap();
-        let item = &items[sound_idx];
-        match item.sound_type.as_str() {
-            "sine" => {
-                let freq = get_knob(items, &item.params[0], sample_rate, 1.0 / sample_rate as f32);
-                let strength = get_knob(items, &item.params[1], sample_rate, 1.0);
-                let duration = item.params[2].parse::<f32>().unwrap() * sample_rate as f32;
-                Box::new(Sine::new(freq, strength, duration.round() as i32))
-            },
-            "sequence" => {
-                let mut sequence = Sequence::new();
-                let repeats = item.params[0].parse::<u32>().unwrap();
-                sequence.set_repeat(repeats);
-                let duration = item.params[1].parse::<f32>().unwrap() * sample_rate as f32;
-                for source_def in &item.params[2..] {
-                    let parts: Vec<_> = source_def.split(" ").collect();
-                    let start_time = parts[0].parse::<f32>().unwrap() * sample_rate as f32;
-                    let source = get_sound(items, &parts[1], sample_rate);
-                    sequence.add(start_time.round() as i32, source);
-                }
-                if duration > 0.0 {
-                    sequence.set_duration(duration.round() as i32);
-                }
-                Box::new(sequence)
-            },
-            &_ => todo!()
+    fn get_patch(patch_name: &str, params: &Vec::<String>, yaml: &YAMLFormat, sample_rate: i32) -> DynSoundSource {
+        println!("get_patch({})", patch_name);
+        let patch_idx = yaml.patches.binary_search_by_key(&patch_name, |s: &SoundItem| &s.name).unwrap();
+        let patch = &yaml.patches[patch_idx];
+        let mut new_params = Vec::<String>::new();
+        for p in &patch.params {
+            if p.starts_with("INPUT ") {
+                let idx = p[6..].parse::<usize>().unwrap();
+                new_params.push(params[idx].clone());
+            } else {
+                new_params.push(p.clone());
+            }
         }
+        get_sound_from_type(&patch.sound_type, &new_params, yaml, sample_rate)
+    }
+
+    fn get_sound_from_type(sound_type: &str, params: &Vec::<String>, yaml: &YAMLFormat, sample_rate: i32) -> DynSoundSource {
+        if sound_type.starts_with("patch ") {
+            get_patch(&sound_type[6..], &params, yaml, sample_rate)
+        } else {
+            match sound_type {
+                "sine" => {
+                    let freq = get_knob(&params[0], 1.0 / sample_rate as f32, yaml, sample_rate);
+                    let strength = get_knob(&params[1], 1.0, yaml, sample_rate);
+                    let duration = params[2].parse::<f32>().unwrap() * sample_rate as f32;
+                    Box::new(Sine::new(freq, strength, duration.round() as i32))
+                },
+                "sequence" => {
+                    let mut sequence = Sequence::new();
+                    let repeats = params[0].parse::<u32>().unwrap();
+                    sequence.set_repeat(repeats);
+                    let duration = params[1].parse::<f32>().unwrap() * sample_rate as f32;
+                    for source_def in &params[2..] {
+                        let parts: Vec<_> = source_def.split(" ").collect();
+                        let start_time = parts[0].parse::<f32>().unwrap() * sample_rate as f32;
+                        let source = get_sound(&parts[1], yaml, sample_rate);
+                        sequence.add(start_time.round() as i32, source);
+                    }
+                    if duration > 0.0 {
+                        sequence.set_duration(duration.round() as i32);
+                    }
+                    Box::new(sequence)
+                },
+                &_ => todo!()
+            }
+        }
+    }
+
+    fn get_sound(sound_name: &str, yaml: &YAMLFormat, sample_rate: i32) -> DynSoundSource {
+        println!("get_sound({})", sound_name);
+        let sound_idx = yaml.sounds.binary_search_by_key(&sound_name, |s: &SoundItem| &s.name).unwrap();
+        let item = &yaml.sounds[sound_idx];
+        get_sound_from_type(&item.sound_type, &item.params, yaml, sample_rate)
     }
 
     pub fn read_song(filename: &str, sample_rate: i32) -> DynSoundSource {
         let f = File::open(filename).unwrap();
         let mut yaml:YAMLFormat = serde_yaml::from_reader(&f).unwrap();
         yaml.sounds.sort_by(|s1: &SoundItem, s2: &SoundItem| s1.name.cmp(&s2.name));
-        get_sound(&yaml.sounds, &yaml.root, sample_rate)
+        yaml.patches.sort_by(|s1: &SoundItem, s2: &SoundItem| s1.name.cmp(&s2.name));
+        get_sound(&yaml.root, &yaml, sample_rate)
     }
 }

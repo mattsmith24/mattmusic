@@ -1,40 +1,41 @@
-sounds:
+patches:
   - name: mysine
     sound_type: sine
     params:
-      - "INPUT_1"
+      - "INPUT 0"
       - "0.5"
       - "0.16"
+sounds:
   - name: sine58
-    sound_type: mysine
+    sound_type: patch mysine
     params:
       - "58"
   - name: sine63
-    sound_type: mysine
+    sound_type: patch mysine
     params:
       - "63"
   - name: sine70
-    sound_type: mysine
+    sound_type: patch mysine
     params:
       - "70"
   - name: sine72
-    sound_type: mysine
+    sound_type: patch mysine
     params:
       - "72"
   - name: sine65
-    sound_type: mysine
+    sound_type: patch mysine
     params:
       - "65"
   - name: sine60
-    sound_type: mysine
+    sound_type: patch mysine
     params:
       - "60"
   - name: sine67
-    sound_type: mysine
+    sound_type: patch mysine
     params:
       - "67"
   - name: sine62
-    sound_type: mysine
+    sound_type: patch mysine
     params:
       - "62"
   - name: sequence1
