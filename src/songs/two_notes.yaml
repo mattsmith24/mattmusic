@@ -1,0 +1,22 @@
+sounds:
+  - name: sine1
+    sound_type: sine
+    params:
+      - "G4"
+      - "0.5"
+      - "0.5"
+  - name: sine2
+    sound_type: sine
+    params:
+      - "G3"
+      - "0.5"
+      - "0.5"
+  - name: sequence1
+    sound_type: sequence
+    params:
+      - "10"
+      - "1.0"
+      - "0.0 sine1"
+      - "0.5 sine2"
+
+root: sequence1

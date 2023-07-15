@@ -139,4 +139,32 @@ pub fn midi2freq(midi: u8) -> f32 {
     MIDI_NOTES[idx].3
 }
 
+pub fn midistr2freq(midi: &str) -> f32 {
+    if midi.len() > 3 {
+        panic!("Couldn't parse \"{}\" as a midi note", midi);
+    }
+    let note_name = &midi[0..midi.len()-1];
+    let octave = midi[midi.len()-1..].parse::<u8>().unwrap();
+    match note_name {
+        "A" => note2freq(octave, MIDI_OFFSET_A),
+        "A#" => note2freq(octave, MIDI_OFFSET_A_SHARP),
+        "Bb" => note2freq(octave, MIDI_OFFSET_B_FLAT),
+        "B" => note2freq(octave, MIDI_OFFSET_B),
+        "C" => note2freq(octave, MIDI_OFFSET_C),
+        "C#" => note2freq(octave, MIDI_OFFSET_C_SHARP),
+        "Db" => note2freq(octave, MIDI_OFFSET_D_FLAT),
+        "D" => note2freq(octave, MIDI_OFFSET_D),
+        "D#" => note2freq(octave, MIDI_OFFSET_D_SHARP),
+        "Eb" => note2freq(octave, MIDI_OFFSET_E_FLAT),
+        "E" => note2freq(octave, MIDI_OFFSET_E),
+        "F" => note2freq(octave, MIDI_OFFSET_F),
+        "F#" => note2freq(octave, MIDI_OFFSET_F_SHARP),
+        "Gb" => note2freq(octave, MIDI_OFFSET_G_FLAT),
+        "G" => note2freq(octave, MIDI_OFFSET_G),
+        "G#" => note2freq(octave, MIDI_OFFSET_G_SHARP),
+        "Ab" => note2freq(octave, MIDI_OFFSET_A_FLAT),
+        _ => todo!()
+    }
+}
+
 }

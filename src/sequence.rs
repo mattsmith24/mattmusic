@@ -40,6 +40,14 @@ impl Sequence {
         seq
     }
 
+    pub fn set_repeat(&mut self, repeat: u32) {
+        self.repeat = repeat;
+    }
+
+    pub fn set_duration(&mut self, duration: i32) {
+        self.duration = duration;
+    }
+
     fn calculate_duration(&self) -> i32 {
         // self.duration is subtly different to calculated_duration. The first case is the time
         // we use to start repeating and doesn't include any 'ring' time of notes that overlap.
