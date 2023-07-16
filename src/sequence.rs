@@ -1,6 +1,8 @@
 pub mod sequence {
 
+use crate::read_song::read_song::{YAMLFormat, get_sound};
 use crate::traits::traits::{SoundSource, DynSoundSource};
+
 
 struct SequenceMember {
     sound_source: DynSoundSource,
@@ -93,8 +95,26 @@ impl SoundSource for Sequence {
         }
         (res1, res2)
     }
+
     fn duration(&self) -> i32 {
         self.calculate_duration() * self.repeat as i32
+    }
+
+    fn from_yaml(params: &Vec::<String>, yaml: &YAMLFormat, sample_rate: i32) -> DynSoundSource {
+        let mut sequence = Sequence::new();
+        let repeats = params[0].parse::<u32>().unwrap();
+        sequence.set_repeat(repeats);
+        let duration = params[1].parse::<f32>().unwrap() * sample_rate as f32;
+        for source_def in &params[2..] {
+            let parts: Vec<_> = source_def.split(" ").collect();
+            let start_time = parts[0].parse::<f32>().unwrap() * sample_rate as f32;
+            let source = get_sound(&parts[1], yaml, sample_rate);
+            sequence.add(start_time.round() as i32, source);
+        }
+        if duration > 0.0 {
+            sequence.set_duration(duration.round() as i32);
+        }
+        Box::new(sequence)
     }
 }
 

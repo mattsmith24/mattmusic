@@ -6,6 +6,7 @@ pub mod low_pass_filter {
 //fc = 0.1
 //b = 0.08
 use std::collections::VecDeque;
+use crate::read_song::read_song::YAMLFormat;
 use crate::traits::traits::{SoundSource, DynSoundSource};
 use crate::knob::knob::Knob;
 
@@ -113,6 +114,12 @@ impl SoundSource for LowPassFilter {
     fn duration(&self) -> i32 {
         // add the filter delay to the duration
         (*self.source).duration() + (self.filter_length as i32 - 1 / 2)
+    }
+
+    fn from_yaml(params: &Vec::<String>, yaml: &YAMLFormat, sample_rate: i32) -> DynSoundSource {
+        use crate::dc::dc::DC;
+        todo!();
+        Box::new(Self::new(Knob::dc(0.0), 0, Box::new(DC::new(0.0, 0))))
     }
 }
 

@@ -1,6 +1,8 @@
 pub mod mix {
 
+    use crate::read_song::read_song::YAMLFormat;
     use crate::traits::traits::{SoundSource, DynSoundSource};
+
     use crate::sequence::sequence::Sequence;
 
     pub struct Mix
@@ -25,6 +27,12 @@ pub mod mix {
 
         fn duration(&self) -> i32 {
             self.sequence.duration()
+        }
+
+        fn from_yaml(params: &Vec::<String>, yaml: &YAMLFormat, sample_rate: i32) -> DynSoundSource {
+            use crate::dc::dc::DC;
+            todo!();
+            Box::new(Self::new())
         }
     }
 }

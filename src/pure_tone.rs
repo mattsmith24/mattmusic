@@ -1,6 +1,8 @@
 pub mod pure_tone {
 
-use crate::traits::traits::SoundSource;
+use crate::read_song::read_song::YAMLFormat;
+use crate::traits::traits::{SoundSource, DynSoundSource};
+
 use crate::knob::knob::Knob;
 
 pub struct PureTone {
@@ -36,6 +38,12 @@ impl SoundSource for PureTone {
 
     fn duration(&self) -> i32 {
         self.duration
+    }
+
+    fn from_yaml(params: &Vec::<String>, yaml: &YAMLFormat, sample_rate: i32) -> DynSoundSource {
+        use crate::dc::dc::DC;
+        todo!();
+        Box::new(Self::new(Knob::dc(0.0), Knob::dc(0.0), 0))
     }
 }
 }

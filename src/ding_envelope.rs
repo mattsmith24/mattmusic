@@ -1,5 +1,6 @@
 pub mod ding_envelope {
 
+use crate::read_song::read_song::YAMLFormat;
 use crate::traits::traits::{SoundSource, DynSoundSource};
 
 pub struct DingEnvelope {
@@ -51,6 +52,13 @@ impl SoundSource for DingEnvelope {
     fn duration(&self) -> i32 {
         self.decay.min(self.duration).min((*self.source).duration())
     }
+
+    fn from_yaml(params: &Vec::<String>, yaml: &YAMLFormat, sample_rate: i32) -> DynSoundSource {
+        use crate::dc::dc::DC;
+        todo!();
+        Box::new(Self::new(0, 0, Box::new(DC::new(0.0, 0))))
+    }
+
 }
 
 }

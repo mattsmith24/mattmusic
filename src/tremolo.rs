@@ -1,5 +1,6 @@
 pub mod tremolo {
 
+use crate::read_song::read_song::YAMLFormat;
 use crate::traits::traits::{SoundSource, DynSoundSource};
 
 pub struct Tremolo
@@ -38,6 +39,12 @@ impl SoundSource for Tremolo {
 
     fn duration(&self) -> i32 {
         (*self.source).duration()
+    }
+
+    fn from_yaml(params: &Vec::<String>, yaml: &YAMLFormat, sample_rate: i32) -> DynSoundSource {
+        use crate::dc::dc::DC;
+        todo!();
+        Box::new(Self::new(0.0, 0.0, Box::new(DC::new(0.0, 0))))
     }
 }
 

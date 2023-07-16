@@ -2,7 +2,9 @@ pub mod pre_render {
 
 // use std::fs::File;
 // use std::io::{Result, Write};
+use crate::read_song::read_song::YAMLFormat;
 use crate::traits::traits::{SoundSource, DynSoundSource};
+
 
 pub struct PreRender {
     rendered_sound_source: Vec::<(f32,f32)>
@@ -43,6 +45,12 @@ impl SoundSource for PreRender {
 
     fn duration(&self) -> i32 {
         self.rendered_sound_source.len() as i32
+    }
+
+    fn from_yaml(params: &Vec::<String>, yaml: &YAMLFormat, sample_rate: i32) -> DynSoundSource {
+        use crate::dc::dc::DC;
+        todo!();
+        Box::new(Self::new(Box::new(DC::new(0.0, 0))))
     }
 }
 

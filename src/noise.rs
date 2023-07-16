@@ -1,7 +1,9 @@
 pub mod noise {
 
 use rand::Rng;
-use crate::traits::traits::SoundSource;
+use crate::read_song::read_song::YAMLFormat;
+use crate::traits::traits::{SoundSource, DynSoundSource};
+
 
 pub struct Noise {
     duration: i32,
@@ -30,6 +32,11 @@ impl SoundSource for Noise {
 
     fn duration(&self) -> i32 {
         self.duration
+    }
+
+    fn from_yaml(params: &Vec::<String>, yaml: &YAMLFormat, sample_rate: i32) -> DynSoundSource {
+        todo!();
+        Box::new(Self::new(0))
     }
 }
 }
