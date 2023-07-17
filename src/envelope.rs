@@ -1,6 +1,6 @@
 pub mod envelope {
 
-use crate::read_song::read_song::YAMLFormat;
+use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource};
 
 
@@ -53,7 +53,7 @@ impl SoundSource for Envelope {
         res
     }
 
-    fn from_yaml(params: &Vec::<String>, yaml: &YAMLFormat, sample_rate: i32) -> DynSoundSource {
+    fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
         let mut points = Vec::<EnvelopePoint>::new();
         todo!();
         Box::new(Self::new(points))

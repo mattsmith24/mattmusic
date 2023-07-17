@@ -1,6 +1,6 @@
 pub mod time_box {
 
-use crate::read_song::read_song::YAMLFormat;
+use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource};
 
 
@@ -40,7 +40,7 @@ impl SoundSource for TimeBox {
         self.duration
     }
 
-    fn from_yaml(params: &Vec::<String>, yaml: &YAMLFormat, sample_rate: i32) -> DynSoundSource {
+    fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
         use crate::dc::dc::DC;
         todo!();
         Box::new(Self::new(0, Box::new(DC::new(0.0, 0))))

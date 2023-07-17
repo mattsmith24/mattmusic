@@ -1,6 +1,6 @@
 pub mod dc {
 
-use crate::read_song::read_song::YAMLFormat;
+use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource};
 
 pub struct DC {
@@ -24,9 +24,9 @@ impl SoundSource for DC {
     fn duration(&self) -> i32 {
         self.duration
     }
-    fn from_yaml(params: &Vec::<String>, yaml: &YAMLFormat, sample_rate: i32) -> DynSoundSource {
+    fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
         let value = params[0].parse::<f32>().unwrap();
-        let duration = params[1].parse::<f32>().unwrap() * sample_rate as f32;
+        let duration = params[1].parse::<f32>().unwrap() * reader.sample_rate as f32;
         Box::new(Self::new(value, duration.round() as i32))
     }
 

@@ -1,0 +1,70 @@
+# Based on PureData tutorial by Really Useful Plugins https://www.youtube.com/watch?v=I88Cxi86Zu8
+
+patches:
+  - name: rich
+    root: multiply1
+    sounds:
+      - name: multiply1
+        sound_type: multiply
+        params:
+          - "1.0 mysine"
+          - "0.0 vol"
+      - name: mysine
+        sound_type: sine
+        params:
+          - "INPUT 0"
+          - "1.0"
+          - "0.16"
+      - name: vol
+        sound_type: dc
+        params:
+          - "0.5"
+          - "0.16"
+sounds:
+  - name: rich58
+    sound_type: patch rich
+    params:
+      - "58"
+  - name: rich63
+    sound_type: patch rich
+    params:
+      - "63"
+  - name: rich70
+    sound_type: patch rich
+    params:
+      - "70"
+  - name: rich72
+    sound_type: patch rich
+    params:
+      - "72"
+  - name: rich65
+    sound_type: patch rich
+    params:
+      - "65"
+  - name: rich60
+    sound_type: patch rich
+    params:
+      - "60"
+  - name: rich67
+    sound_type: patch rich
+    params:
+      - "67"
+  - name: rich62
+    sound_type: patch rich
+    params:
+      - "62"
+  - name: sequence1
+    sound_type: sequence
+    params:
+      - "10"
+      - "1.28"
+      - "0.0 rich58"
+      - "0.16 rich63"
+      - "0.32 rich70"
+      - "0.48 rich72"
+      - "0.64 rich65"
+      - "0.80 rich60"
+      - "0.96 rich67"
+      - "1.12 rich62"
+
+root: sequence1

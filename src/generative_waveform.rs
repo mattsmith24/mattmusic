@@ -4,7 +4,7 @@ pub mod generative_waveform {
 // https://github.com/RustAudio/cpal/blob/master/examples/synth_tones.rs
 // Apache License applies
 
-use crate::read_song::read_song::YAMLFormat;
+use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource};
 
 use crate::knob::knob::Knob;
@@ -85,7 +85,7 @@ impl SoundSource for GenerativeWaveform {
         self.duration
     }
 
-    fn from_yaml(params: &Vec::<String>, yaml: &YAMLFormat, sample_rate: i32) -> DynSoundSource {
+    fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
         use crate::dc::dc::DC;
         todo!();
         Box::new(Self::new(Knob::dc(0.0), 0, 0, Knob::dc(0.0), 0))

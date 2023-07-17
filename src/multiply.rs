@@ -1,6 +1,6 @@
 pub mod multiply {
 
-use crate::read_song::read_song::YAMLFormat;
+use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource};
 
 
@@ -43,10 +43,16 @@ impl SoundSource for Multiply {
         duration
     }
 
-    fn from_yaml(params: &Vec::<String>, yaml: &YAMLFormat, sample_rate: i32) -> DynSoundSource {
-        use crate::dc::dc::DC;
-        todo!();
-        Box::new(Self::new())
+    fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
+        let mut multiply = Multiply::new();
+        for param in params {
+            let parts: Vec<_> = param.split(" ").collect();
+            let dc_offset = parts[0].parse::<f32>().unwrap();
+            let source_name = parts[1];
+            let source = reader.get_sound(source_name);
+            multiply.add(source, dc_offset);
+        }
+        Box::new(multiply)
     }
 }
 

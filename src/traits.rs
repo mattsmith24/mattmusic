@@ -1,9 +1,9 @@
 pub mod traits {
-use crate::read_song::read_song::YAMLFormat;
+use crate::read_song::read_song::SongReader;
 pub trait SoundSource {
     fn next_value(&mut self, n: i32) -> (f32, f32);
     fn duration(&self) -> i32;
-    fn from_yaml(params: &Vec::<String>, yaml: &YAMLFormat, sample_rate: i32) -> DynSoundSource where Self: Sized;
+    fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource where Self: Sized;
 }
 pub type DynSoundSource = Box<dyn SoundSource + Send + Sync>;
 
