@@ -2,7 +2,7 @@ pub mod multiply {
 
 use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource};
-
+use crate::dc::dc::DC;
 
 pub struct MultiplyInput {
     source: DynSoundSource,
@@ -46,11 +46,21 @@ impl SoundSource for Multiply {
     fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
         let mut multiply = Multiply::new();
         for param in params {
+            println!("Multiply::from_yaml(param: {})", param);
             let parts: Vec<_> = param.split(" ").collect();
-            let dc_offset = parts[0].parse::<f32>().unwrap();
-            let source_name = parts[1];
-            let source = reader.get_sound(source_name);
-            multiply.add(source, dc_offset);
+            // If the first token is 'dc' then we expect the following to be the value and duration
+            // Otherwise we expect to see a dc offset and a source name
+            if parts[0] == "dc" {
+                let val = parts[1].parse::<f32>().unwrap();
+                let duration = parts[2].parse::<f32>().unwrap() * reader.sample_rate as f32;
+                let source = Box::new(DC::new(val, duration.round() as i32));
+                multiply.add(source, 0.0);
+            } else {
+                let dc_offset = parts[0].parse::<f32>().unwrap();
+                let source_name = parts[1];
+                let source = reader.get_sound(source_name);
+                multiply.add(source, dc_offset);
+            }
         }
         Box::new(multiply)
     }

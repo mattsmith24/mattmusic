@@ -7,6 +7,7 @@ pub mod read_song {
     use crate::midi_notes::midi_notes::{midistr2freq, midi2freq};
     use crate::dc::dc::DC;
     use crate::envelope::envelope::Envelope;
+    use crate::midi2freq::midi2freq::Midi2Freq;
     use crate::multiply::multiply::Multiply;
     use crate::sequence::sequence::Sequence;
     use crate::sine::sine::Sine;
@@ -114,6 +115,18 @@ pub mod read_song {
                 if param.starts_with("INPUT ") {
                     let substitute_index = param[6..].parse::<usize>().unwrap();
                     new_params.push(self.patch_context.get_param(substitute_index));
+                } else if param.contains(" INPUT ") {
+                    let start_pos = param.find(" INPUT ").unwrap();
+                    let end_pos: usize;
+                    match param[start_pos+7..].find(" ") {
+                        Some(p) => end_pos = p + start_pos + 7,
+                        None => end_pos = param.len()
+                    }
+                    let substitute_index = param[start_pos+7..end_pos].parse::<usize>().unwrap();
+                    let substitute_param = param[0..start_pos+1].to_string()
+                        + &self.patch_context.get_param(substitute_index)
+                        + &param[end_pos..];
+                    new_params.push(substitute_param);
                 } else {
                     new_params.push(param.clone());
                 }
@@ -129,6 +142,7 @@ pub mod read_song {
                 match sound_type {
                     "dc" => DC::from_yaml(&new_params, self),
                     "envelope" => Envelope::from_yaml(&new_params, self),
+                    "midi2freq" => Midi2Freq::from_yaml(&new_params, self),
                     "multiply" => Multiply::from_yaml(&new_params, self),
                     "sequence" => Sequence::from_yaml(&new_params, self),
                     "sine" => Sine::from_yaml(&new_params, self),

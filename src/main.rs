@@ -28,6 +28,7 @@ mod sine;
 mod time_box;
 mod noise;
 mod read_song;
+mod midi2freq;
 
 use traits::traits::{DynSoundSource, DynInstrument};
 use read_song::read_song::read_song;
