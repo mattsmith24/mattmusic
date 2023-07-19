@@ -1,24 +1,21 @@
 # Based on PureData tutorial by Really Useful Plugins https://www.youtube.com/watch?v=I88Cxi86Zu8
 
 patches:
-  - name: rich
-    root: multiply1
+  - name: oscs
+    root: mix
     sounds:
-      - name: input-freq
-        sound_type: midi2freq
+      - name: mix
+        sound_type: mix
         params:
-          - "INPUT 0"
-          - "0.16"
-      - name: multiply1
-        sound_type: multiply
-        params:
-          - "1.0 base-sine"
-          - "1.0 detune-sine"
-          - "dc 0.5 0.16"
+          - "base-sine"
+          - "detune-sine"
+          - "low-detune-sine"
+          - "fifth-detune-sine"
+          - "octave-up-detune-sine"
       - name: base-sine
         sound_type: sine
         params:
-          - "input-freq"
+          - "PATCH_INPUT"
           - "1.0"
           - "0.16"
       - name: detune-sine
@@ -30,8 +27,70 @@ patches:
       - name: "detune-sine-input"
         sound_type: multiply
         params:
-          - "0.0 input-freq"
+          - "0.0 PATCH_INPUT"
           - "dc 1.015 0.16"
+      - name: low-detune-sine
+        sound_type: sine
+        params:
+          - "low-detune-sine-input"
+          - "1.0"
+          - "0.16"
+      - name: "low-detune-sine-input"
+        sound_type: multiply
+        params:
+          - "0.0 PATCH_INPUT"
+          - "dc 0.503 0.16"
+      - name: fifth-detune-sine
+        sound_type: sine
+        params:
+          - "fifth-detune-sine-input"
+          - "0.5"
+          - "0.16"
+      - name: "fifth-detune-sine-input"
+        sound_type: multiply
+        params:
+          - "0.0 PATCH_INPUT"
+          - "dc 1.496 0.16"
+      - name: octave-up-detune-sine
+        sound_type: sine
+        params:
+          - "octave-up-detune-sine-input"
+          - "0.25"
+          - "0.16"
+      - name: "octave-up-detune-sine-input"
+        sound_type: multiply
+        params:
+          - "0.0 PATCH_INPUT"
+          - "dc 2.01 0.16"
+  - name: rich
+    root: vol
+    sounds:
+      - name: vol
+        sound_type: multiply
+        params:
+          - "dc 0.25 0.16"
+          - "1.0 mix"
+      - name: mix
+        sound_type: mix
+        params:
+          - "oscs1"
+          - "oscs2"
+      - name: oscs1
+        sound_type: "patch oscs input-freq"
+        params:
+      - name: oscs2
+        sound_type: "patch oscs oscs2-input"
+        params:
+      - name: "oscs2-input"
+        sound_type: multiply
+        params:
+          - "0.0 input-freq"
+          - "dc 2.0 0.16"
+      - name: input-freq
+        sound_type: midi2freq
+        params:
+          - "INPUT 0"
+          - "0.16"
 sounds:
   - name: rich58
     sound_type: patch rich

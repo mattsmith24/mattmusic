@@ -1,17 +1,104 @@
 patches:
+  - name: oscs
+    root: mix
+    sounds:
+      - name: mix
+        sound_type: mix
+        params:
+          - "base-sine"
+          - "detune-sine"
+          - "low-detune-sine"
+          - "fifth-detune-sine"
+          - "octave-up-detune-sine"
+      - name: base-sine
+        sound_type: sine
+        params:
+          - "PATCH_INPUT"
+          - "1.0"
+          - "0.5"
+      - name: detune-sine
+        sound_type: sine
+        params:
+          - "detune-sine-input"
+          - "1.0"
+          - "0.5"
+      - name: "detune-sine-input"
+        sound_type: multiply
+        params:
+          - "0.0 PATCH_INPUT"
+          - "dc 1.015 0.5"
+      - name: low-detune-sine
+        sound_type: sine
+        params:
+          - "low-detune-sine-input"
+          - "1.0"
+          - "0.5"
+      - name: "low-detune-sine-input"
+        sound_type: multiply
+        params:
+          - "0.0 PATCH_INPUT"
+          - "dc 0.503 0.5"
+      - name: fifth-detune-sine
+        sound_type: sine
+        params:
+          - "fifth-detune-sine-input"
+          - "0.5"
+          - "0.5"
+      - name: "fifth-detune-sine-input"
+        sound_type: multiply
+        params:
+          - "0.0 PATCH_INPUT"
+          - "dc 1.496 0.5"
+      - name: octave-up-detune-sine
+        sound_type: sine
+        params:
+          - "octave-up-detune-sine-input"
+          - "0.25"
+          - "0.5"
+      - name: "octave-up-detune-sine-input"
+        sound_type: multiply
+        params:
+          - "0.0 PATCH_INPUT"
+          - "dc 2.01 0.5"
+  - name: rich
+    root: vol
+    sounds:
+      - name: vol
+        sound_type: multiply
+        params:
+          - "dc 0.25 0.5"
+          - "1.0 mix"
+      - name: mix
+        sound_type: mix
+        params:
+          - "oscs1"
+          - "oscs2"
+      - name: oscs1
+        sound_type: "patch oscs input-freq"
+        params:
+      - name: oscs2
+        sound_type: "patch oscs oscs2-input"
+        params:
+      - name: "oscs2-input"
+        sound_type: multiply
+        params:
+          - "0.0 input-freq"
+          - "dc 2.0 0.5"
+      - name: input-freq
+        sound_type: midi2freq
+        params:
+          - "INPUT 0"
+          - "0.5"
+
 sounds:
   - name: sine1
-    sound_type: sine
+    sound_type: patch rich
     params:
       - "G4"
-      - "0.5"
-      - "0.5"
   - name: sine2
-    sound_type: sine
+    sound_type: patch rich
     params:
       - "G3"
-      - "0.5"
-      - "0.5"
   - name: sequence1
     sound_type: sequence
     params:

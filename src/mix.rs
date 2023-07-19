@@ -30,9 +30,11 @@ pub mod mix {
         }
 
         fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
-            use crate::dc::dc::DC;
-            todo!();
-            Box::new(Self::new())
+            let mut mix = Mix::new();
+            for param in params {
+                mix.add(reader.get_sound(param));
+            }
+            Box::new(mix)
         }
     }
 }
