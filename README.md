@@ -8,6 +8,6 @@ I made a song. Since then, it's moved towards yet another soft synthesiser but I
 still going with it because I'm learning things about sythesis and DSP as I go and
 hope to still make something interesting.
 
-To start with this, try `cargo run arpeggios vibraphone`. The main.rs file lists a
+To start with this, try `cargo run -s arpeggios -i vibraphone`. The main.rs file lists a
 few other built-in songs and instruments. I hope to create a YAML file format to
 use with this or even a Pure Data style interface.
