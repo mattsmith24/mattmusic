@@ -1,52 +1,46 @@
+include:
+  - "rich_synthesis1.yaml"
 patches:
 sounds:
   - name: sine58
-    sound_type: sine
+    sound_type: patch rich
     params:
       - "58"
-      - "0.5"
       - "0.16"
   - name: sine63
-    sound_type: sine
+    sound_type: patch rich
     params:
       - "63"
-      - "0.5"
       - "0.16"
   - name: sine70
-    sound_type: sine
+    sound_type: patch rich
     params:
       - "70"
-      - "0.5"
       - "0.16"
   - name: sine72
-    sound_type: sine
+    sound_type: patch rich
     params:
       - "72"
-      - "0.5"
       - "0.16"
   - name: sine65
-    sound_type: sine
+    sound_type: patch rich
     params:
       - "65"
-      - "0.5"
       - "0.16"
   - name: sine60
-    sound_type: sine
+    sound_type: patch rich
     params:
       - "60"
-      - "0.5"
       - "0.16"
   - name: sine67
-    sound_type: sine
+    sound_type: patch rich
     params:
       - "67"
-      - "0.5"
       - "0.16"
   - name: sine62
-    sound_type: sine
+    sound_type: patch rich
     params:
       - "62"
-      - "0.5"
       - "0.16"
   - name: sequence1
     sound_type: sequence

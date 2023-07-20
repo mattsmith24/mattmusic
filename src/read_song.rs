@@ -1,5 +1,6 @@
 pub mod read_song {
     use std::fs::File;
+    use std::path::{Path, PathBuf};
     use std::rc::Rc;
     use serde::{Serialize, Deserialize};
     use crate::traits::traits::{DynSoundSource, SoundSource};
@@ -29,9 +30,16 @@ pub mod read_song {
 
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
     pub struct YAMLFormat {
+        include: Vec<String>,
         patches: Vec<PatchItem>,
         sounds: Vec<SoundItem>,
         root: String
+    }
+
+    #[derive(Serialize, Deserialize, PartialEq, Debug)]
+    pub struct IncludeFormat {
+        include: Vec<String>,
+        patches: Vec<PatchItem>,
     }
 
     struct PatchContextItem {
@@ -203,9 +211,27 @@ pub mod read_song {
         }
     }
 
+    fn process_includes(path: &Path, includes: &Vec<String>) -> Vec<PatchItem> {
+        let mut res = Vec::<PatchItem>::new();
+        for include_fname in includes {
+            let full_include_fname = path.join(include_fname);
+            let include_file = File::open(full_include_fname).unwrap();
+            let mut patch_file: IncludeFormat = serde_yaml::from_reader(&include_file).unwrap();
+            let mut sub_patches = process_includes(path, &patch_file.include);
+            patch_file.patches.append(&mut sub_patches);
+            res.append(&mut patch_file.patches);
+        }
+        res
+    }
+
     pub fn read_song(filename: &str, sample_rate: i32) -> DynSoundSource {
         let f = File::open(filename).unwrap();
         let mut yaml:YAMLFormat = serde_yaml::from_reader(&f).unwrap();
+        // get path of base file then look for include files in that location
+        let path = Path::new(filename);
+        let parent = path.parent().unwrap();
+        let mut patches = process_includes(parent, &yaml.include);
+        yaml.patches.append(&mut patches);
         yaml.sounds.sort_by(|s1: &SoundItem, s2: &SoundItem| s1.name.cmp(&s2.name));
         yaml.patches.sort_by(|s1: &PatchItem, s2: &PatchItem| s1.name.cmp(&s2.name));
         for patch in yaml.patches.iter_mut() {
