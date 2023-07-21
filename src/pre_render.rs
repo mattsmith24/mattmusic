@@ -48,9 +48,8 @@ impl SoundSource for PreRender {
     }
 
     fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
-        use crate::dc::dc::DC;
-        todo!();
-        Box::new(Self::new(Box::new(DC::new(0.0, 0))))
+        let source = reader.get_sound(&params[0]);
+        Box::new(Self::new(source))
     }
 }
 

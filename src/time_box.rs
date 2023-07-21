@@ -41,9 +41,9 @@ impl SoundSource for TimeBox {
     }
 
     fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
-        use crate::dc::dc::DC;
-        todo!();
-        Box::new(Self::new(0, Box::new(DC::new(0.0, 0))))
+        let duration = params[0].parse::<f32>().unwrap() * reader.sample_rate as f32;
+        let source = reader.get_sound(&params[1]);
+        Box::new(Self::new(duration.round() as i32, source))
     }
 }
 

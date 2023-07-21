@@ -35,9 +35,12 @@ impl SoundSource for LFO {
     }
 
     fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
-        use crate::dc::dc::DC;
-        todo!();
-        Box::new(Self::new(0.0, 0.0, 0.0, Knob::dc(0.0), 0))
+        let dc_offset = params[0].parse::<f32>().unwrap();
+        let freq = params[1].parse::<f32>().unwrap() / reader.sample_rate as f32;
+        let phase = params[2].parse::<f32>().unwrap() / reader.sample_rate as f32;
+        let depth = reader.get_knob(&params[3], 1.0);
+        let duration = params[4].parse::<f32>().unwrap() * reader.sample_rate as f32;
+        Box::new(Self::new(dc_offset, freq, phase, depth, duration.round() as i32))
     }
 }
 

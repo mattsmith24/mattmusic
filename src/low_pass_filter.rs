@@ -117,9 +117,10 @@ impl SoundSource for LowPassFilter {
     }
 
     fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
-        use crate::dc::dc::DC;
-        todo!();
-        Box::new(Self::new(Knob::dc(0.0), 0, Box::new(DC::new(0.0, 0))))
+        let frequency_cutoff = reader.get_knob(&params[0], 1.0 / reader.sample_rate as f32);
+        let filter_length = params[1].parse::<usize>().unwrap();
+        let source = reader.get_sound(&params[2]);
+        Box::new(Self::new(frequency_cutoff, filter_length, source))
     }
 }
 

@@ -1,18 +1,25 @@
 pub mod read_song {
     use std::fs::File;
-    use std::path::{Path, PathBuf};
-    use std::rc::Rc;
+    use std::path::Path;
     use serde::{Serialize, Deserialize};
     use crate::traits::traits::{DynSoundSource, SoundSource};
     use crate::knob::knob::Knob;
     use crate::midi_notes::midi_notes::{midistr2freq, midi2freq};
     use crate::dc::dc::DC;
     use crate::envelope::envelope::Envelope;
+    use crate::lfo::lfo::LFO;
+    use crate::low_pass_filter::low_pass_filter::LowPassFilter;
     use crate::midi2freq::midi2freq::Midi2Freq;
     use crate::mix::mix::Mix;
     use crate::multiply::multiply::Multiply;
+    use crate::noise::noise::Noise;
+    use crate::pre_render::pre_render::PreRender;
     use crate::sequence::sequence::Sequence;
+    use crate::saw::saw::Saw;
     use crate::sine::sine::Sine;
+    use crate::square::square::Square;
+    use crate::time_box::time_box::TimeBox;
+    use crate::triangle::triangle::Triangle;
 
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
     pub struct PatchItem {
@@ -172,11 +179,19 @@ pub mod read_song {
                 match sound_type {
                     "dc" => DC::from_yaml(&new_params, self),
                     "envelope" => Envelope::from_yaml(&new_params, self),
+                    "lfo" => LFO::from_yaml(&new_params, self),
+                    "low_pass_filter" => LowPassFilter::from_yaml(&new_params, self),
                     "midi2freq" => Midi2Freq::from_yaml(&new_params, self),
                     "mix" => Mix::from_yaml(&new_params, self),
                     "multiply" => Multiply::from_yaml(&new_params, self),
+                    "noise" => Noise::from_yaml(&new_params, self),
+                    "pre_render" => PreRender::from_yaml(&new_params, self),
                     "sequence" => Sequence::from_yaml(&new_params, self),
+                    "saw" => Saw::from_yaml(&new_params, self),
                     "sine" => Sine::from_yaml(&new_params, self),
+                    "square" => Square::from_yaml(&new_params, self),
+                    "time_box" => TimeBox::from_yaml(&new_params, self),
+                    "triangle" => Triangle::from_yaml(&new_params, self),
                     &_ => todo!()
                 }
             }
@@ -199,7 +214,7 @@ pub mod read_song {
                 self.patch_context.set_child_context();
                 res
             } else {
-                let mut item;
+                let item;
                 if self.patch_context.active() {
                     item = self.get_patch_sound(sound_name);
                 } else {

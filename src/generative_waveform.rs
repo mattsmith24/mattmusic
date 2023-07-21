@@ -86,9 +86,12 @@ impl SoundSource for GenerativeWaveform {
     }
 
     fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
-        use crate::dc::dc::DC;
-        todo!();
-        Box::new(Self::new(Knob::dc(0.0), 0, 0, Knob::dc(0.0), 0))
+        let freq = reader.get_knob(&params[0], 1.0 / reader.sample_rate as f32);
+        let harmonic_index_increment = params[1].parse::<i32>().unwrap();
+        let gain_exponent = params[2].parse::<i32>().unwrap();
+        let gain = reader.get_knob(&params[3], 1.0);
+        let duration = params[2].parse::<f32>().unwrap() * reader.sample_rate as f32;
+        Box::new(Self::new(freq, harmonic_index_increment, gain_exponent, gain, duration.round() as i32))
     }
 }
 

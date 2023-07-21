@@ -40,9 +40,7 @@ impl SoundSource for PureTone {
         self.duration
     }
 
-    fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
-        use crate::dc::dc::DC;
-        todo!();
+    fn from_yaml(_params: &Vec::<String>, _reader: &mut SongReader) -> DynSoundSource {
         Box::new(Self::new(Knob::dc(0.0), Knob::dc(0.0), 0))
     }
 }

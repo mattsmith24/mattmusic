@@ -35,8 +35,8 @@ impl SoundSource for Noise {
     }
 
     fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
-        todo!();
-        Box::new(Self::new(0))
+        let duration = params[0].parse::<f32>().unwrap() * reader.sample_rate as f32;
+        Box::new(Self::new(duration.round() as i32))
     }
 }
 }

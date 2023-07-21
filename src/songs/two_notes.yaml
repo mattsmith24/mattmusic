@@ -2,18 +2,24 @@ include:
   - "rich_synthesis1.yaml"
 
 patches:
+  - name: instrument
+    root: instrument1
+    sounds:
+      - name: instrument1
+        sound_type: patch rich
+        params:
+          - INPUT 0
+          - "0.5"
 
 sounds:
   - name: sine1
-    sound_type: patch rich
+    sound_type: patch instrument
     params:
       - "G4"
-      - "0.5"
   - name: sine2
-    sound_type: patch rich
+    sound_type: patch instrument
     params:
       - "G3"
-      - "0.5"
   - name: sequence1
     sound_type: sequence
     params:

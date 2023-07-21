@@ -41,9 +41,8 @@ impl SoundSource for Tremolo {
         (*self.source).duration()
     }
 
-    fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
+    fn from_yaml(_params: &Vec::<String>, _reader: &mut SongReader) -> DynSoundSource {
         use crate::dc::dc::DC;
-        todo!();
         Box::new(Self::new(0.0, 0.0, Box::new(DC::new(0.0, 0))))
     }
 }

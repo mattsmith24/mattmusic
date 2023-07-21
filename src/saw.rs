@@ -36,9 +36,10 @@ impl SoundSource for Saw {
     }
 
     fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
-        use crate::dc::dc::DC;
-        todo!();
-        Box::new(Self::new(Knob::dc(0.0), Knob::dc(0.0), 0))
+        let freq = reader.get_knob(&params[0], 1.0 / reader.sample_rate as f32);
+        let strength = reader.get_knob(&params[1], 1.0);
+        let duration = params[2].parse::<f32>().unwrap() * reader.sample_rate as f32;
+        Box::new(Self::new(freq, strength, duration.round() as i32))
     }
 }
 
