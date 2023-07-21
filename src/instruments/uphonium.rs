@@ -2,12 +2,12 @@ pub mod uphonium {
 
     use crate::traits::traits::{DynSoundSource, Instrument} ;
     use crate::knob::knob::Knob;
-    use crate::pure_tone::pure_tone::PureTone;
-    use crate::lfo::lfo::LFO;
+    use crate::sine::sine::Sine;
     use crate::envelope::envelope::{Envelope, EnvelopePoint};
     use crate::multiply::multiply::Multiply;
     use crate::low_pass_filter::low_pass_filter::LowPassFilter;
     use crate::pre_render::pre_render::PreRender;
+    use crate::generative_waveform::generative_waveform::GenerativeWaveform;
 
 
     pub struct Uphonium {
@@ -54,12 +54,17 @@ pub mod uphonium {
             points.push(EnvelopePoint::new( self.t2n(3.85),  0.0 ));
             let envelope = Envelope::new(points);
             //
-            let freq_knob = Knob::new(Box::new(LFO::new(freq, freq, 0.0, Knob::new(Box::new(envelope)), duration)));
+            let mut freq_multiplier = Multiply::new();
+            freq_multiplier.add(Box::new(Sine::new(Knob::dc(freq), Knob::new(Box::new(envelope)), duration)), freq);
+            let freq_knob = Knob::new(Box::new(freq_multiplier));
             // strength is the gain for oscillators
             let strength_knob = Knob::new(Box::new(multiplier));
-            let pure_tone = PureTone::new(
+            let pure_tone =  GenerativeWaveform::new(
                 freq_knob,
+                self.sample_rate * 2,
+                1,
                 strength_knob,
+                false,
                 duration);
             let low_pass = LowPassFilter::new(
                 Knob::dc(2000.0/self.sample_rate as f32),

@@ -21,6 +21,7 @@ impl Saw {
             1,
             1,
             gain,
+            true,
             duration
         ) }
     }

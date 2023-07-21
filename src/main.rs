@@ -5,10 +5,7 @@ use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{FromSample, Sample, SampleFormat, SizedSample};
 
 mod traits;
-mod pure_tone;
 mod midi_notes;
-mod tremolo;
-mod ding_envelope;
 mod sequence;
 mod mix;
 mod songs;
@@ -19,7 +16,6 @@ mod triangle;
 mod saw;
 mod dc;
 mod knob;
-mod lfo;
 mod envelope;
 mod multiply;
 mod low_pass_filter;

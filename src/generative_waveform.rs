@@ -14,6 +14,7 @@ pub struct GenerativeWaveform {
     harmonic_index_increment: i32,
     gain_exponent: i32,
     gain: Knob,
+    lock_phase: bool,
     duration: i32,
     next_clock: i32,
     freq_lock: f32,
@@ -26,6 +27,7 @@ impl GenerativeWaveform {
         harmonic_index_increment: i32,
         gain_exponent: i32,
         gain: Knob,
+        lock_phase: bool,
         duration: i32
     ) -> Self {
         GenerativeWaveform{
@@ -33,6 +35,7 @@ impl GenerativeWaveform {
             harmonic_index_increment: harmonic_index_increment,
             gain_exponent: gain_exponent,
             gain: gain,
+            lock_phase: lock_phase,
             duration: duration,
             next_clock: 0,
             freq_lock: 0.0,
@@ -55,29 +58,33 @@ impl SoundSource for GenerativeWaveform {
         } else {
             let mut output = 0.0;
             let base_gain = self.gain.next_value(n);
-            // Use a clock to lock the frequency for each cycle. This prevents phase artifacts
-            // resulting from a constantly varying frequency input.
-            // n == 0 is used to reset when replaying the sound
-            if n == 0 {
-                self.next_clock = 0;
-            }
-            if n >= self.next_clock {
-                let freq = self.freq.next_value(n);
-                // calc period from desired frequency
-                self.next_clock += (1.0 / freq).round() as i32;
-                // lock the frequency until the next clock
-                self.freq_lock = freq;
-                // subtract any phase at this value of n so that we start the waveform at 0
-                self.phase_adjust = -freq * n as f32;
+            if self.lock_phase {
+                // Use a clock to lock the frequency for each cycle. This prevents phase artifacts
+                // resulting from a constantly varying frequency input.
+                // n == 0 is used to reset when replaying the sound
+                if n == 0 {
+                    self.next_clock = 0;
+                }
+                if n >= self.next_clock {
+                    let freq = self.freq.next_value(n);
+                    // calc period from desired frequency
+                    self.next_clock += (1.0 / freq).round() as i32;
+                    // lock the frequency until the next clock
+                    self.freq_lock = freq;
+                    // subtract any phase at this value of n so that we start the waveform at 0
+                    self.phase_adjust = -freq * n as f32;
+                }
+            } else {
+                self.freq_lock = self.freq.next_value(n);
             }
             let mut i = 1;
             while !self.is_freq_above_nyquist(i as f32 * self.freq_lock) {
                 let gain = 1.0 / (i as f32).powf(self.gain_exponent as f32);
-                output += base_gain * gain * self.calculate_sine_output_from_freq(
+                output += gain * self.calculate_sine_output_from_freq(
                     self.freq_lock * i as f32, self.phase_adjust * i as f32, n);
                 i += self.harmonic_index_increment;
             }
-            (output, output)
+            (output * base_gain, output * base_gain)
         }
     }
 
@@ -90,8 +97,9 @@ impl SoundSource for GenerativeWaveform {
         let harmonic_index_increment = params[1].parse::<i32>().unwrap();
         let gain_exponent = params[2].parse::<i32>().unwrap();
         let gain = reader.get_knob(&params[3], 1.0);
-        let duration = params[2].parse::<f32>().unwrap() * reader.sample_rate as f32;
-        Box::new(Self::new(freq, harmonic_index_increment, gain_exponent, gain, duration.round() as i32))
+        let lock_phase = params[4].parse::<bool>().unwrap();
+        let duration = params[5].parse::<f32>().unwrap() * reader.sample_rate as f32;
+        Box::new(Self::new(freq, harmonic_index_increment, gain_exponent, gain, lock_phase, duration.round() as i32))
     }
 }
 

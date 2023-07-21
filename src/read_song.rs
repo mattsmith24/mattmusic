@@ -7,7 +7,6 @@ pub mod read_song {
     use crate::midi_notes::midi_notes::{midistr2freq, midi2freq};
     use crate::dc::dc::DC;
     use crate::envelope::envelope::Envelope;
-    use crate::lfo::lfo::LFO;
     use crate::low_pass_filter::low_pass_filter::LowPassFilter;
     use crate::midi2freq::midi2freq::Midi2Freq;
     use crate::mix::mix::Mix;
@@ -179,7 +178,6 @@ pub mod read_song {
                 match sound_type {
                     "dc" => DC::from_yaml(&new_params, self),
                     "envelope" => Envelope::from_yaml(&new_params, self),
-                    "lfo" => LFO::from_yaml(&new_params, self),
                     "low_pass_filter" => LowPassFilter::from_yaml(&new_params, self),
                     "midi2freq" => Midi2Freq::from_yaml(&new_params, self),
                     "mix" => Mix::from_yaml(&new_params, self),

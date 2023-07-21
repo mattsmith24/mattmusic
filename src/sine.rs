@@ -21,6 +21,7 @@ impl Sine {
             1000000000, // A really high number so we don't add any frequencies
             1,
             gain,
+            true,
             duration
         ) }
     }

@@ -20,6 +20,7 @@ impl Triangle {
             2,
             2,
             gain,
+            true,
             duration
         ) }
     }

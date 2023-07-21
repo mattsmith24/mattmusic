@@ -21,6 +21,7 @@ impl Square {
             2,
             1,
             gain,
+            true,
             duration
         ) }
     }
