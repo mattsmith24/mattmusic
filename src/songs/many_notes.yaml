@@ -5,7 +5,7 @@ patches:
     root: instrument1
     sounds:
       - name: instrument1
-        sound_type: patch beyond_sine_tones
+        sound_type: patch rich
         params:
           - INPUT 0
           - "0.16"

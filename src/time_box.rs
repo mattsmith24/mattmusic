@@ -25,10 +25,14 @@ impl SoundSource for TimeBox {
     fn next_value(&mut self, n: i32) -> (f32, f32) {
         let source_val = (*self.source).next_value(n);
         let mut gain = 1.0;
-        const LIFT: i32 = 44;
-        if n > self.duration - LIFT {
+        const RAMP: i32 = 88;
+        if n < RAMP {
+            // ramp up start of note to avoid discontinuity
+            gain *= 1.0 - (RAMP - n) as f32 / RAMP as f32;
+        }
+        if n > self.duration - RAMP {
             // ramp down to end of note to avoid discontinuity
-            gain *= 1.0 - (n - (self.duration - LIFT)) as f32 / LIFT as f32;
+            gain *= 1.0 - (n - (self.duration - RAMP)) as f32 / RAMP as f32;
         }
         if gain < 0.0 || n > self.duration {
             gain = 0.0;

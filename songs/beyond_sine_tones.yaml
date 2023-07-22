@@ -1,6 +1,42 @@
 # Based on PureData tutorial by Really Useful Plugins https://www.youtube.com/watch?v=I88Cxi86Zu8
 include:
 patches:
+  - name: beyond_sine_tones
+    root: timebox
+    sounds:
+      - name: timebox
+        sound_type: time_box
+        params:
+          - INPUT 1
+          - vol
+      - name: vol
+        sound_type: multiply
+        params:
+          - "dc 0.25 INPUT 1"
+          - "1.0 mix"
+      - name: mix
+        sound_type: mix
+        params:
+          - "oscs1"
+          - "oscs2"
+      - name: oscs1
+        sound_type: "patch oscs input-freq"
+        params:
+          - "INPUT 1"
+      - name: oscs2
+        sound_type: "patch oscs oscs2-input"
+        params:
+          - "INPUT 1"
+      - name: "oscs2-input"
+        sound_type: multiply
+        params:
+          - "0.0 input-freq"
+          - "dc 2.0 INPUT 1"
+      - name: input-freq
+        sound_type: midi2freq
+        params:
+          - "INPUT 0"
+          - "INPUT 1"
   - name: oscs
     root: mix
     sounds:
@@ -62,34 +98,3 @@ patches:
         params:
           - "0.0 PATCH_INPUT"
           - "dc 2.01 INPUT 0"
-  - name: rich
-    root: vol
-    sounds:
-      - name: vol
-        sound_type: multiply
-        params:
-          - "dc 0.25 INPUT 1"
-          - "1.0 mix"
-      - name: mix
-        sound_type: mix
-        params:
-          - "oscs1"
-          - "oscs2"
-      - name: oscs1
-        sound_type: "patch oscs input-freq"
-        params:
-          - "INPUT 1"
-      - name: oscs2
-        sound_type: "patch oscs oscs2-input"
-        params:
-          - "INPUT 1"
-      - name: "oscs2-input"
-        sound_type: multiply
-        params:
-          - "0.0 input-freq"
-          - "dc 2.0 INPUT 1"
-      - name: input-freq
-        sound_type: midi2freq
-        params:
-          - "INPUT 0"
-          - "INPUT 1"
