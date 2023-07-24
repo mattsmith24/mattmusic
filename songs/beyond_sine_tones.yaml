@@ -9,12 +9,17 @@ patches:
         sound_type: time_box
         params:
           - INPUT 1
-          - vol
-      - name: vol
+          - multiply
+      - name: multiply
         sound_type: multiply
         params:
-          - "dc 0.25 INPUT 1"
+          - "0.0 vol"
           - "1.0 mix"
+      - name: vol
+        sound_type: db2amp
+        params:
+          - "70.0"
+          - INPUT 1
       - name: mix
         sound_type: mix
         params:

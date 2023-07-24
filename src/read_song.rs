@@ -5,6 +5,8 @@ pub mod read_song {
     use crate::traits::traits::{DynSoundSource, SoundSource};
     use crate::knob::knob::Knob;
     use crate::midi_notes::midi_notes::{midistr2freq, midi2freq};
+
+    use crate::db2amp::db2amp::Db2Amp;
     use crate::dc::dc::DC;
     use crate::envelope::envelope::Envelope;
     use crate::low_pass_filter::low_pass_filter::LowPassFilter;
@@ -13,8 +15,8 @@ pub mod read_song {
     use crate::multiply::multiply::Multiply;
     use crate::noise::noise::Noise;
     use crate::pre_render::pre_render::PreRender;
-    use crate::sequence::sequence::Sequence;
     use crate::saw::saw::Saw;
+    use crate::sequence::sequence::Sequence;
     use crate::sine::sine::Sine;
     use crate::square::square::Square;
     use crate::time_box::time_box::TimeBox;
@@ -183,6 +185,7 @@ pub mod read_song {
                 self.get_patch(&sound_type[6..], &new_params)
             } else {
                 match sound_type {
+                    "db2amp" => Db2Amp::from_yaml(&new_params, self),
                     "dc" => DC::from_yaml(&new_params, self),
                     "envelope" => Envelope::from_yaml(&new_params, self),
                     "low_pass_filter" => LowPassFilter::from_yaml(&new_params, self),
