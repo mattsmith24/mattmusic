@@ -149,8 +149,15 @@ pub mod read_song {
             let mut new_params = Vec::<String>::new();
             for param in params {
                 if param.starts_with("INPUT ") {
-                    let substitute_index = param[6..].parse::<usize>().unwrap();
-                    new_params.push(self.patch_context.get_param(substitute_index));
+                    let end_pos: usize;
+                    match param[6..].find(" ") {
+                        Some(p) => end_pos = p + 6,
+                        None => end_pos = param.len()
+                    }
+                    let substitute_index = param[6..end_pos].parse::<usize>().unwrap();
+                    let substitute_param = self.patch_context.get_param(substitute_index).to_string()
+                        + &param[end_pos..];
+                    new_params.push(substitute_param);
                 } else if param.contains(" INPUT ") {
                     let start_pos = param.find(" INPUT ").unwrap();
                     let end_pos: usize;

@@ -53,13 +53,14 @@ impl SoundSource for Envelope {
         res
     }
 
-    fn from_yaml(params: &Vec::<String>, _reader: &mut SongReader) -> DynSoundSource {
+    fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
         let mut points = Vec::<EnvelopePoint>::new();
         for param in params {
+            println!("Envelope::from_yaml param {}", &param);
             let parts: Vec<_> = param.split(" ").collect();
-            let time_offset = parts[0].parse::<i32>().unwrap();
+            let time_offset = parts[0].parse::<f32>().unwrap() * reader.sample_rate as f32;
             let value = parts[1].parse::<f32>().unwrap();
-            points.push(EnvelopePoint::new(time_offset, value));
+            points.push(EnvelopePoint::new(time_offset.round() as i32, value));
         }
         Box::new(Self::new(points))
     }
