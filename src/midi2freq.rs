@@ -34,7 +34,7 @@ impl SoundSource for Midi2Freq {
         if  note_range.contains(&char1) && params[0].len() <= 3 {
             value = midistr2freq(&params[0]) / reader.sample_rate as f32;
         } else {
-            value = midi2freq(params[0].parse::<u8>().unwrap()) / reader.sample_rate as f32;
+            value = midi2freq(params[0].parse::<i8>().unwrap()) / reader.sample_rate as f32;
         }
         let duration = params[1].parse::<f32>().unwrap() * reader.sample_rate as f32;
         Box::new(Self::new(value, duration.round() as i32))

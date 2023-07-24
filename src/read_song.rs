@@ -113,7 +113,7 @@ pub mod read_song {
             if  note_range.contains(&char1) && knob_val.len() <= 3 {
                 Knob::dc(midistr2freq(knob_val) * dc_scale)
             } else {
-                let int_parse = knob_val.parse::<u8>();
+                let int_parse = knob_val.parse::<i8>();
                 match int_parse {
                     Ok(i) => Knob::dc(midi2freq(i) * dc_scale),
                     Err(_) => {

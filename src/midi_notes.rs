@@ -134,9 +134,8 @@ pub fn note2freq(octave: u8, pitch: u8) -> f32 {
     MIDI_NOTES[offset as usize].3
 }
 
-pub fn midi2freq(midi: u8) -> f32 {
-    let idx = MIDI_NOTES.binary_search_by_key(&midi, |&(a,_b,_c,_d,_e)| a).unwrap();
-    MIDI_NOTES[idx].3
+pub fn midi2freq(midi: i8) -> f32 {
+    440.0 * 2.0_f32.powf((midi - 69) as f32 / 12.0)
 }
 
 pub fn midistr2freq(midi: &str) -> f32 {
