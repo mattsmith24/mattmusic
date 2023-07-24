@@ -1,0 +1,37 @@
+include:
+  - oscs.yaml
+  - env.yaml
+patches:
+  - name: simple_envelopes
+    root: timebox
+    sounds:
+      - name: timebox
+        sound_type: time_box
+        params:
+          - INPUT 1
+          - vol
+      - name: vol
+        sound_type: multiply
+        params:
+          - dc 0.5 INPUT 1
+          - 0.0 mul1
+      - name: mul1
+        sound_type: multiply
+        params:
+          - 0.0 oscs1
+          - 0.0 env
+      - name: oscs1
+        sound_type: patch oscs input-freq
+        params:
+          - INPUT 1
+      - name: input-freq
+        sound_type: midi2freq
+        params:
+          - "INPUT 0"
+          - "INPUT 1"
+      - name: env
+        sound_type: patch env
+        params:
+          - INPUT 2
+
+

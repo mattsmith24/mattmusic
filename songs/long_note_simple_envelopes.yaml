@@ -1,0 +1,12 @@
+include:
+  - simple_envelopes.yaml
+patches:
+sounds:
+  - name: sine1
+    sound_type: patch simple_envelopes
+    params:
+      - "72"
+      - "10.0"
+      - "1.200"
+
+root: sine1
