@@ -17,6 +17,7 @@ mod mix;
 mod multiply;
 mod noise;
 mod pre_render;
+mod ramp;
 mod read_song;
 mod saw;
 mod sequence;
@@ -26,6 +27,7 @@ mod square;
 mod time_box;
 mod traits;
 mod triangle;
+mod wavetable;
 
 use traits::traits::{DynSoundSource, DynInstrument};
 use read_song::read_song::read_song;

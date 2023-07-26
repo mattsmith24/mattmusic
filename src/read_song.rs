@@ -15,12 +15,14 @@ pub mod read_song {
     use crate::multiply::multiply::Multiply;
     use crate::noise::noise::Noise;
     use crate::pre_render::pre_render::PreRender;
+    use crate::ramp::ramp::Ramp;
     use crate::saw::saw::Saw;
     use crate::sequence::sequence::Sequence;
     use crate::sine::sine::Sine;
     use crate::square::square::Square;
     use crate::time_box::time_box::TimeBox;
     use crate::triangle::triangle::Triangle;
+    use crate::wavetable::wavetable::Wavetable;
 
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
     pub struct PatchItem {
@@ -194,12 +196,14 @@ pub mod read_song {
                     "multiply" => Multiply::from_yaml(&new_params, self),
                     "noise" => Noise::from_yaml(&new_params, self),
                     "pre_render" => PreRender::from_yaml(&new_params, self),
+                    "ramp" => Ramp::from_yaml(&new_params, self),
                     "sequence" => Sequence::from_yaml(&new_params, self),
                     "saw" => Saw::from_yaml(&new_params, self),
                     "sine" => Sine::from_yaml(&new_params, self),
                     "square" => Square::from_yaml(&new_params, self),
                     "time_box" => TimeBox::from_yaml(&new_params, self),
                     "triangle" => Triangle::from_yaml(&new_params, self),
+                    "wavetable" => Wavetable::from_yaml(&new_params, self),
                     &_ => todo!()
                 }
             }

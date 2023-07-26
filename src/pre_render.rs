@@ -15,7 +15,7 @@ impl PreRender {
         let mut buf = Vec::<(f32, f32)>::new();
         let mut sample_clock = 0i32;
         let duration = (*source).duration();
-        while sample_clock <= duration {
+        while sample_clock < duration {
             buf.push((*source).next_value(sample_clock));
             sample_clock += 1;
         }
