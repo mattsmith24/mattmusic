@@ -60,13 +60,14 @@ sounds:
     sound_type: ramp
     params:
       - "1.0"
-      - "50000.0"
+      - "20000.0"
       - "5.0"
   - name: wavetable
     sound_type: wavetable
     params:
       - sequence1
       - ramp
+      - cubic
       - "5.0"
 
 root: wavetable
