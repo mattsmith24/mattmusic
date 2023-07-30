@@ -1,0 +1,37 @@
+include:
+patches:
+sounds:
+  - name: sweep_ramp
+    sound_type: ramp
+    params:
+      - "10.0"
+      - "0.01"
+      - "10.0"
+  - name: sweep_start
+    sound_type: dc
+    params:
+      - "0.005"
+      - "10.0"
+  - name: sweep
+    sound_type: mix
+    params:
+      - sweep_start
+      - sweep_ramp
+  - name: a
+    sound_type: sine
+    params:
+      - "440.0"
+      - "1.0"
+      - "10.0"
+  - name: b
+    sound_type: sine
+    params:
+      - sweep
+      - "1.0"
+      - "10.0"
+  - name: modulate_ab
+    sound_type: multiply
+    params:
+      - 1.0 a
+      - 1.0 b
+root: modulate_ab
