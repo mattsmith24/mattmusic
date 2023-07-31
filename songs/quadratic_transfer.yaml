@@ -18,11 +18,12 @@ sounds:
     params:
       - 0.0 tone
       - 0.0 decay
-  # Clip the sound wave - it will be a square wave that smooths out as it looses
-  # amplitude.
-  - name: clip
-    sound_type: clip
+  # Quadratic transfer function. We don't offset the two waveforms on purpose
+  # two demonstrate how the amplitude is wrapped causing doubling of frequency
+  # and distortion harmonics
+  - name: quad
+    sound_type: multiply
     params:
-      - "0.3"
-      - decay_tone
-root: clip
+      - 0.0 decay_tone
+      - 0.0 decay_tone
+root: quad
