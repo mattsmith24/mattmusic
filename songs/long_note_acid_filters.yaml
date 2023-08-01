@@ -1,0 +1,12 @@
+include:
+  - acid_filters.yaml
+patches:
+sounds:
+  - name: sine1
+    sound_type: patch acid_filters
+    params:
+      - "72"
+      - "10.0"
+      - "0.6"
+
+root: sine1

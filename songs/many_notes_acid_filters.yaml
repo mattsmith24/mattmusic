@@ -1,0 +1,61 @@
+include:
+  - acid_filters.yaml
+patches:
+  - name: instrument
+    root: instrument1
+    sounds:
+      - name: instrument1
+        sound_type: patch acid_filters
+        params:
+          - INPUT 0
+          - "0.16"
+          - "0.25"
+
+sounds:
+  - name: sine58
+    sound_type: patch instrument
+    params:
+      - "58"
+  - name: sine63
+    sound_type: patch instrument
+    params:
+      - "63"
+  - name: sine70
+    sound_type: patch instrument
+    params:
+      - "70"
+  - name: sine72
+    sound_type: patch instrument
+    params:
+      - "72"
+  - name: sine65
+    sound_type: patch instrument
+    params:
+      - "65"
+  - name: sine60
+    sound_type: patch instrument
+    params:
+      - "60"
+  - name: sine67
+    sound_type: patch instrument
+    params:
+      - "67"
+  - name: sine62
+    sound_type: patch instrument
+    params:
+      - "62"
+  - name: sequence1
+    sound_type: sequence
+    params:
+      - "10"
+      - "1.28"
+      - "0.0 sine58"
+      - "0.16 sine63"
+      - "0.32 sine70"
+      - "0.48 sine72"
+      - "0.64 sine65"
+      - "0.80 sine60"
+      - "0.96 sine67"
+      - "1.12 sine62"
+
+root: sequence1

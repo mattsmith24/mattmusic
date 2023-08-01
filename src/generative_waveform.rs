@@ -53,7 +53,7 @@ impl GenerativeWaveform {
 
 impl SoundSource for GenerativeWaveform {
     fn next_value(&mut self, n: i32) -> (f32, f32) {
-        if n > self.duration {
+        if n >= self.duration {
             (0.0, 0.0)
         } else {
             let mut output = 0.0;

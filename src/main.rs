@@ -17,6 +17,7 @@ mod midi2freq;
 mod mix;
 mod multiply;
 mod noise;
+mod oscillator;
 mod pre_render;
 mod ramp;
 mod read_song;

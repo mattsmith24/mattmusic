@@ -15,6 +15,7 @@ pub mod read_song {
     use crate::mix::mix::Mix;
     use crate::multiply::multiply::Multiply;
     use crate::noise::noise::Noise;
+    use crate::oscillator::oscillator::Oscillator;
     use crate::pre_render::pre_render::PreRender;
     use crate::ramp::ramp::Ramp;
     use crate::saw::saw::Saw;
@@ -150,34 +151,36 @@ pub mod read_song {
             res
         }
 
+        fn substitute_params_in_str(&self, param_str: &str) -> String {
+            let substitute_param: String;
+            let mut needs_substitution = false;
+            let mut start_pos: usize = 0;
+            if param_str.starts_with("INPUT ") {
+                needs_substitution = true;
+            } else if param_str.contains(" INPUT ") {
+                needs_substitution = true;
+                start_pos = param_str.find(" INPUT ").unwrap() + 1;
+            }
+            if needs_substitution {
+                let end_pos: usize;
+                match param_str[start_pos + 6..].find(" ") {
+                    Some(p) => end_pos = p + start_pos + 6,
+                    None => end_pos = param_str.len()
+                }
+                let substitute_index = param_str[start_pos + 6..end_pos].parse::<usize>().unwrap();
+                substitute_param = param_str[0..start_pos].to_string()
+                    + &self.patch_context.get_param(substitute_index)
+                    + &self.substitute_params_in_str(&param_str[end_pos..]);
+            } else {
+                substitute_param = param_str.clone().to_string();
+            }
+            substitute_param
+        }
+
         fn substitute_params(&self, params: &Vec::<String>) -> Vec::<String> {
             let mut new_params = Vec::<String>::new();
             for param in params {
-                if param.starts_with("INPUT ") {
-                    let end_pos: usize;
-                    match param[6..].find(" ") {
-                        Some(p) => end_pos = p + 6,
-                        None => end_pos = param.len()
-                    }
-                    let substitute_index = param[6..end_pos].parse::<usize>().unwrap();
-                    let substitute_param = self.patch_context.get_param(substitute_index).to_string()
-                        + &param[end_pos..];
-                    new_params.push(substitute_param);
-                } else if param.contains(" INPUT ") {
-                    let start_pos = param.find(" INPUT ").unwrap();
-                    let end_pos: usize;
-                    match param[start_pos+7..].find(" ") {
-                        Some(p) => end_pos = p + start_pos + 7,
-                        None => end_pos = param.len()
-                    }
-                    let substitute_index = param[start_pos+7..end_pos].parse::<usize>().unwrap();
-                    let substitute_param = param[0..start_pos+1].to_string()
-                        + &self.patch_context.get_param(substitute_index)
-                        + &param[end_pos..];
-                    new_params.push(substitute_param);
-                } else {
-                    new_params.push(param.clone());
-                }
+                new_params.push(self.substitute_params_in_str(&param));
             }
             new_params
         }
@@ -197,6 +200,7 @@ pub mod read_song {
                     "mix" => Mix::from_yaml(&new_params, self),
                     "multiply" => Multiply::from_yaml(&new_params, self),
                     "noise" => Noise::from_yaml(&new_params, self),
+                    "oscillator" => Oscillator::from_yaml(&new_params, self),
                     "pre_render" => PreRender::from_yaml(&new_params, self),
                     "ramp" => Ramp::from_yaml(&new_params, self),
                     "sequence" => Sequence::from_yaml(&new_params, self),

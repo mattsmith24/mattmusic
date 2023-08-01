@@ -1,0 +1,42 @@
+include:
+patches:
+  # params: carrier_frequency, modulation_frequency, modulation_index, duration
+  - name: frequency_modulation
+    root: output_osc
+    sounds:
+      - name: output_osc
+        sound_type: oscillator
+        params:
+          - carrier_adder
+          - "1.0"
+          - INPUT 3
+      - name: carrier_adder
+        sound_type: mix
+        params:
+          - carrier_frequency
+          - modulation_multiplier
+      - name: carrier_frequency
+        sound_type: dc
+        params:
+          - INPUT 0
+          - INPUT 3
+      - name: modulation_multiplier
+        sound_type: multiply
+        params:
+          - dc INPUT 2 INPUT 3
+          - 0.0 modulation_oscillator
+      - name: modulation_oscillator
+        sound_type: oscillator
+        params:
+          - INPUT 1
+          - "1.0"
+          - INPUT 3
+sounds:
+  - name: test
+    sound_type: patch frequency_modulation
+    params:
+      - "0.01" # Hz / 44000
+      - "220.0"  # Hz
+      - "0.000003409" # Hz / 44000
+      - "5.0"
+root: test
