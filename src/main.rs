@@ -5,6 +5,7 @@ use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{FromSample, Sample, SampleFormat, SizedSample};
 
 mod clip;
+mod cos_transfer;
 mod db2amp;
 mod dc;
 mod envelope;

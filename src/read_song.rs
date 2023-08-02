@@ -7,6 +7,7 @@ pub mod read_song {
     use crate::midi_notes::midi_notes::{midistr2freq, midi2freq};
 
     use crate::clip::clip::Clip;
+    use crate::cos_transfer::cos_transfer::CosTransfer;
     use crate::db2amp::db2amp::Db2Amp;
     use crate::dc::dc::DC;
     use crate::envelope::envelope::Envelope;
@@ -192,6 +193,7 @@ pub mod read_song {
             } else {
                 match sound_type {
                     "clip" => Clip::from_yaml(&new_params, self),
+                    "cos_transfer" => CosTransfer::from_yaml(&new_params, self),
                     "db2amp" => Db2Amp::from_yaml(&new_params, self),
                     "dc" => DC::from_yaml(&new_params, self),
                     "envelope" => Envelope::from_yaml(&new_params, self),
