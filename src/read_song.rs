@@ -11,6 +11,7 @@ pub mod read_song {
     use crate::db2amp::db2amp::Db2Amp;
     use crate::dc::dc::DC;
     use crate::envelope::envelope::Envelope;
+    use crate::gaussian_transfer::gaussian_transfer::GaussianTransfer;
     use crate::low_pass_filter::low_pass_filter::LowPassFilter;
     use crate::midi2freq::midi2freq::Midi2Freq;
     use crate::mix::mix::Mix;
@@ -197,6 +198,7 @@ pub mod read_song {
                     "db2amp" => Db2Amp::from_yaml(&new_params, self),
                     "dc" => DC::from_yaml(&new_params, self),
                     "envelope" => Envelope::from_yaml(&new_params, self),
+                    "gaussian_transfer" => GaussianTransfer::from_yaml(&new_params, self),
                     "low_pass_filter" => LowPassFilter::from_yaml(&new_params, self),
                     "midi2freq" => Midi2Freq::from_yaml(&new_params, self),
                     "mix" => Mix::from_yaml(&new_params, self),

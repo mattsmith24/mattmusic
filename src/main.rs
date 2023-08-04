@@ -9,6 +9,7 @@ mod cos_transfer;
 mod db2amp;
 mod dc;
 mod envelope;
+mod gaussian_transfer;
 mod generative_waveform;
 mod instruments;
 mod knob;
