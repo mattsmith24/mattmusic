@@ -6,6 +6,7 @@ pub mod read_song {
     use crate::knob::knob::Knob;
     use crate::midi_notes::midi_notes::{midistr2freq, midi2freq};
 
+    use crate::cauchy_transfer::cauchy_transfer::CauchyTransfer;
     use crate::clip::clip::Clip;
     use crate::cos_transfer::cos_transfer::CosTransfer;
     use crate::db2amp::db2amp::Db2Amp;
@@ -193,6 +194,7 @@ pub mod read_song {
                 self.get_patch(&sound_type[6..], &new_params)
             } else {
                 match sound_type {
+                    "cauchy_transfer" => CauchyTransfer::from_yaml(&new_params, self),
                     "clip" => Clip::from_yaml(&new_params, self),
                     "cos_transfer" => CosTransfer::from_yaml(&new_params, self),
                     "db2amp" => Db2Amp::from_yaml(&new_params, self),

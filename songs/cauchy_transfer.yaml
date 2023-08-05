@@ -1,0 +1,26 @@
+include:
+patches:
+sounds:
+  # Make a decaying tone - it goes from 1 to 0 in ten seconds
+  - name: decay
+    sound_type: envelope
+    params:
+      - 0.0 1.0
+      - 10.0 0.0
+  - name: tone
+    sound_type: sine
+    params:
+      - "220.0"
+      - "5.0"
+      - "10.0"
+  - name: decay_tone
+    sound_type: multiply
+    params:
+      - 0.0 tone
+      - 0.0 decay
+  # gaussian transfer will distort the wave
+  - name: cauchy
+    sound_type: cauchy_transfer
+    params:
+      - decay_tone
+root: cauchy

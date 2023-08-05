@@ -4,6 +4,7 @@ use clap::{Parser, ValueEnum};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{FromSample, Sample, SampleFormat, SizedSample};
 
+mod cauchy_transfer;
 mod clip;
 mod cos_transfer;
 mod db2amp;
