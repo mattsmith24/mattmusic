@@ -18,7 +18,7 @@ sounds:
     params:
       - 0.0 tone
       - 0.0 decay
-  # gaussian transfer will distort the wave
+  # cauchy transfer will distort the wave
   - name: cauchy
     sound_type: cauchy_transfer
     params:

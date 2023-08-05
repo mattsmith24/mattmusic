@@ -1,0 +1,24 @@
+include:
+patches:
+sounds:
+  - name: sweep_ramp
+    sound_type: ramp
+    params:
+      - "0.002272" # 440Hz
+      - "8.0" # duty. Should be >= 2*PI
+      - "5.0"
+  - name: offset
+    sound_type: dc
+    params:
+      - "-3.1415"
+      - "5.0"
+  - name: sweep
+    sound_type: mix
+    params:
+      - sweep_ramp
+      - offset
+  - name: hann
+    sound_type: hann_window
+    params:
+       - sweep
+root: hann

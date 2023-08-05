@@ -12,6 +12,7 @@ mod dc;
 mod envelope;
 mod gaussian_transfer;
 mod generative_waveform;
+mod hann_window;
 mod instruments;
 mod knob;
 mod low_pass_filter;
