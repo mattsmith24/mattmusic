@@ -21,4 +21,9 @@ sounds:
     sound_type: hann_window
     params:
        - sweep
-root: hann
+  - name: export
+    sound_type: export_wav
+    params:
+      - export.wav
+      - hann
+root: export

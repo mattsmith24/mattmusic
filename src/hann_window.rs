@@ -17,15 +17,13 @@ impl HannWindow {
     }
 }
 
-fn window(mut x:f32) -> f32 {
+fn window(x:f32) -> f32 {
     // wrap x to lie between -pi and pi
-    while x > std::f32::consts::PI {
-        x -= 2.0 * std::f32::consts::PI;
+    if x > std::f32::consts::PI || x < -std::f32::consts::PI {
+        0.0
+    } else {
+        (x.cos() + 1.0) / 2.0
     }
-    while x < -std::f32::consts::PI {
-        x += 2.0 * std::f32::consts::PI;
-    }
-    (x.cos() + 1.0) / 2.0
 }
 
 impl SoundSource for HannWindow {

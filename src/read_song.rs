@@ -12,6 +12,7 @@ pub mod read_song {
     use crate::db2amp::db2amp::Db2Amp;
     use crate::dc::dc::DC;
     use crate::envelope::envelope::Envelope;
+    use crate::export_wav::export_wav::ExportWav;
     use crate::gaussian_transfer::gaussian_transfer::GaussianTransfer;
     use crate::hann_window::hann_window::HannWindow;
     use crate::low_pass_filter::low_pass_filter::LowPassFilter;
@@ -201,6 +202,7 @@ pub mod read_song {
                     "db2amp" => Db2Amp::from_yaml(&new_params, self),
                     "dc" => DC::from_yaml(&new_params, self),
                     "envelope" => Envelope::from_yaml(&new_params, self),
+                    "export_wav" => ExportWav::from_yaml(&new_params, self),
                     "gaussian_transfer" => GaussianTransfer::from_yaml(&new_params, self),
                     "hann_window" => HannWindow::from_yaml(&new_params, self),
                     "low_pass_filter" => LowPassFilter::from_yaml(&new_params, self),

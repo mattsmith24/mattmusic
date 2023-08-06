@@ -10,6 +10,7 @@ mod cos_transfer;
 mod db2amp;
 mod dc;
 mod envelope;
+mod export_wav;
 mod gaussian_transfer;
 mod generative_waveform;
 mod hann_window;
