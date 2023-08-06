@@ -21,9 +21,25 @@ sounds:
     sound_type: hann_window
     params:
        - sweep
+  - name: hann_export
+    sound_type: export_wav
+    params:
+      - tmp/hann_modulator.wav
+      - hann
+  - name: carrier
+    sound_type: sine
+    params:
+      - "2640.0" # 440 * 6
+      - "1.0"
+      - "5.0"
+  - name: modulate
+    sound_type: multiply
+    params:
+      - 0.0 carrier
+      - 0.0 hann_export
   - name: export
     sound_type: export_wav
     params:
-      - export.wav
-      - hann
+      - tmp/hann.wav
+      - modulate
 root: export

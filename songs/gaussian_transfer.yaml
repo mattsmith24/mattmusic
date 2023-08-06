@@ -1,26 +1,36 @@
 include:
 patches:
 sounds:
-  # Make a decaying tone - it goes from 1 to 0 in ten seconds
-  - name: decay
-    sound_type: envelope
-    params:
-      - 0.0 1.0
-      - 10.0 0.0
-  - name: tone
+  - name: modulator
     sound_type: sine
     params:
       - "220.0"
-      - "5.0"
+      - "2.0"
       - "10.0"
-  - name: decay_tone
-    sound_type: multiply
-    params:
-      - 0.0 tone
-      - 0.0 decay
   # gaussian transfer will distort the wave
-  - name: gauss
+  - name: gaussian
     sound_type: gaussian_transfer
     params:
-      - decay_tone
-root: gauss
+      - modulator
+  - name: gaussian_export
+    sound_type: export_wav
+    params:
+      - tmp/gaussian_modulator.wav
+      - gaussian
+  - name: carrier
+    sound_type: sine
+    params:
+      - "2640.0" # 440 * 6
+      - "1.0"
+      - "5.0"
+  - name: modulate
+    sound_type: multiply
+    params:
+      - 0.0 carrier
+      - 0.0 gaussian_export
+  - name: export
+    sound_type: export_wav
+    params:
+      - tmp/gaussian.wav
+      - modulate
+root: export
