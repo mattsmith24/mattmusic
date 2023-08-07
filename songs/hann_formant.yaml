@@ -1,0 +1,58 @@
+include:
+patches:
+sounds:
+  - name: sweep_ramp
+    sound_type: ramp
+    params:
+      - "0.002272" # 440Hz
+      - "1.0"
+      - "5.0"
+  - name: offset
+    sound_type: dc
+    params:
+      - "-0.5"
+      - "5.0"
+  - name: sweep
+    sound_type: mix
+    params:
+      - sweep_ramp
+      - offset
+  - name: modulation_index
+    sound_type: multiply
+    params:
+      - 0.0 sweep
+      - dc 6.3 5.0 # >= 2 * pi
+  - name: hann
+    sound_type: hann_window
+    params:
+       - modulation_index
+  - name: hann_export
+    sound_type: export_wav
+    params:
+      - tmp/hann_modulator.wav
+      - hann
+  - name: stretch
+    sound_type: multiply
+    params:
+      - 0.0 sweep
+      - dc 3.0 5.0 # Places formant at 1320Hz
+  - name: carrier
+    sound_type: cos_transfer
+    params:
+      - stretch
+  - name: carrier_export
+    sound_type: export_wav
+    params:
+      - tmp/hann_carrier.wav
+      - carrier
+  - name: modulate
+    sound_type: multiply
+    params:
+      - 0.0 carrier_export
+      - 0.0 hann_export
+  - name: export
+    sound_type: export_wav
+    params:
+      - tmp/hann.wav
+      - modulate
+root: export
