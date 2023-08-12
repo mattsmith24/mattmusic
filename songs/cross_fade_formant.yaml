@@ -1,0 +1,93 @@
+include:
+patches:
+sounds:
+  - name: sweep_ramp
+    sound_type: ramp
+    params:
+      - "0.002272" # 440Hz
+      - "1.0"
+      - "5.0"
+  - name: offset
+    sound_type: dc
+    params:
+      - "-0.5"
+      - "5.0"
+  - name: sweep
+    sound_type: mix
+    params:
+      - sweep_ramp
+      - offset
+  - name: modulation_index
+    sound_type: multiply
+    params:
+      - 0.0 sweep
+      - dc 6.3 5.0 # >= 2 * pi
+  - name: modulator
+    sound_type: hann_window
+    params:
+       - modulation_index
+  # For a carrier at 3.7 x 440Hz, we can fade between two close harmonics
+  # k and q are the integer and fractional part of wc/w
+  # ie 3 and 0.7
+  - name: kwn
+    sound_type: multiply
+    params:
+      - 0.0 sweep
+      - dc 3.0 5.0 # k
+  # cos(k*w*n)
+  # Note - cos_transfer multiplies input by 2*pi
+  - name: cos_kwn_input
+    sound_type: cos_transfer
+    params:
+      - kwn
+  - name: cos_kwn
+    sound_type: export_wav
+    params:
+      - tmp/cross_fade_formant_cos_kwn.wav
+      - cos_kwn_input
+  # p * cos(k*w*n)
+  - name: p_cos_kwn
+    sound_type: multiply
+    params:
+      - 0.0 cos_kwn
+      - dc 0.3 5.0
+  # (k + 1) * w *n
+  - name: k1wn
+    sound_type: multiply
+    params:
+      - 0.0 sweep
+      - dc 4.0 5.0 # (k + 1)
+  # cos((k + 1)*w*n)
+  - name: cos_k1wn
+    sound_type: cos_transfer
+    params:
+      - k1wn
+  # q * cos((k + 1)*w*n)
+  - name: q_cos_k1wn
+    sound_type: multiply
+    params:
+      - 0.0 cos_k1wn
+      - dc 0.7 5.0
+  # p * cos(k*w*n) + q * cos((k + 1)*w*n)
+  - name: carrier1
+    sound_type: mix
+    params:
+      - p_cos_kwn
+      - q_cos_k1wn
+  - name: carrier
+    sound_type: export_wav
+    params:
+      - tmp/cross_fade_formant_carrier.wav
+      - carrier1
+  - name: modulate
+    sound_type: multiply
+    params:
+      - 0.0 carrier
+      - 0.0 modulator
+  - name: export
+    sound_type: export_wav
+    params:
+      - tmp/cross_fade_formant.wav
+      - modulate
+root: export
+
