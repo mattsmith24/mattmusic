@@ -2,6 +2,8 @@ pub mod read_song {
     use std::fs::File;
     use std::path::Path;
     use serde::{Serialize, Deserialize};
+    use meval;
+
     use crate::traits::traits::{DynSoundSource, SoundSource};
     use crate::knob::knob::Knob;
     use crate::midi_notes::midi_notes::{midistr2freq, midi2freq};
@@ -160,22 +162,22 @@ pub mod read_song {
             let substitute_param: String;
             let mut needs_substitution = false;
             let mut start_pos: usize = 0;
-            if param_str.starts_with("INPUT ") {
+            if param_str.starts_with("INPUT(") {
                 needs_substitution = true;
-            } else if param_str.contains(" INPUT ") {
+            } else if param_str.contains("INPUT(") {
+                start_pos = param_str.find("INPUT(").unwrap();
                 needs_substitution = true;
-                start_pos = param_str.find(" INPUT ").unwrap() + 1;
             }
             if needs_substitution {
                 let end_pos: usize;
-                match param_str[start_pos + 6..].find(" ") {
+                match param_str[start_pos + 6..].find(")") {
                     Some(p) => end_pos = p + start_pos + 6,
                     None => end_pos = param_str.len()
                 }
                 let substitute_index = param_str[start_pos + 6..end_pos].parse::<usize>().unwrap();
                 substitute_param = param_str[0..start_pos].to_string()
                     + &self.patch_context.get_param(substitute_index)
-                    + &self.substitute_params_in_str(&param_str[end_pos..]);
+                    + &self.substitute_params_in_str(&param_str[end_pos+1..]);
             } else {
                 substitute_param = param_str.clone().to_string();
             }
@@ -190,36 +192,86 @@ pub mod read_song {
             new_params
         }
 
+        fn evaluate_params_in_str(&self, param_str: &str) -> String {
+            let evaluated_param: String;
+            let mut has_expr = false;
+            let mut start_pos: usize = 0;
+            if param_str.starts_with("EXPR(") {
+                has_expr = true;
+            } else if param_str.contains(" EXPR(") {
+                has_expr = true;
+                start_pos = param_str.find(" EXPR(").unwrap() + 1;
+            }
+            if has_expr {
+                // find end_pos
+                let end_pos: usize;
+                let mut bracket_count: u32 = 1;
+                let mut idx = start_pos + 5; // this should place us at the first char after the (
+                let mut chars = param_str.chars(); // iterator on string
+                chars.nth(idx-1); // consume chars up to idx
+                while bracket_count > 0 {
+                    let ch = chars.next().unwrap();
+                    if ch == '(' {
+                        bracket_count += 1;
+                    } else if ch == ')' {
+                        bracket_count -= 1;
+                    }
+                    idx += 1;
+                }
+                end_pos = idx - 1; // Don't include the last bracket. We also skip the first bracket in the next line
+                let eval: f32 = meval::eval_str(param_str[start_pos + 5..end_pos].to_string()).unwrap() as f32;
+                evaluated_param = param_str[0..start_pos].to_string() // prefix
+                    + &eval.to_string() // replace EXPR(blah) with evaluated expression
+                    + &self.evaluate_params_in_str(&param_str[end_pos+1..]); // evaluate any other params in the string
+            } else {
+                evaluated_param = param_str.clone().to_string();
+            }
+            evaluated_param
+        }
+
+        fn evaluate_params(&self, params: &Vec::<String>) -> Vec::<String> {
+            let mut new_params = Vec::<String>::new();
+            for param in params {
+                let p1 = self.evaluate_params_in_str(&param);
+                println!("evaluate_params {} => {}", &param, &p1);
+                new_params.push(p1);
+            }
+            new_params
+        }
+
         fn get_sound_from_type(&mut self, sound_type: &str, params: &Vec::<String>) -> DynSoundSource {
-            let new_params = self.substitute_params(params);
+            // Subsitute the INPUT(N) style expressions
+            let substituted_params = self.substitute_params(params);
+            // Substitute the EXPR(maths stuff) style expressions
+            let evaluated_params = self.evaluate_params(&substituted_params);
             if sound_type.starts_with("patch ") {
-                self.get_patch(&sound_type[6..], &new_params)
+                self.get_patch(&sound_type[6..], &evaluated_params)
             } else {
                 match sound_type {
-                    "cauchy_transfer" => CauchyTransfer::from_yaml(&new_params, self),
-                    "clip" => Clip::from_yaml(&new_params, self),
-                    "cos_transfer" => CosTransfer::from_yaml(&new_params, self),
-                    "db2amp" => Db2Amp::from_yaml(&new_params, self),
-                    "dc" => DC::from_yaml(&new_params, self),
-                    "envelope" => Envelope::from_yaml(&new_params, self),
-                    "export_wav" => ExportWav::from_yaml(&new_params, self),
-                    "gaussian_transfer" => GaussianTransfer::from_yaml(&new_params, self),
-                    "hann_window" => HannWindow::from_yaml(&new_params, self),
-                    "low_pass_filter" => LowPassFilter::from_yaml(&new_params, self),
-                    "midi2freq" => Midi2Freq::from_yaml(&new_params, self),
-                    "mix" => Mix::from_yaml(&new_params, self),
-                    "multiply" => Multiply::from_yaml(&new_params, self),
-                    "noise" => Noise::from_yaml(&new_params, self),
-                    "oscillator" => Oscillator::from_yaml(&new_params, self),
-                    "pre_render" => PreRender::from_yaml(&new_params, self),
-                    "ramp" => Ramp::from_yaml(&new_params, self),
-                    "sequence" => Sequence::from_yaml(&new_params, self),
-                    "saw" => Saw::from_yaml(&new_params, self),
-                    "sine" => Sine::from_yaml(&new_params, self),
-                    "square" => Square::from_yaml(&new_params, self),
-                    "time_box" => TimeBox::from_yaml(&new_params, self),
-                    "triangle" => Triangle::from_yaml(&new_params, self),
-                    "wavetable" => Wavetable::from_yaml(&new_params, self),
+                    "cauchy_transfer" => CauchyTransfer::from_yaml(&evaluated_params, self),
+                    "clip" => Clip::from_yaml(&evaluated_params, self),
+                    "cos_transfer" => CosTransfer::from_yaml(&evaluated_params, self),
+                    "db2amp" => Db2Amp::from_yaml(&evaluated_params, self),
+                    "dc" => DC::from_yaml(&evaluated_params, self),
+                    "envelope" => Envelope::from_yaml(&evaluated_params, self),
+                    "export_wav" => ExportWav::from_yaml(&evaluated_params, self),
+                    "gaussian_transfer" => GaussianTransfer::from_yaml(&evaluated_params, self),
+                    "hann_window" => HannWindow::from_yaml(&evaluated_params, self),
+                    "low_pass_filter" => LowPassFilter::from_yaml(&evaluated_params, self),
+                    "midi2freq" => Midi2Freq::from_yaml(&evaluated_params, self),
+                    "mix" => Mix::from_yaml(&evaluated_params, self),
+                    "multiply" => Multiply::from_yaml(&evaluated_params, self),
+                    "noise" => Noise::from_yaml(&evaluated_params, self),
+                    "oscillator" => Oscillator::from_yaml(&evaluated_params, self),
+                    "pre_render" => PreRender::from_yaml(&evaluated_params, self),
+                    "ramp" => Ramp::from_yaml(&evaluated_params, self),
+                    "sequence" => Sequence::from_yaml(&evaluated_params, self),
+                    "saw" => Saw::from_yaml(&evaluated_params, self),
+                    "sine" => Sine::from_yaml(&evaluated_params, self),
+                    "square" => Square::from_yaml(&evaluated_params, self),
+                    "time_box" => TimeBox::from_yaml(&evaluated_params, self),
+                    "triangle" => Triangle::from_yaml(&evaluated_params, self),
+                    "wavetable" => Wavetable::from_yaml(&evaluated_params, self),
                     &_ => todo!()
                 }
             }
