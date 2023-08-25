@@ -1,0 +1,43 @@
+# This file plays a sound and mixes it with a copy of itself delayed by 10ms.
+# When the delay in this kind of network is less than 20ms, then the effect is
+# heard as a filter. In this case a non-recirculating comb filter results with
+# peaks at multiple of w = 2*pi / d (at sample rate 44000, this is every 100 Hz )
+include:
+patches:
+sounds:
+  - name: start_freq
+    sound_type: dc
+    params:
+      - EXPR(440.0 / CONST(sample_rate))
+      - "10.0"
+  # sweep up by 1000Hz from base of 440 so we can hear the notches every 1 second
+  - name: sweep_ramp
+    sound_type: ramp
+    params:
+      - "10.0"
+      - EXPR(1000.0 / CONST(sample_rate))
+      - "10.0"
+  - name: sweep
+    sound_type: mix
+    params:
+      - start_freq
+      - sweep_ramp
+  - name: input_signal
+    sound_type: sine
+    params:
+      - sweep
+      - "1.0"
+      - "10.0"
+  - name: delay1
+    sound_type: sequence
+    params:
+      - "1"
+      - EXPR(10.0 + 0.010)
+      - 0.0 input_signal
+      - 0.010 input_signal
+  - name: delay
+    sound_type: export_wav
+    params:
+      - tmp/10ms_delay.wav
+      - delay1
+root: delay
