@@ -16,8 +16,7 @@ pub struct GenerativeWaveform {
     gain: Knob,
     lock_phase: bool,
     duration: i32,
-    next_clock: i32,
-    freq_lock: f32,
+    prev_freq: f32,
     phase_adjust: f32
 }
 
@@ -37,8 +36,7 @@ impl GenerativeWaveform {
             gain: gain,
             lock_phase: lock_phase,
             duration: duration,
-            next_clock: 0,
-            freq_lock: 0.0,
+            prev_freq: 0.0,
             phase_adjust: 0.0
         }
     }
@@ -49,6 +47,13 @@ impl GenerativeWaveform {
         let two_pi = 2.0 * std::f32::consts::PI;
         ((n as f32 * freq + phase) * two_pi).sin()
     }
+
+    fn calculate_phase(&self, freq: f32) -> f32 {
+        let two_pi = 2.0 * std::f32::consts::PI;
+        let phase_div = (freq * n as f32) / two_pi;
+        phase_div - phase_div.floor() + self.phase_adjust
+    }
+
 }
 
 impl SoundSource for GenerativeWaveform {
@@ -58,32 +63,26 @@ impl SoundSource for GenerativeWaveform {
         } else {
             let mut output = 0.0;
             let base_gain = self.gain.next_value(n);
+            let freq = self.freq.next_value(n);
             if self.lock_phase {
-                // Use a clock to lock the frequency for each cycle. This prevents phase artifacts
-                // resulting from a constantly varying frequency input.
-                // n == 0 is used to reset when replaying the sound
-                if n == 0 {
-                    self.next_clock = 0;
+                if self.prev_freq == 0.0 {
+                    self.prev_freq = freq;
                 }
-                if n >= self.next_clock {
-                    let freq = self.freq.next_value(n);
-                    // calc period from desired frequency
-                    self.next_clock += (1.0 / freq).round() as i32;
-                    // lock the frequency until the next clock
-                    self.freq_lock = freq;
-                    // subtract any phase at this value of n so that we start the waveform at 0
-                    self.phase_adjust = -freq * n as f32;
-                }
-            } else {
-                self.freq_lock = self.freq.next_value(n);
+                let phase = self.calculate_phase(freq);
+                let prev_phase = self.calculate_phase(self.prev_freq);
+                // adjust the phase so that the new phase is the same as what
+                // the phase would have been at the previous frequency
+                self.phase_adjust -= phase - prev_phase;
+                self.prev_freq = freq;
             }
             let mut i = 1;
-            while !self.is_freq_above_nyquist(i as f32 * self.freq_lock) {
+            while !self.is_freq_above_nyquist(i as f32 * freq) {
                 let gain = 1.0 / (i as f32).powf(self.gain_exponent as f32);
                 output += gain * self.calculate_sine_output_from_freq(
-                    self.freq_lock * i as f32, self.phase_adjust * i as f32, n);
+                    freq * i as f32, self.phase_adjust * i as f32, n);
                 i += self.harmonic_index_increment;
             }
+
             (output * base_gain, output * base_gain)
         }
     }
