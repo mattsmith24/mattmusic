@@ -192,6 +192,47 @@ pub mod read_song {
             new_params
         }
 
+        fn get_const(&self, const_name: &str) -> String {
+            match const_name {
+                "sample_rate" => format!("{}", self.sample_rate),
+                _ => panic!("Unknown const '{}'", const_name)
+            }
+        }
+
+        fn substitute_const_params_in_str(&self, param_str: &str) -> String {
+            let substitute_param: String;
+            let mut needs_substitution = false;
+            let mut start_pos: usize = 0;
+            if param_str.starts_with("CONST(") {
+                needs_substitution = true;
+            } else if param_str.contains("CONST(") {
+                start_pos = param_str.find("CONST(").unwrap();
+                needs_substitution = true;
+            }
+            if needs_substitution {
+                let end_pos: usize;
+                match param_str[start_pos + 6..].find(")") {
+                    Some(p) => end_pos = p + start_pos + 6,
+                    None => end_pos = param_str.len()
+                }
+                let const_name = &param_str[start_pos + 6..end_pos];
+                substitute_param = param_str[0..start_pos].to_string()
+                    + &self.get_const(const_name)
+                    + &self.substitute_params_in_str(&param_str[end_pos+1..]);
+            } else {
+                substitute_param = param_str.clone().to_string();
+            }
+            substitute_param
+        }
+
+        fn substitute_const_params(&self, params: &Vec::<String>) -> Vec::<String> {
+            let mut new_params = Vec::<String>::new();
+            for param in params {
+                new_params.push(self.substitute_const_params_in_str(&param));
+            }
+            new_params
+        }
+
         fn evaluate_params_in_str(&self, param_str: &str) -> String {
             let evaluated_param: String;
             let mut has_expr = false;
@@ -233,7 +274,9 @@ pub mod read_song {
             let mut new_params = Vec::<String>::new();
             for param in params {
                 let p1 = self.evaluate_params_in_str(&param);
-                println!("evaluate_params {} => {}", &param, &p1);
+                if param.contains("EXPR(") {
+                    println!("evaluate_params {} => {}", &param, &p1);
+                }
                 new_params.push(p1);
             }
             new_params
@@ -242,8 +285,10 @@ pub mod read_song {
         fn get_sound_from_type(&mut self, sound_type: &str, params: &Vec::<String>) -> DynSoundSource {
             // Subsitute the INPUT(N) style expressions
             let substituted_params = self.substitute_params(params);
+            // Substitute the CONST(blah) style expressions
+            let const_substituted_params = self.substitute_const_params(&substituted_params);
             // Substitute the EXPR(maths stuff) style expressions
-            let evaluated_params = self.evaluate_params(&substituted_params);
+            let evaluated_params = self.evaluate_params(&const_substituted_params);
             if sound_type.starts_with("patch ") {
                 self.get_patch(&sound_type[6..], &evaluated_params)
             } else {
