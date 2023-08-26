@@ -8,7 +8,7 @@ patches:
         sound_type: cos_transfer
         params:
           - carrier_adder
-          - INPUT 3
+          - INPUT(3)
       - name: carrier_adder
         sound_type: mix
         params:
@@ -17,20 +17,20 @@ patches:
       - name: carrier_frequency
         sound_type: ramp
         params:
-          - INPUT 0
+          - INPUT(0)
           - "1.0"
-          - INPUT 3
+          - INPUT(3)
       - name: modulation_multiplier
         sound_type: multiply
         params:
-          - dc INPUT 2 INPUT 3
+          - dc INPUT(2) INPUT(3)
           - 0.0 modulation_oscillator
       - name: modulation_oscillator
         sound_type: sine
         params:
-          - INPUT 1
+          - INPUT(1)
           - "1.0"
-          - INPUT 3
+          - INPUT(3)
 sounds:
   - name: test
     sound_type: patch phase_modulation

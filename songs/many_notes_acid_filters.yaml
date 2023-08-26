@@ -7,7 +7,7 @@ patches:
       - name: instrument1
         sound_type: patch acid_filters
         params:
-          - INPUT 0
+          - INPUT(0)
           - "0.16"
           - "0.25"
 

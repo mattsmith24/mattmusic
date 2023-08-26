@@ -8,7 +8,7 @@ patches:
       - name: instrument1
         sound_type: patch beyond_sine_tones
         params:
-          - INPUT 0
+          - INPUT(0)
           - "0.5"
 
 sounds:

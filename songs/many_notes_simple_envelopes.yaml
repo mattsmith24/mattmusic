@@ -7,7 +7,7 @@ patches:
       - name: instrument1
         sound_type: patch simple_envelopes
         params:
-          - INPUT 0
+          - INPUT(0)
           - "0.6"
           - "0.4"
 
