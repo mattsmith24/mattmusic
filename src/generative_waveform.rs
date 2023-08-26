@@ -48,7 +48,7 @@ impl GenerativeWaveform {
         ((n as f32 * freq + phase) * two_pi).sin()
     }
 
-    fn calculate_phase(&self, freq: f32) -> f32 {
+    fn calculate_phase(&self, freq: f32, n:i32) -> f32 {
         let two_pi = 2.0 * std::f32::consts::PI;
         let phase_div = (freq * n as f32) / two_pi;
         phase_div - phase_div.floor() + self.phase_adjust
@@ -68,8 +68,8 @@ impl SoundSource for GenerativeWaveform {
                 if self.prev_freq == 0.0 {
                     self.prev_freq = freq;
                 }
-                let phase = self.calculate_phase(freq);
-                let prev_phase = self.calculate_phase(self.prev_freq);
+                let phase = self.calculate_phase(freq, n);
+                let prev_phase = self.calculate_phase(self.prev_freq, n);
                 // adjust the phase so that the new phase is the same as what
                 // the phase would have been at the previous frequency
                 self.phase_adjust -= phase - prev_phase;
