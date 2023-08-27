@@ -1,0 +1,17 @@
+include:
+patches:
+  # delay params.
+  # PATCH_INPUT: sound to delay
+  # INPUT(0): input duration
+  # INPUT(1): delay time
+  - name: delay
+    root: delay
+    sounds:
+      - name: delay
+        sound_type: sequence
+        params:
+          - "1"
+          - EXPR(INPUT(0) + INPUT(1))
+          - 0.0 PATCH_INPUT
+          - INPUT(1) PATCH_INPUT
+

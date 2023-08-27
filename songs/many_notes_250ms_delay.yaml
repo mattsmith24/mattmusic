@@ -1,0 +1,92 @@
+# This file plays the many notes example using a sinewave that is delayed by
+# 250ms. In this case the delayed note overlaps with the next note in the
+# sequence so the notes harmonise with each other. This mimics a musical
+# technique called a canon where the harmony is the melody delayed by one or
+# more notes.
+include:
+  - "delay_patch.yaml"
+patches:
+  # INPUT(0) midi pitch
+  - name: instrument
+    root: instrument
+    sounds:
+      - name: instrument
+        sound_type: patch instrument2
+        params:
+          - INPUT(0)
+          - "0.2"
+  # INPUT(0) midi pitch
+  # INPUT(1) duration
+  - name: instrument2
+    root: instrument2
+    sounds:
+      - name: instrument2
+        sound_type: patch delay tone1
+        params:
+          - INPUT(1)
+          - "0.250"
+      - name: tone1
+        sound_type: time_box
+        params:
+          - INPUT(1)
+          - tone
+      - name: tone
+        sound_type: sine
+        params:
+          - midi2freq
+          - "0.5"
+          - INPUT(1)
+      - name: midi2freq
+        sound_type: midi2freq
+        params:
+          - INPUT(0)
+          - INPUT(1)
+
+sounds:
+  - name: sine58
+    sound_type: patch instrument
+    params:
+      - "58"
+  - name: sine63
+    sound_type: patch instrument
+    params:
+      - "63"
+  - name: sine70
+    sound_type: patch instrument
+    params:
+      - "70"
+  - name: sine72
+    sound_type: patch instrument
+    params:
+      - "72"
+  - name: sine65
+    sound_type: patch instrument
+    params:
+      - "65"
+  - name: sine60
+    sound_type: patch instrument
+    params:
+      - "60"
+  - name: sine67
+    sound_type: patch instrument
+    params:
+      - "67"
+  - name: sine62
+    sound_type: patch instrument
+    params:
+      - "62"
+  - name: sequence1
+    sound_type: sequence
+    params:
+      - "10"
+      - "2.0"
+      - "0.0 sine58"
+      - "0.25 sine63"
+      - "0.5 sine70"
+      - "0.75 sine72"
+      - "1.0 sine65"
+      - "1.25 sine60"
+      - "1.5 sine67"
+      - "1.75 sine62"
+
+root: sequence1
