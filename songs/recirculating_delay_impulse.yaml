@@ -1,0 +1,21 @@
+include:
+patches:
+sounds:
+  - name: impulse
+    sound_type: dc
+    params:
+      - "1.0"
+      - EXPR(1.0 / CONST(sample_rate))
+  - name: delay1
+    sound_type: recirculating_delay
+    params:
+      - impulse
+      - "0.01"
+      - "0.5"
+      - "2.0"
+  - name: delay
+    sound_type: export_wav
+    params:
+      - tmp/recirculating_delay.wav
+      - delay1
+root: delay

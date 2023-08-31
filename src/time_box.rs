@@ -1,7 +1,7 @@
 pub mod time_box {
 
 use crate::read_song::read_song::SongReader;
-use crate::traits::traits::{SoundSource, DynSoundSource};
+use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
 
 pub struct TimeBox {
@@ -21,9 +21,18 @@ impl TimeBox {
     }
 }
 
+pub struct TimeBoxState {
+    source_state: SoundData
+}
+
 impl SoundSource for TimeBox {
-    fn next_value(&mut self, n: i32) -> (f32, f32) {
-        let source_val = (*self.source).next_value(n);
+    fn init_state(&self) -> SoundData {
+        Box::new(TimeBoxState { source_state: self.source.init_state() })
+    }
+
+    fn next_value(&self, n: i32, state: &mut SoundData) -> (f32, f32) {
+        let data = &mut state.downcast_mut::<TimeBoxState>().unwrap();
+        let source_val = self.source.next_value(n, &mut data.source_state);
         let mut gain = 1.0;
         const RAMP: i32 = 88;
         if n < RAMP {

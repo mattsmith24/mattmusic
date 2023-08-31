@@ -22,7 +22,7 @@ fn eminusxsq(x:f32) -> f32 {
 }
 
 impl SoundSource for GaussianTransfer {
-    fn next_value(&mut self, n: i32) -> (f32, f32) {
+    fn next_value(&self, n: i32) -> (f32, f32) {
         let val = self.source.next_value(n);
         (eminusxsq(val.0), eminusxsq(val.1))
     }

@@ -27,7 +27,7 @@ fn window(x:f32) -> f32 {
 }
 
 impl SoundSource for HannWindow {
-    fn next_value(&mut self, n: i32) -> (f32, f32) {
+    fn next_value(&self, n: i32) -> (f32, f32) {
         let val = self.source.next_value(n);
         (window(val.0), window(val.1))
     }

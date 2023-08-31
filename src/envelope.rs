@@ -1,7 +1,7 @@
 pub mod envelope {
 
 use crate::read_song::read_song::SongReader;
-use crate::traits::traits::{SoundSource, DynSoundSource};
+use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
 
 #[derive(Clone)]
@@ -27,7 +27,11 @@ impl Envelope {
     }
 }
 impl SoundSource for Envelope {
-    fn next_value(&mut self, n: i32) -> (f32, f32) {
+    fn init_state(&self) -> SoundData {
+        Box::new(0)
+    }
+
+    fn next_value(&self, n: i32, _state: &mut SoundData) -> (f32, f32) {
         let mut point_start_time = 0;
         let mut output = 0.0;
         for point in &self.points {

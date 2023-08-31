@@ -1,0 +1,27 @@
+include:
+patches:
+  # delay params.
+  # PATCH_INPUT: sound to delay
+  # INPUT(0): total duration
+  # INPUT(1): delay time
+  # INPUT(2): delay gain
+  - name: delay
+    root: mix
+    sounds:
+      - name: mix
+        sound_type: mix
+        params:
+          - PATCH_INPUT
+          - multiply
+      - name: delay
+        sound_type: sequence
+        params:
+          - "1"
+          - INPUT(0)
+          - INPUT(1) mix
+      - name: multiply
+        sound_type: multiply
+        params:
+          - 0.0 delay
+          - dc INPUT(2) INPUT(0)
+

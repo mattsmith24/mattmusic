@@ -3,7 +3,7 @@ pub mod pre_render {
 // use std::fs::File;
 // use std::io::{Result, Write};
 use crate::read_song::read_song::SongReader;
-use crate::traits::traits::{SoundSource, DynSoundSource};
+use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
 
 pub struct PreRender {
@@ -11,12 +11,13 @@ pub struct PreRender {
 }
 
 impl PreRender {
-    pub fn new(mut source: DynSoundSource) -> Self {
+    pub fn new(source: DynSoundSource) -> Self {
         let mut buf = Vec::<(f32, f32)>::new();
         let mut sample_clock = 0i32;
-        let duration = (*source).duration();
+        let duration = source.duration();
+        let mut source_data = source.init_state();
         while sample_clock < duration {
-            buf.push((*source).next_value(sample_clock));
+            buf.push(source.next_value(sample_clock, &mut source_data));
             sample_clock += 1;
         }
         PreRender {
@@ -35,7 +36,11 @@ impl PreRender {
 }
 
 impl SoundSource for PreRender {
-    fn next_value(&mut self, n: i32) -> (f32, f32) {
+    fn init_state(&self) -> SoundData {
+        Box::new(0)
+    }
+
+    fn next_value(&self, n: i32, _state: &mut SoundData) -> (f32, f32) {
         if n < self.rendered_sound_source.len() as i32 {
             self.rendered_sound_source[n as usize]
         } else {

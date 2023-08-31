@@ -1,7 +1,7 @@
 pub mod mix {
 
     use crate::read_song::read_song::SongReader;
-    use crate::traits::traits::{SoundSource, DynSoundSource};
+    use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
     use crate::sequence::sequence::Sequence;
 
@@ -20,9 +20,18 @@ pub mod mix {
         }
     }
 
+    struct MixData {
+        sequence_data: SoundData
+    }
+
     impl SoundSource for Mix {
-        fn next_value(&mut self, n: i32) -> (f32, f32) {
-            self.sequence.next_value(n)
+        fn init_state(&self) -> SoundData {
+            Box::new(MixData{sequence_data: self.sequence.init_state()})
+        }
+
+        fn next_value(&self, n: i32, state: &mut SoundData) -> (f32, f32) {
+            let data = state.downcast_mut::<MixData>().unwrap();
+            self.sequence.next_value(n, &mut data.sequence_data)
         }
 
         fn duration(&self) -> i32 {

@@ -1,7 +1,7 @@
 pub mod triangle {
 
 use crate::read_song::read_song::SongReader;
-use crate::traits::traits::{SoundSource, DynSoundSource};
+use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 use crate::knob::knob::Knob;
 use crate::generative_waveform::generative_waveform::GenerativeWaveform;
 
@@ -26,9 +26,18 @@ impl Triangle {
     }
 }
 
+pub struct TriangleState {
+    gen_state: SoundData
+}
+
 impl SoundSource for Triangle {
-    fn next_value(&mut self, n: i32) -> (f32, f32) {
-        self.generative_waveform.next_value(n)
+    fn init_state(&self) -> SoundData {
+        Box::new(TriangleState { gen_state: self.generative_waveform.init_state() })
+    }
+
+    fn next_value(&self, n: i32, state: &mut SoundData) -> (f32, f32) {
+        let data = &mut state.downcast_mut::<TriangleState>().unwrap();
+        self.generative_waveform.next_value(n, &mut data.gen_state)
     }
 
     fn duration(&self) -> i32 {

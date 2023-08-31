@@ -1,5 +1,6 @@
 pub mod read_song {
     use std::fs::File;
+    use std::sync::{Arc, Mutex};
     use std::path::Path;
     use serde::{Serialize, Deserialize};
     use meval;
@@ -8,30 +9,31 @@ pub mod read_song {
     use crate::knob::knob::Knob;
     use crate::midi_notes::midi_notes::{midistr2freq, midi2freq};
 
-    use crate::cauchy_transfer::cauchy_transfer::CauchyTransfer;
-    use crate::clip::clip::Clip;
-    use crate::cos_transfer::cos_transfer::CosTransfer;
-    use crate::db2amp::db2amp::Db2Amp;
+    // use crate::cauchy_transfer::cauchy_transfer::CauchyTransfer;
+    // use crate::clip::clip::Clip;
+    // use crate::cos_transfer::cos_transfer::CosTransfer;
+    // use crate::db2amp::db2amp::Db2Amp;
     use crate::dc::dc::DC;
     use crate::envelope::envelope::Envelope;
     use crate::export_wav::export_wav::ExportWav;
-    use crate::gaussian_transfer::gaussian_transfer::GaussianTransfer;
-    use crate::hann_window::hann_window::HannWindow;
-    use crate::low_pass_filter::low_pass_filter::LowPassFilter;
-    use crate::midi2freq::midi2freq::Midi2Freq;
+    // use crate::gaussian_transfer::gaussian_transfer::GaussianTransfer;
+    // use crate::hann_window::hann_window::HannWindow;
+    // use crate::low_pass_filter::low_pass_filter::LowPassFilter;
+    // use crate::midi2freq::midi2freq::Midi2Freq;
     use crate::mix::mix::Mix;
     use crate::multiply::multiply::Multiply;
-    use crate::noise::noise::Noise;
-    use crate::oscillator::oscillator::Oscillator;
-    use crate::pre_render::pre_render::PreRender;
-    use crate::ramp::ramp::Ramp;
-    use crate::saw::saw::Saw;
+    // use crate::noise::noise::Noise;
+    // use crate::oscillator::oscillator::Oscillator;
+    // use crate::pre_render::pre_render::PreRender;
+    // use crate::ramp::ramp::Ramp;
+    use crate::recirculating_delay::recirculating_delay::RecirculatingDelay;
+    // use crate::saw::saw::Saw;
     use crate::sequence::sequence::Sequence;
     use crate::sine::sine::Sine;
-    use crate::square::square::Square;
+    // use crate::square::square::Square;
     use crate::time_box::time_box::TimeBox;
     use crate::triangle::triangle::Triangle;
-    use crate::wavetable::wavetable::Wavetable;
+    // use crate::wavetable::wavetable::Wavetable;
 
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
     pub struct PatchItem {
@@ -114,7 +116,7 @@ pub mod read_song {
     pub struct SongReader {
         yaml: YAMLFormat,
         pub sample_rate: i32,
-        patch_context: PatchContext
+        patch_context: PatchContext,
     }
 
     impl SongReader {
@@ -293,31 +295,32 @@ pub mod read_song {
                 self.get_patch(&sound_type[6..], &evaluated_params)
             } else {
                 match sound_type {
-                    "cauchy_transfer" => CauchyTransfer::from_yaml(&evaluated_params, self),
-                    "clip" => Clip::from_yaml(&evaluated_params, self),
-                    "cos_transfer" => CosTransfer::from_yaml(&evaluated_params, self),
-                    "db2amp" => Db2Amp::from_yaml(&evaluated_params, self),
+                    // "cauchy_transfer" => CauchyTransfer::from_yaml(&evaluated_params, self),
+                    // "clip" => Clip::from_yaml(&evaluated_params, self),
+                    // "cos_transfer" => CosTransfer::from_yaml(&evaluated_params, self),
+                    // "db2amp" => Db2Amp::from_yaml(&evaluated_params, self),
                     "dc" => DC::from_yaml(&evaluated_params, self),
                     "envelope" => Envelope::from_yaml(&evaluated_params, self),
                     "export_wav" => ExportWav::from_yaml(&evaluated_params, self),
-                    "gaussian_transfer" => GaussianTransfer::from_yaml(&evaluated_params, self),
-                    "hann_window" => HannWindow::from_yaml(&evaluated_params, self),
-                    "low_pass_filter" => LowPassFilter::from_yaml(&evaluated_params, self),
-                    "midi2freq" => Midi2Freq::from_yaml(&evaluated_params, self),
+                    // "gaussian_transfer" => GaussianTransfer::from_yaml(&evaluated_params, self),
+                    // "hann_window" => HannWindow::from_yaml(&evaluated_params, self),
+                    // "low_pass_filter" => LowPassFilter::from_yaml(&evaluated_params, self),
+                    // "midi2freq" => Midi2Freq::from_yaml(&evaluated_params, self),
                     "mix" => Mix::from_yaml(&evaluated_params, self),
                     "multiply" => Multiply::from_yaml(&evaluated_params, self),
-                    "noise" => Noise::from_yaml(&evaluated_params, self),
-                    "oscillator" => Oscillator::from_yaml(&evaluated_params, self),
-                    "pre_render" => PreRender::from_yaml(&evaluated_params, self),
-                    "ramp" => Ramp::from_yaml(&evaluated_params, self),
+                    // "noise" => Noise::from_yaml(&evaluated_params, self),
+                    // "oscillator" => Oscillator::from_yaml(&evaluated_params, self),
+                    // "pre_render" => PreRender::from_yaml(&evaluated_params, self),
+                    // "ramp" => Ramp::from_yaml(&evaluated_params, self),
+                    "recirculating_delay" => RecirculatingDelay::from_yaml(&evaluated_params, self),
                     "sequence" => Sequence::from_yaml(&evaluated_params, self),
-                    "saw" => Saw::from_yaml(&evaluated_params, self),
+                    // "saw" => Saw::from_yaml(&evaluated_params, self),
                     "sine" => Sine::from_yaml(&evaluated_params, self),
-                    "square" => Square::from_yaml(&evaluated_params, self),
+                    // "square" => Square::from_yaml(&evaluated_params, self),
                     "time_box" => TimeBox::from_yaml(&evaluated_params, self),
                     "triangle" => Triangle::from_yaml(&evaluated_params, self),
-                    "wavetable" => Wavetable::from_yaml(&evaluated_params, self),
-                    &_ => todo!()
+                    // "wavetable" => Wavetable::from_yaml(&evaluated_params, self),
+                    &_ => todo!("sound_type: {}", sound_type)
                 }
             }
         }
@@ -328,6 +331,10 @@ pub mod read_song {
             let patch = &self.yaml.patches[idx];
             let sound_idx = patch.sounds.binary_search_by_key(&sound_name, |s: &SoundItem| &s.name).unwrap();
             &patch.sounds[sound_idx]
+        }
+
+        pub fn get_buffer(&mut self, buffer_name: &str) -> Arc<Mutex<Vec<(f32,f32)>>> {
+            todo!()
         }
 
         pub fn get_sound(&mut self, sound_name: &str) -> DynSoundSource {

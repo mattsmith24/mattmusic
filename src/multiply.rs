@@ -1,7 +1,7 @@
 pub mod multiply {
 
 use crate::read_song::read_song::SongReader;
-use crate::traits::traits::{SoundSource, DynSoundSource};
+use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 use crate::dc::dc::DC;
 
 pub struct MultiplyInput {
@@ -24,21 +24,36 @@ impl Multiply {
     }
 }
 
+pub struct MultiplyState {
+    inputs: Vec<SoundData>
+}
+
 impl SoundSource for Multiply {
-    fn next_value(&mut self, n: i32) -> (f32, f32) {
+    fn init_state(&self) -> SoundData {
+        let mut data = MultiplyState { inputs: Vec::<SoundData>::new() };
+        for input in &self.inputs {
+            data.inputs.push(input.source.init_state())
+        }
+        Box::new(data)
+    }
+
+    fn next_value(&self, n: i32, state: &mut SoundData) -> (f32, f32) {
+        let data = &mut state.downcast_mut::<MultiplyState>().unwrap();
         let mut res1: f32 = 1.0;
         let mut res2: f32 = 1.0;
-        for minput in self.inputs.iter_mut() {
-            let (v1, v2) = (*minput.source).next_value(n);
+        let mut idx = 0;
+        for minput in &self.inputs {
+            let (v1, v2) = minput.source.next_value(n, &mut data.inputs[idx]);
             res1 *= v1 + minput.offset;
             res2 *= v2 + minput.offset;
+            idx += 1;
         }
         (res1, res2)
     }
     fn duration(&self) -> i32 {
         let mut duration: i32 = 0;
         for minput in self.inputs.iter() {
-            duration = duration.max((*minput.source).duration());
+            duration = duration.max(minput.source.duration());
         }
         duration
     }

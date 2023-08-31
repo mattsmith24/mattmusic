@@ -82,7 +82,7 @@ fn convolve(slices_a: (&[f32], &[f32]), slice_b: &[f32]) -> f32 {
 }
 
 impl SoundSource for LowPassFilter {
-    fn next_value(&mut self, n: i32) -> (f32, f32) {
+    fn next_value(&self, n: i32) -> (f32, f32) {
         let s = (*self.source).next_value(n);
         self.samples_left.push_back(s.0);
         self.samples_right.push_back(s.1);

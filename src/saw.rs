@@ -28,7 +28,7 @@ impl Saw {
 }
 
 impl SoundSource for Saw {
-    fn next_value(&mut self, n: i32) -> (f32, f32) {
+    fn next_value(&self, n: i32) -> (f32, f32) {
         self.generative_waveform.next_value(n)
     }
 

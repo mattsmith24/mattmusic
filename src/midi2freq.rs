@@ -15,7 +15,7 @@ impl Midi2Freq {
 }
 
 impl SoundSource for Midi2Freq {
-    fn next_value(&mut self, n: i32) -> (f32, f32) {
+    fn next_value(&self, n: i32) -> (f32, f32) {
         if n < self.duration {
             (self.freq, self.freq)
         } else {

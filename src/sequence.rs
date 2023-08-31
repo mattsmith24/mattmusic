@@ -1,12 +1,16 @@
 pub mod sequence {
 
 use crate::read_song::read_song::SongReader;
-use crate::traits::traits::{SoundSource, DynSoundSource};
+use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
 
 struct SequenceMember {
     sound_source: DynSoundSource,
     start_time: i32,
+}
+
+struct SequenceMemberData {
+    note_source_data: SoundData,
     is_playing: bool,
     playing_start_time: i32
 }
@@ -24,7 +28,7 @@ impl Sequence {
 
     // Add notes into the sequence at arbitrary time offsets
     pub fn add(&mut self, start_time: i32, note: DynSoundSource) -> &mut Sequence {
-        self.notes.push( SequenceMember { sound_source: note, start_time: start_time, is_playing: false, playing_start_time: 0 } );
+        self.notes.push( SequenceMember { sound_source: note, start_time: start_time } );
         self.duration = self.calculate_duration();
         self
     }
@@ -60,10 +64,24 @@ impl Sequence {
         }
         duration
     }
+
 }
 
 impl SoundSource for Sequence {
-    fn next_value(&mut self, n: i32) -> (f32, f32) {
+    fn init_state(&self) -> SoundData {
+        let mut res = Vec::<SequenceMemberData>::new();
+        for note in &self.notes {
+            res.push(SequenceMemberData {
+                note_source_data: note.sound_source.init_state(),
+                is_playing: false,
+                playing_start_time: 0
+            })
+        }
+        Box::new(res)
+    }
+
+    fn next_value(&self, n: i32, state: &mut SoundData) -> (f32, f32) {
+        let data = &mut state.downcast_mut::<Vec::<SequenceMemberData>>().unwrap();
         let mut res1: f32 = 0.0;
         let mut res2: f32 = 0.0;
         let mut time_offset: i32 = 0;
@@ -73,25 +91,31 @@ impl SoundSource for Sequence {
             repeat_count += 1;
         }
         if repeat_count < self.repeat {
-            for note in self.notes.iter_mut() {
+            let mut note_idx: usize = 0;
+            for note in &self.notes {
+                let mut note_data = &mut data[note_idx];
                 if n - time_offset >= note.start_time
-                        && n - time_offset < note.start_time + (*note.sound_source).duration()
-                        && !note.is_playing {
-                    note.is_playing = true;
-                    note.playing_start_time = time_offset + note.start_time;
+                        && n - time_offset < note.start_time + note.sound_source.duration()
+                        && !note_data.is_playing {
+                            note_data.is_playing = true;
+                    note_data.playing_start_time = time_offset + note.start_time;
                 }
+                note_idx += 1;
             }
         }
-        for note in self.notes.iter_mut() {
-            if note.is_playing {
-                if n - note.playing_start_time < (*note.sound_source).duration() {
-                    let (v1, v2) = (*note.sound_source).next_value(n - note.playing_start_time);
+        let mut note_idx: usize = 0;
+        for note in &self.notes {
+            let mut note_data = &mut data[note_idx];
+            if note_data.is_playing {
+                if n - note_data.playing_start_time < note.sound_source.duration() {
+                    let (v1, v2) = note.sound_source.next_value(n - note_data.playing_start_time, &mut note_data.note_source_data);
                     res1 += v1;
                     res2 += v2;
                 } else {
-                    note.is_playing = false;
+                    note_data.is_playing = false;
                 }
             }
+            note_idx += 1;
         }
         (res1, res2)
     }

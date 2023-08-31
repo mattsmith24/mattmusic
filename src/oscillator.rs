@@ -26,7 +26,7 @@ impl Oscillator {
 }
 
 impl SoundSource for Oscillator {
-    fn next_value(&mut self, n: i32) -> (f32, f32) {
+    fn next_value(&self, n: i32) -> (f32, f32) {
         if n > self.duration {
             (0.0, 0.0)
         } else {

@@ -4,37 +4,41 @@ use clap::{Parser, ValueEnum};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{FromSample, Sample, SampleFormat, SizedSample};
 
-mod cauchy_transfer;
-mod clip;
-mod cos_transfer;
-mod db2amp;
+mod buffer_reader;
+mod buffer_writer;
+// mod cauchy_transfer;
+// mod clip;
+// mod cos_transfer;
+// mod db2amp;
 mod dc;
 mod envelope;
 mod export_wav;
-mod gaussian_transfer;
+// mod gaussian_transfer;
 mod generative_waveform;
-mod hann_window;
+// mod hann_window;
 mod instruments;
 mod knob;
-mod low_pass_filter;
+// mod low_pass_filter;
 mod midi_notes;
-mod midi2freq;
+// mod midi2freq;
 mod mix;
 mod multiply;
-mod noise;
-mod oscillator;
+// mod noise;
+// mod oscillator;
 mod pre_render;
-mod ramp;
+// mod ramp;
 mod read_song;
-mod saw;
+mod recirculating_delay;
+// mod saw;
 mod sequence;
 mod sine;
 mod songs;
-mod square;
+// mod square;
 mod time_box;
 mod traits;
 mod triangle;
-mod wavetable;
+// mod unused_sound_state;
+// mod wavetable;
 
 use traits::traits::{DynSoundSource, DynInstrument};
 use read_song::read_song::read_song;
@@ -43,33 +47,35 @@ use read_song::read_song::read_song;
 fn get_song(songname: &Option<Song>, instrument_name: &Option<InstrumentName>, sample_rate: i32) -> DynSoundSource {
     let instrument: DynInstrument;
     match instrument_name {
-    Some(InstrumentName::Vibraphone) => {
-        instrument = Box::new(instruments::vibraphone::vibraphone::Vibraphone::new(sample_rate)); }
-    Some(InstrumentName::Kick) => {
-        instrument = Box::new(instruments::kick::kick::Kick::new(sample_rate)); }
-    Some(InstrumentName::SquareDing) => {
-        instrument = Box::new(instruments::square_ding::square_ding::SquareDing::new(sample_rate)); }
+    // Some(InstrumentName::Vibraphone) => {
+    //     instrument = Box::new(instruments::vibraphone::vibraphone::Vibraphone::new(sample_rate)); }
+    // Some(InstrumentName::Kick) => {
+    //     instrument = Box::new(instruments::kick::kick::Kick::new(sample_rate)); }
+    // Some(InstrumentName::SquareDing) => {
+    //     instrument = Box::new(instruments::square_ding::square_ding::SquareDing::new(sample_rate)); }
     Some(InstrumentName::TriangleDing) => {
         instrument = Box::new(instruments::triangle_ding::triangle_ding::TriangleDing::new(sample_rate)); }
-    Some(InstrumentName::SawDing) => {
-        instrument = Box::new(instruments::saw_ding::saw_ding::SawDing::new(sample_rate)); }
-    Some(InstrumentName::Experiment) => {
-        instrument = Box::new(instruments::experiment::experiment::Experiment::new(sample_rate)); }
-    Some(InstrumentName::Uphonium) => {
-        instrument = Box::new(instruments::uphonium::uphonium::Uphonium::new(sample_rate)); },
+    // Some(InstrumentName::SawDing) => {
+    //     instrument = Box::new(instruments::saw_ding::saw_ding::SawDing::new(sample_rate)); }
+    // Some(InstrumentName::Experiment) => {
+    //     instrument = Box::new(instruments::experiment::experiment::Experiment::new(sample_rate)); }
+    // Some(InstrumentName::Uphonium) => {
+    //     instrument = Box::new(instruments::uphonium::uphonium::Uphonium::new(sample_rate)); },
+    Some(_) => todo!(),
     &None => todo!()
     }
     match songname {
-    Some(Song::Arpeggios) => {
-        songs::arpeggios::arpeggios::arpeggios(sample_rate, instrument) }
-    Some(Song::LongNote) => {
-        songs::long_note::long_note::long_note(sample_rate, instrument) }
-    Some(Song::Beats) => {
-        songs::beats::beats::beats(sample_rate, instrument) }
-    Some(Song::TwoNotes) => {
-        songs::two_notes::two_notes::two_notes(sample_rate, instrument) }
+    // Some(Song::Arpeggios) => {
+    //     songs::arpeggios::arpeggios::arpeggios(sample_rate, instrument) }
+    // Some(Song::LongNote) => {
+    //     songs::long_note::long_note::long_note(sample_rate, instrument) }
+    // Some(Song::Beats) => {
+    //     songs::beats::beats::beats(sample_rate, instrument) }
+    // Some(Song::TwoNotes) => {
+    //     songs::two_notes::two_notes::two_notes(sample_rate, instrument) }
     Some(Song::ManyNotes) => {
         songs::many_notes::many_notes::many_notes(sample_rate, instrument) },
+    Some(_) => todo!(),
     &None => todo!()
     }
 }
@@ -128,12 +134,13 @@ where
     T: SizedSample + FromSample<f32>,
 {
     let sample_rate = config.sample_rate.0 as i32;
-    let mut song;
+    let song;
     if let Some(filename) = &args.file {
         song = read_song(&filename, sample_rate);
     } else {
         song = get_song(&args.song, &args.instrument, sample_rate);
     }
+    let mut song_state = song.init_state();
     let channels = config.channels as usize;
     let mut sample_clock = 0i32;
     let pair = Arc::new((Mutex::new(false), Condvar::new()));
@@ -141,13 +148,13 @@ where
     let mut next_value = move || -> (f32, f32) {
         let (lock, cvar) = &*pair2;
         sample_clock = sample_clock + 1;
-        if sample_clock > (*song).duration() {
+        if sample_clock > song.duration() {
             let mut done = lock.lock().unwrap();
             *done = true;
             cvar.notify_one();
             (0.0, 0.0)
         } else {
-            (*song).next_value(sample_clock)
+            song.next_value(sample_clock, &mut song_state)
         }
     };
 
