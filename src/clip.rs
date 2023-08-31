@@ -1,9 +1,7 @@
 pub mod clip {
 
-    use std::sync::{Arc, Mutex};
-
     use crate::read_song::read_song::SongReader;
-    use crate::traits::traits::{SoundSource, DynSoundSource, SoundState, DynSoundState};
+    use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
     pub struct Clip
     {
@@ -18,28 +16,17 @@ pub mod clip {
     }
 
     pub struct ClipState {
-        source_state: DynSoundState
-    }
-
-    const SOURCE_STATE: usize = 0;
-
-    impl SoundState for ClipState {
-        fn get_sound_state(&self, key: usize) -> DynSoundState {
-            match key {
-                SOURCE_STATE => self.source_state,
-                _ => panic!("ClipState unknown key {}", key)
-            }
-        }
+        source_state: SoundData
     }
 
     impl SoundSource for Clip {
-        fn init_state(&self) -> DynSoundState {
-            Arc::new(Mutex::new(ClipState { source_state: self.source.init_state() }))
+        fn init_state(&self) -> SoundData {
+            Box::new(ClipState { source_state: self.source.init_state() })
         }
 
-        fn next_value(&self, n: i32, state: DynSoundState) -> (f32, f32) {
-            let data = state.lock().unwrap();
-            let (mut v0, mut v1) = self.source.next_value(n, data.get_sound_state(SOURCE_STATE));
+        fn next_value(&self, n: i32, state: &mut SoundData) -> (f32, f32) {
+            let data = &mut state.downcast_mut::<ClipState>().unwrap();
+            let (mut v0, mut v1) = self.source.next_value(n, &mut data.source_state);
             v0 = v0.min(self.limit);
             v0 = v0.max(-self.limit);
             v1 = v1.min(self.limit);

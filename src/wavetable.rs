@@ -3,7 +3,7 @@ pub mod wavetable {
 use std::sync::{Arc, Mutex};
 
 use crate::read_song::read_song::SongReader;
-use crate::traits::traits::{SoundSource, DynSoundSource, SoundState, DynSoundState};
+use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
 pub enum Interpolation {
     Rounding,
@@ -43,13 +43,13 @@ fn wrap_x(mut x: i32, table_len: i32) -> usize {
 }
 
 pub struct WavetableState {
-    sweep_state: DynSoundState
+    sweep_state: SoundData
 }
 
 const SWEEP_STATE: usize = 0;
 
 impl SoundState for WavetableState {
-    fn get_sound_state(&self, key: usize) -> DynSoundState {
+    fn get_sound_state(&self, key: usize) -> SoundData {
         match key {
             SWEEP_STATE => self.sweep_state,
             _ => panic!("WavetableState unknown key {}", key)
@@ -58,12 +58,12 @@ impl SoundState for WavetableState {
 }
 
 impl SoundSource for Wavetable {
-    fn init_state(&self) -> DynSoundState {
-        Arc::new(Mutex::new(WavetableState { sweep_state: self.sweep.init_state() }))
+    fn init_state(&self) -> SoundData {
+        Box::new(WavetableState { sweep_state: self.sweep.init_state() })
     }
 
-    fn next_value(&self, n: i32, state: DynSoundState) -> (f32, f32) {
-        let data = state.lock().unwrap();
+    fn next_value(&self, n: i32, state: &mut SoundData) -> (f32, f32) {
+        let data = state.downcast_mut::<MyData>().unwrap();
         let sweep_value = self.sweep.next_value(n, data.get_sound_state(SWEEP_STATE)).0;
         if sweep_value.floor() >= 0.0 && (sweep_value.ceil() as usize) < self.table.len() {
             let output0: f32;

@@ -24,9 +24,17 @@ impl BufferReader {
     }
 }
 
+struct BufferReaderData {
+    buffer: Arc<Mutex<Vec<(f32,f32)>>>
+}
+
 impl SoundSource for BufferReader {
     fn init_state(&self) -> SoundData {
-        Box::new(0)
+        {
+            let buffer = &mut self.buffer.lock().unwrap();
+            buffer.clear();
+        }
+        Box::new(BufferReaderData { buffer: self.buffer.clone() })
     }
     fn next_value(&self, n: i32, _state: &mut SoundData) -> (f32, f32) {
         self.get_sample(n)

@@ -1,7 +1,7 @@
 pub mod hann_window {
 
 use crate::read_song::read_song::SongReader;
-use crate::traits::traits::{SoundSource, DynSoundSource};
+use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
 pub struct HannWindow {
     source: DynSoundSource,
@@ -26,9 +26,17 @@ fn window(x:f32) -> f32 {
     }
 }
 
+struct HannWindowData {
+    source_data: SoundData,
+}
+
 impl SoundSource for HannWindow {
-    fn next_value(&self, n: i32) -> (f32, f32) {
-        let val = self.source.next_value(n);
+    fn init_state(&self) -> SoundData {
+        Box::new(HannWindowData { source_data: self.source.init_state() })
+    }
+    fn next_value(&self, n: i32, state: &mut SoundData) -> (f32, f32) {
+        let data = &mut state.downcast_mut::<HannWindowData>().unwrap();
+        let val = self.source.next_value(n, &mut data.source_data);
         (window(val.0), window(val.1))
     }
 

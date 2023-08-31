@@ -9,15 +9,15 @@ pub mod read_song {
     use crate::knob::knob::Knob;
     use crate::midi_notes::midi_notes::{midistr2freq, midi2freq};
 
-    // use crate::cauchy_transfer::cauchy_transfer::CauchyTransfer;
-    // use crate::clip::clip::Clip;
-    // use crate::cos_transfer::cos_transfer::CosTransfer;
+    use crate::cauchy_transfer::cauchy_transfer::CauchyTransfer;
+    use crate::clip::clip::Clip;
+    use crate::cos_transfer::cos_transfer::CosTransfer;
     // use crate::db2amp::db2amp::Db2Amp;
     use crate::dc::dc::DC;
     use crate::envelope::envelope::Envelope;
     use crate::export_wav::export_wav::ExportWav;
     // use crate::gaussian_transfer::gaussian_transfer::GaussianTransfer;
-    // use crate::hann_window::hann_window::HannWindow;
+    use crate::hann_window::hann_window::HannWindow;
     // use crate::low_pass_filter::low_pass_filter::LowPassFilter;
     // use crate::midi2freq::midi2freq::Midi2Freq;
     use crate::mix::mix::Mix;
@@ -25,7 +25,7 @@ pub mod read_song {
     // use crate::noise::noise::Noise;
     // use crate::oscillator::oscillator::Oscillator;
     // use crate::pre_render::pre_render::PreRender;
-    // use crate::ramp::ramp::Ramp;
+    use crate::ramp::ramp::Ramp;
     use crate::recirculating_delay::recirculating_delay::RecirculatingDelay;
     // use crate::saw::saw::Saw;
     use crate::sequence::sequence::Sequence;
@@ -295,15 +295,15 @@ pub mod read_song {
                 self.get_patch(&sound_type[6..], &evaluated_params)
             } else {
                 match sound_type {
-                    // "cauchy_transfer" => CauchyTransfer::from_yaml(&evaluated_params, self),
-                    // "clip" => Clip::from_yaml(&evaluated_params, self),
-                    // "cos_transfer" => CosTransfer::from_yaml(&evaluated_params, self),
+                    "cauchy_transfer" => CauchyTransfer::from_yaml(&evaluated_params, self),
+                    "clip" => Clip::from_yaml(&evaluated_params, self),
+                    "cos_transfer" => CosTransfer::from_yaml(&evaluated_params, self),
                     // "db2amp" => Db2Amp::from_yaml(&evaluated_params, self),
                     "dc" => DC::from_yaml(&evaluated_params, self),
                     "envelope" => Envelope::from_yaml(&evaluated_params, self),
                     "export_wav" => ExportWav::from_yaml(&evaluated_params, self),
                     // "gaussian_transfer" => GaussianTransfer::from_yaml(&evaluated_params, self),
-                    // "hann_window" => HannWindow::from_yaml(&evaluated_params, self),
+                    "hann_window" => HannWindow::from_yaml(&evaluated_params, self),
                     // "low_pass_filter" => LowPassFilter::from_yaml(&evaluated_params, self),
                     // "midi2freq" => Midi2Freq::from_yaml(&evaluated_params, self),
                     "mix" => Mix::from_yaml(&evaluated_params, self),
@@ -311,7 +311,7 @@ pub mod read_song {
                     // "noise" => Noise::from_yaml(&evaluated_params, self),
                     // "oscillator" => Oscillator::from_yaml(&evaluated_params, self),
                     // "pre_render" => PreRender::from_yaml(&evaluated_params, self),
-                    // "ramp" => Ramp::from_yaml(&evaluated_params, self),
+                    "ramp" => Ramp::from_yaml(&evaluated_params, self),
                     "recirculating_delay" => RecirculatingDelay::from_yaml(&evaluated_params, self),
                     "sequence" => Sequence::from_yaml(&evaluated_params, self),
                     // "saw" => Saw::from_yaml(&evaluated_params, self),
