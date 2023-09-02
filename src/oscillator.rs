@@ -1,7 +1,7 @@
 pub mod oscillator {
 
 use crate::read_song::read_song::SongReader;
-use crate::traits::traits::{SoundSource, DynSoundSource};
+use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
 use crate::knob::knob::Knob;
 
@@ -25,12 +25,25 @@ impl Oscillator {
     }
 }
 
+struct OscillatorData {
+    freq_data: SoundData,
+    phase_data: SoundData,
+}
+
 impl SoundSource for Oscillator {
-    fn next_value(&self, n: i32) -> (f32, f32) {
+    fn init_state(&self) -> SoundData {
+        Box::new(OscillatorData {
+            freq_data: self.freq.init_state(),
+            phase_data: self.phase.init_state(),
+        })
+    }
+    fn next_value(&self, n: i32, state: &mut SoundData) -> (f32, f32) {
         if n > self.duration {
             (0.0, 0.0)
         } else {
-            let val = ((n as f32 * self.freq.next_value(n) + self.phase.next_value(n))
+            let data = &mut state.downcast_mut::<OscillatorData>().unwrap();
+            let val = ((n as f32 * self.freq.next_value(n, &mut data.freq_data)
+                + self.phase.next_value(n, &mut data.phase_data))
                 * 2.0 * std::f32::consts::PI).sin();
             (val, val)
         }

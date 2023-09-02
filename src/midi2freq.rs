@@ -1,5 +1,5 @@
 pub mod midi2freq {
-use crate::traits::traits::{SoundSource, DynSoundSource};
+use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 use crate::midi_notes::midi_notes::{midistr2freq, midi2freq};
 use crate::read_song::read_song::SongReader;
 
@@ -15,7 +15,11 @@ impl Midi2Freq {
 }
 
 impl SoundSource for Midi2Freq {
-    fn next_value(&self, n: i32) -> (f32, f32) {
+    fn init_state(&self) -> SoundData {
+        Box::new(0)
+    }
+
+    fn next_value(&self, n: i32, _state: &mut SoundData) -> (f32, f32) {
         if n < self.duration {
             (self.freq, self.freq)
         } else {

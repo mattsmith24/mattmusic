@@ -1,7 +1,7 @@
 pub mod saw {
 
 use crate::read_song::read_song::SongReader;
-use crate::traits::traits::{SoundSource, DynSoundSource};
+use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
 use crate::knob::knob::Knob;
 use crate::generative_waveform::generative_waveform::GenerativeWaveform;
@@ -27,9 +27,17 @@ impl Saw {
     }
 }
 
+struct SawData {
+    gen_data: SoundData,
+}
+
 impl SoundSource for Saw {
-    fn next_value(&self, n: i32) -> (f32, f32) {
-        self.generative_waveform.next_value(n)
+    fn init_state(&self) -> SoundData {
+        Box::new(SawData { gen_data: self.generative_waveform.init_state() })
+    }
+    fn next_value(&self, n: i32, state: &mut SoundData) -> (f32, f32) {
+        let data = &mut state.downcast_mut::<SawData>().unwrap();
+        self.generative_waveform.next_value(n, &mut data.gen_data)
     }
 
     fn duration(&self) -> i32 {

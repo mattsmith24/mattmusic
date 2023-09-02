@@ -1,7 +1,7 @@
 pub mod gaussian_transfer {
 
 use crate::read_song::read_song::SongReader;
-use crate::traits::traits::{SoundSource, DynSoundSource};
+use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
 pub struct GaussianTransfer {
     source: DynSoundSource,
@@ -21,9 +21,18 @@ fn eminusxsq(x:f32) -> f32 {
     std::f32::consts::E.powf(-x * x)
 }
 
+struct GaussianTransferData {
+    source_data: SoundData,
+}
+
 impl SoundSource for GaussianTransfer {
-    fn next_value(&self, n: i32) -> (f32, f32) {
-        let val = self.source.next_value(n);
+    fn init_state(&self) -> SoundData {
+        Box::new(GaussianTransferData { source_data: self.source.init_state() })
+    }
+
+    fn next_value(&self, n: i32, state: &mut SoundData) -> (f32, f32) {
+        let data = &mut state.downcast_mut::<GaussianTransferData>().unwrap();
+        let val = self.source.next_value(n, &mut data.source_data);
         (eminusxsq(val.0), eminusxsq(val.1))
     }
 
