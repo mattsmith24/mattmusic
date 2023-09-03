@@ -7,15 +7,13 @@ pub mod low_pass_filter {
 //b = 0.08
 use std::collections::VecDeque;
 use crate::read_song::read_song::SongReader;
-use crate::traits::traits::{SoundSource, DynSoundSource};
+use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 use crate::knob::knob::Knob;
 
 pub struct LowPassFilter {
     filter_length: usize,
     frequency_cutoff: Knob,
     source: DynSoundSource,
-    samples_left: VecDeque::<f32>,
-    samples_right: VecDeque::<f32>,
 }
 
 impl LowPassFilter {
@@ -25,17 +23,10 @@ impl LowPassFilter {
             fl += 1  // Make sure that N is odd.
         }
         //println!("filter_length = {} samples ({} seconds)", filter_length, filter_length as f32 / sample_rate);
-
-        // deques for samples (should be efficient way to store the last filter_length samples)
-        let samples_left = VecDeque::<f32>::from(vec![0.0; filter_length]);
-        let samples_right = VecDeque::<f32>::from(vec![0.0; filter_length]);
-
         LowPassFilter {
             filter_length: fl,
             frequency_cutoff: frequency_cutoff,
             source: source,
-            samples_left: samples_left,
-            samples_right: samples_right
         }
     }
 }
@@ -81,15 +72,35 @@ fn convolve(slices_a: (&[f32], &[f32]), slice_b: &[f32]) -> f32 {
     val
 }
 
-impl SoundSource for LowPassFilter {
-    fn next_value(&self, n: i32) -> (f32, f32) {
-        let s = (*self.source).next_value(n);
-        self.samples_left.push_back(s.0);
-        self.samples_right.push_back(s.1);
-        self.samples_left.pop_front();
-        self.samples_right.pop_front();
+struct LowPassFilterData {
+    frequency_cutoff_data: SoundData,
+    source_data: SoundData,
+    samples_left: VecDeque::<f32>,
+    samples_right: VecDeque::<f32>,
+}
 
-        let fc = self.frequency_cutoff.next_value(n);
+impl SoundSource for LowPassFilter {
+    fn init_state(&self) -> SoundData {
+        // deques for samples (should be efficient way to store the last filter_length samples)
+        let samples_left = VecDeque::<f32>::from(vec![0.0; self.filter_length]);
+        let samples_right = VecDeque::<f32>::from(vec![0.0; self.filter_length]);
+        Box::new(LowPassFilterData {
+            frequency_cutoff_data: self.frequency_cutoff.init_state(),
+            source_data: self.source.init_state(),
+            samples_left: samples_left,
+            samples_right: samples_right,
+        })
+    }
+
+    fn next_value(&self, n: i32, state: &mut SoundData) -> (f32, f32) {
+        let data = &mut state.downcast_mut::<LowPassFilterData>().unwrap();
+        let s = self.source.next_value(n, &mut data.source_data);
+        data.samples_left.push_back(s.0);
+        data.samples_right.push_back(s.1);
+        data.samples_left.pop_front();
+        data.samples_right.pop_front();
+
+        let fc = self.frequency_cutoff.next_value(n, &mut data.frequency_cutoff_data);
 
         // Windowed Sinc Filter
         let twopi = 2.0 * std::f32::consts::PI;
@@ -106,14 +117,14 @@ impl SoundSource for LowPassFilter {
         h = vec_multiply_scalar(&h, 1.0 / sum_h);
 
         // convolution
-        let output_left = convolve(self.samples_left.as_slices(), &h[..]);
-        let output_right = convolve(self.samples_right.as_slices(), &h[..]);
+        let output_left = convolve(data.samples_left.as_slices(), &h[..]);
+        let output_right = convolve(data.samples_right.as_slices(), &h[..]);
         (output_left, output_right)
     }
 
     fn duration(&self) -> i32 {
         // add the filter delay to the duration
-        (*self.source).duration() + (self.filter_length as i32 - 1 / 2)
+        self.source.duration() + (self.filter_length as i32 - 1 / 2)
     }
 
     fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {

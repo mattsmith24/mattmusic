@@ -18,12 +18,12 @@ mod generative_waveform;
 mod hann_window;
 mod instruments;
 mod knob;
-// mod low_pass_filter;
+mod low_pass_filter;
 mod midi_notes;
 mod midi2freq;
 mod mix;
 mod multiply;
-// mod noise;
+mod noise;
 mod oscillator;
 mod pre_render;
 mod ramp;
@@ -33,7 +33,7 @@ mod saw;
 mod sequence;
 mod sine;
 mod songs;
-// mod square;
+mod square;
 mod time_box;
 mod traits;
 mod triangle;
@@ -46,35 +46,33 @@ use read_song::read_song::read_song;
 fn get_song(songname: &Option<Song>, instrument_name: &Option<InstrumentName>, sample_rate: i32) -> DynSoundSource {
     let instrument: DynInstrument;
     match instrument_name {
-    // Some(InstrumentName::Vibraphone) => {
-    //     instrument = Box::new(instruments::vibraphone::vibraphone::Vibraphone::new(sample_rate)); }
-    // Some(InstrumentName::Kick) => {
-    //     instrument = Box::new(instruments::kick::kick::Kick::new(sample_rate)); }
-    // Some(InstrumentName::SquareDing) => {
-    //     instrument = Box::new(instruments::square_ding::square_ding::SquareDing::new(sample_rate)); }
+    Some(InstrumentName::Vibraphone) => {
+        instrument = Box::new(instruments::vibraphone::vibraphone::Vibraphone::new(sample_rate)); }
+    Some(InstrumentName::Kick) => {
+        instrument = Box::new(instruments::kick::kick::Kick::new(sample_rate)); }
+    Some(InstrumentName::SquareDing) => {
+        instrument = Box::new(instruments::square_ding::square_ding::SquareDing::new(sample_rate)); }
     Some(InstrumentName::TriangleDing) => {
         instrument = Box::new(instruments::triangle_ding::triangle_ding::TriangleDing::new(sample_rate)); }
-    // Some(InstrumentName::SawDing) => {
-    //     instrument = Box::new(instruments::saw_ding::saw_ding::SawDing::new(sample_rate)); }
-    // Some(InstrumentName::Experiment) => {
-    //     instrument = Box::new(instruments::experiment::experiment::Experiment::new(sample_rate)); }
-    // Some(InstrumentName::Uphonium) => {
-    //     instrument = Box::new(instruments::uphonium::uphonium::Uphonium::new(sample_rate)); },
-    Some(_) => todo!(),
+    Some(InstrumentName::SawDing) => {
+        instrument = Box::new(instruments::saw_ding::saw_ding::SawDing::new(sample_rate)); }
+    Some(InstrumentName::Experiment) => {
+        instrument = Box::new(instruments::experiment::experiment::Experiment::new(sample_rate)); }
+    Some(InstrumentName::Uphonium) => {
+        instrument = Box::new(instruments::uphonium::uphonium::Uphonium::new(sample_rate)); },
     &None => todo!()
     }
     match songname {
-    // Some(Song::Arpeggios) => {
-    //     songs::arpeggios::arpeggios::arpeggios(sample_rate, instrument) }
-    // Some(Song::LongNote) => {
-    //     songs::long_note::long_note::long_note(sample_rate, instrument) }
-    // Some(Song::Beats) => {
-    //     songs::beats::beats::beats(sample_rate, instrument) }
-    // Some(Song::TwoNotes) => {
-    //     songs::two_notes::two_notes::two_notes(sample_rate, instrument) }
+    Some(Song::Arpeggios) => {
+        songs::arpeggios::arpeggios::arpeggios(sample_rate, instrument) }
+    Some(Song::LongNote) => {
+        songs::long_note::long_note::long_note(sample_rate, instrument) }
+    Some(Song::Beats) => {
+        songs::beats::beats::beats(sample_rate, instrument) }
+    Some(Song::TwoNotes) => {
+        songs::two_notes::two_notes::two_notes(sample_rate, instrument) }
     Some(Song::ManyNotes) => {
         songs::many_notes::many_notes::many_notes(sample_rate, instrument) },
-    Some(_) => todo!(),
     &None => todo!()
     }
 }

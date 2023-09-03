@@ -2,7 +2,7 @@ pub mod noise {
 
 use rand::Rng;
 use crate::read_song::read_song::SongReader;
-use crate::traits::traits::{SoundSource, DynSoundSource};
+use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
 
 pub struct Noise {
@@ -20,7 +20,10 @@ impl Noise {
 }
 
 impl SoundSource for Noise {
-    fn next_value(&self, n: i32) -> (f32, f32) {
+    fn init_state(&self) -> SoundData {
+        Box::new(0)
+    }
+    fn next_value(&self, n: i32, _state: &mut SoundData) -> (f32, f32) {
         if n > self.duration {
             (0.0, 0.0)
         } else {
