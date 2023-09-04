@@ -2,6 +2,7 @@ pub mod read_song {
     use std::fs::File;
     use std::sync::{Arc, Mutex};
     use std::path::Path;
+    use std::collections::HashMap;
     use serde::{Serialize, Deserialize};
     use evalexpr;
 
@@ -9,6 +10,8 @@ pub mod read_song {
     use crate::knob::knob::Knob;
     use crate::midi_notes::midi_notes::{midistr2freq, midi2freq};
 
+    use crate::buffer_reader::buffer_reader::BufferReader;
+    use crate::buffer_writer::buffer_writer::BufferWriter;
     use crate::cauchy_transfer::cauchy_transfer::CauchyTransfer;
     use crate::clip::clip::Clip;
     use crate::cos_transfer::cos_transfer::CosTransfer;
@@ -117,6 +120,7 @@ pub mod read_song {
         yaml: YAMLFormat,
         pub sample_rate: i32,
         patch_context: PatchContext,
+        buffers: HashMap<String,Arc<Mutex<Vec<(f32,f32)>>>>,
     }
 
     impl SongReader {
@@ -295,6 +299,8 @@ pub mod read_song {
                 self.get_patch(&sound_type[6..], &evaluated_params)
             } else {
                 match sound_type {
+                    "buffer_reader" => BufferReader::from_yaml(&evaluated_params, self),
+                    "buffer_writer" => BufferWriter::from_yaml(&evaluated_params, self),
                     "cauchy_transfer" => CauchyTransfer::from_yaml(&evaluated_params, self),
                     "clip" => Clip::from_yaml(&evaluated_params, self),
                     "cos_transfer" => CosTransfer::from_yaml(&evaluated_params, self),
@@ -334,7 +340,16 @@ pub mod read_song {
         }
 
         pub fn get_buffer(&mut self, buffer_name: &str) -> Arc<Mutex<Vec<(f32,f32)>>> {
-            todo!()
+            println!("get_buffer({})", buffer_name);
+            if let Some(buf) = self.buffers.get(buffer_name) {
+                println!("found");
+                buf.clone()
+            } else {
+                println!("created");
+                let buf = Arc::new(Mutex::new(Vec::<(f32,f32)>::new()));
+                self.buffers.insert(buffer_name.to_string(), buf.clone());
+                buf
+            }
         }
 
         pub fn get_sound(&mut self, sound_name: &str) -> DynSoundSource {
@@ -387,7 +402,9 @@ pub mod read_song {
         let mut reader = SongReader {
             yaml: yaml,
             sample_rate: sample_rate,
-            patch_context: PatchContext::new() };
+            patch_context: PatchContext::new(),
+            buffers: HashMap::<String, Arc<Mutex<Vec<(f32,f32)>>>>::new(),
+        };
         reader.get_sound(&reader.yaml.root.clone())
     }
 

@@ -5,8 +5,8 @@ patches:
   # INPUT(0): total duration
   # INPUT(1): delay time
   # INPUT(2): delay gain
-  - name: delay
-    root: mix
+  - name: recirculating_delay
+    root: write_buf
     sounds:
       - name: mix
         sound_type: mix
@@ -18,10 +18,20 @@ patches:
         params:
           - "1"
           - INPUT(0)
-          - INPUT(1) mix
+          - INPUT(1) read_buf
       - name: multiply
         sound_type: multiply
         params:
           - 0.0 delay
           - dc INPUT(2) INPUT(0)
+      - name: write_buf
+        sound_type: buffer_writer
+        params:
+          - mix
+          - recirculating_delay_patch.yaml
+      - name: read_buf
+        sound_type: buffer_reader
+        params:
+          - recirculating_delay_patch.yaml
+          - INPUT(0)
 
