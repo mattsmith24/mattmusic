@@ -9,8 +9,8 @@ edition = "2021"
 anyhow = "1.0.71"
 clap = { version = "4.3.11", features = ["derive"] }
 cpal = "0.15.2"
+evalexpr = "11.1.0"
 hound = "3.5.0"
-meval = "0.2.0"
 rand = "0.8.5"
 serde = { version = "1.0.171", features = ["derive"] }
 serde_yaml = "0.9.22"

@@ -3,7 +3,7 @@ pub mod read_song {
     use std::sync::{Arc, Mutex};
     use std::path::Path;
     use serde::{Serialize, Deserialize};
-    use meval;
+    use evalexpr;
 
     use crate::traits::traits::{DynSoundSource, SoundSource};
     use crate::knob::knob::Knob;
@@ -262,7 +262,7 @@ pub mod read_song {
                     idx += 1;
                 }
                 end_pos = idx - 1; // Don't include the last bracket. We also skip the first bracket in the next line
-                let eval: f32 = meval::eval_str(param_str[start_pos + 5..end_pos].to_string()).unwrap() as f32;
+                let eval: f32 = evalexpr::eval_float(&param_str[start_pos + 5..end_pos]).unwrap() as f32;
                 evaluated_param = param_str[0..start_pos].to_string() // prefix
                     + &eval.to_string() // replace EXPR(blah) with evaluated expression
                     + &self.evaluate_params_in_str(&param_str[end_pos+1..]); // evaluate any other params in the string
