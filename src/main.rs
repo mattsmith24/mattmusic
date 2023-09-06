@@ -16,6 +16,7 @@ mod export_wav;
 mod gaussian_transfer;
 mod generative_waveform;
 mod hann_window;
+mod import_wav;
 mod instruments;
 mod knob;
 mod low_pass_filter;
@@ -41,6 +42,8 @@ mod wavetable;
 
 use traits::traits::{DynSoundSource, DynInstrument};
 use read_song::read_song::read_song;
+use wavetable::wavetable::Interpolation;
+use import_wav::import_wav::ImportWav;
 
 // todo make command line args select the song to play
 fn get_song(songname: &Option<Song>, instrument_name: &Option<InstrumentName>, sample_rate: i32) -> DynSoundSource {
@@ -111,6 +114,9 @@ struct Args {
     /// Read song and instrument from file (will ignore --song and --instrument)
     #[arg(short, long)]
     file: Option<String>,
+    /// Play a wav file
+    #[arg(short, long)]
+    wavfile: Option<String>,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -131,9 +137,12 @@ where
     T: SizedSample + FromSample<f32>,
 {
     let sample_rate = config.sample_rate.0 as i32;
+    println!("Output sample rate is {} Hz", sample_rate);
     let song;
     if let Some(filename) = &args.file {
         song = read_song(&filename, sample_rate);
+    } else if let Some(filename) = &args.wavfile {
+        song = Box::new(ImportWav::new(filename, sample_rate, Interpolation::Cubic));
     } else {
         song = get_song(&args.song, &args.instrument, sample_rate);
     }
@@ -179,6 +188,7 @@ where
         }
     }
 
+    println!("Playing");
     stream.play()?;
 
     let (lock, cvar) = &*pair;

@@ -28,6 +28,15 @@ impl Wavetable {
         }
         Wavetable { table: buf, sweep: sweep, interpolation: interpolation, duration: duration }
     }
+
+    pub fn from_buffer(
+        buffer: Vec<(f32, f32)>,
+        sweep: DynSoundSource,
+        interpolation: Interpolation,
+        duration: i32
+    ) -> Self {
+        Wavetable { table: buffer, sweep: sweep, interpolation: interpolation, duration: duration }
+    }
 }
 
 fn wrap_x(mut x: i32, table_len: i32) -> usize {
@@ -50,9 +59,9 @@ impl SoundSource for Wavetable {
     }
 
     fn next_value(&self, n: i32, state: &mut SoundData) -> (f32, f32) {
-        let data = state.downcast_mut::<WavetableState>().unwrap();
+        let data = &mut state.downcast_mut::<WavetableState>().unwrap();
         let sweep_value = self.sweep.next_value(n, &mut data.sweep_state).0;
-        if sweep_value.floor() >= 0.0 && (sweep_value.ceil() as usize) < self.table.len() {
+        if n < self.duration || (sweep_value.floor() >= 0.0 && (sweep_value.ceil() as usize) < self.table.len()) {
             let output0: f32;
             let output1: f32;
             match self.interpolation {

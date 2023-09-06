@@ -1,0 +1,12 @@
+# Plays a wav file. I used freesound.org to search for creative commons sounds.
+# I haven't distributed the actual file in this project but you should be able
+# to find it on that site.
+include:
+patches:
+sounds:
+  - name: what_if
+    sound_type: import_wav
+    params:
+      - wavs/84879__timkahn__what-if.wav
+      - cubic
+root: what_if

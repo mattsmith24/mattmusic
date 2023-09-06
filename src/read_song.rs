@@ -21,6 +21,7 @@ pub mod read_song {
     use crate::export_wav::export_wav::ExportWav;
     use crate::gaussian_transfer::gaussian_transfer::GaussianTransfer;
     use crate::hann_window::hann_window::HannWindow;
+    use crate::import_wav::import_wav::ImportWav;
     use crate::low_pass_filter::low_pass_filter::LowPassFilter;
     use crate::midi2freq::midi2freq::Midi2Freq;
     use crate::mix::mix::Mix;
@@ -310,6 +311,7 @@ pub mod read_song {
                     "export_wav" => ExportWav::from_yaml(&evaluated_params, self),
                     "gaussian_transfer" => GaussianTransfer::from_yaml(&evaluated_params, self),
                     "hann_window" => HannWindow::from_yaml(&evaluated_params, self),
+                    "import_wav" => ImportWav::from_yaml(&evaluated_params, self),
                     "low_pass_filter" => LowPassFilter::from_yaml(&evaluated_params, self),
                     "midi2freq" => Midi2Freq::from_yaml(&evaluated_params, self),
                     "mix" => Mix::from_yaml(&evaluated_params, self),
@@ -342,10 +344,8 @@ pub mod read_song {
         pub fn get_buffer(&mut self, buffer_name: &str) -> Arc<Mutex<Vec<(f32,f32)>>> {
             println!("get_buffer({})", buffer_name);
             if let Some(buf) = self.buffers.get(buffer_name) {
-                println!("found");
                 buf.clone()
             } else {
-                println!("created");
                 let buf = Arc::new(Mutex::new(Vec::<(f32,f32)>::new()));
                 self.buffers.insert(buffer_name.to_string(), buf.clone());
                 buf
