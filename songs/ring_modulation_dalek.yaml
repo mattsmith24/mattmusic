@@ -1,0 +1,42 @@
+#     The ring modulator is best known as the device used to create the
+#     terrifying voices of the Daleks and the Cybermen in Dr. Who.
+
+#     The ring modulator works by taking two inputs and multiplying them
+#     together. In the original Ring Modulator a tape loop with a 30Hz sine wave
+#     tone was combined in real time as an actor spoke into a microphone. The
+#     diodes in the machine also gave the effect its characteristic distortion.
+#     - https://webaudio.prototyping.bbc.co.uk/ring-modulator/
+
+# There is more to making a dalek sound than just this 30Hz ring modulator but
+# it gets you most of the way there. The above website simulates the diode
+# bridge to add distortion which is pretty cool.
+
+include:
+patches:
+sounds:
+  - name: a
+    sound_type: sine
+    params:
+      - "30.0"
+      - "1.0"
+      - EXPR(558720.0 / 44100.0) # Length of the input wav file
+  - name: b
+    sound_type: import_wav
+    params:
+      - wavs\13628__incarnadine__david-c-scott-loss.wav
+      - cubic
+  - name: modulate_ab
+    sound_type: multiply
+    params:
+      - 1.0 a
+      - 1.0 b
+  - name: recenter
+    sound_type: multiply
+    params:
+      - -1.0 modulate_ab
+  - name: timebox
+    sound_type: time_box
+    params:
+      - EXPR(558720.0 / 44100.0)
+      - recenter
+root: timebox
