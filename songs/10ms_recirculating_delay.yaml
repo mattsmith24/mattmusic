@@ -1,0 +1,43 @@
+# When feedback is incorporated with a delay, and the delay is less than 20ms,
+# then the result is a recirculating comb filter with peaks at multiple of w =
+# 2*pi / d (at sample rate 44000, this is every 100 Hz )
+# The peaks are more pronounced than in the non-recirculating filter.
+include:
+patches:
+sounds:
+  - name: start_freq
+    sound_type: dc
+    params:
+      - EXPR(440.0 / CONST(sample_rate))
+      - "10.0"
+  # sweep up by 1000Hz from base of 440 so we can hear the notches every 1 second
+  - name: sweep_ramp
+    sound_type: ramp
+    params:
+      - "10.0"
+      - EXPR(1000.0 / CONST(sample_rate))
+      - "10.0"
+  - name: sweep
+    sound_type: mix
+    params:
+      - start_freq
+      - sweep_ramp
+  - name: input_signal
+    sound_type: sine
+    params:
+      - sweep
+      - "0.2"
+      - "10.0"
+  - name: delay1
+    sound_type: recirculating_delay
+    params:
+      - input_signal
+      - "0.01"
+      - "0.8"
+      - "10.0"
+  - name: delay
+    sound_type: export_wav
+    params:
+      - tmp/10ms_recirculating_delay.wav
+      - delay1
+root: delay
