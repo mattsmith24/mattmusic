@@ -16,7 +16,7 @@ impl BufferReader {
     }
     fn get_sample(&self, n: i32) -> (f32, f32) {
         let buffer = &mut self.buffer.lock().unwrap();
-        if buffer.len() as i32 <= n {
+        if buffer.len() as i32 <= n || n < 0 {
             (0.0, 0.0)
         } else {
             buffer[n as usize].clone()

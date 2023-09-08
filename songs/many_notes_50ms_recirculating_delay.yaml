@@ -1,0 +1,84 @@
+# This file plays the many notes example using a sinewave that is delayed by
+# 50ms with recircualting delay. The delay can be heard as a kind of gargling.
+# This is because delays above 20ms start to be audible as separate events to
+# the human ear where as delays below 20ms are not. The filtering aspect of the
+# delay still plays a part - certain frequencies will be attenuated but that
+# aspect is heard less than the change to the attack.
+include:
+patches:
+  # INPUT(0) midi pitch
+  - name: instrument
+    root: instrument1
+    sounds:
+      - name: instrument1
+        sound_type: recirculating_delay
+        params:
+          - tone1
+          - "0.05"
+          - "0.9"
+          - "0.4"
+      - name: tone1
+        sound_type: time_box
+        params:
+          - "0.4"
+          - tone
+      - name: tone
+        sound_type: sine
+        params:
+          - midi2freq
+          - "0.2"
+          - "0.4"
+      - name: midi2freq
+        sound_type: midi2freq
+        params:
+          - INPUT(0)
+          - "0.4"
+
+sounds:
+  - name: sine58
+    sound_type: patch instrument
+    params:
+      - "58"
+  - name: sine63
+    sound_type: patch instrument
+    params:
+      - "63"
+  - name: sine70
+    sound_type: patch instrument
+    params:
+      - "70"
+  - name: sine72
+    sound_type: patch instrument
+    params:
+      - "72"
+  - name: sine65
+    sound_type: patch instrument
+    params:
+      - "65"
+  - name: sine60
+    sound_type: patch instrument
+    params:
+      - "60"
+  - name: sine67
+    sound_type: patch instrument
+    params:
+      - "67"
+  - name: sine62
+    sound_type: patch instrument
+    params:
+      - "62"
+  - name: sequence1
+    sound_type: sequence
+    params:
+      - "10"
+      - "4.0"
+      - "0.0 sine58"
+      - "0.5 sine63"
+      - "1.0 sine70"
+      - "1.5 sine72"
+      - "2.0 sine65"
+      - "2.5 sine60"
+      - "3.0 sine67"
+      - "3.5 sine62"
+
+root: sequence1
