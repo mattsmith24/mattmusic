@@ -31,6 +31,7 @@ pub mod read_song {
     use crate::pre_render::pre_render::PreRender;
     use crate::ramp::ramp::Ramp;
     use crate::recirculating_delay::recirculating_delay::RecirculatingDelay;
+    use crate::rotation_transfer::rotation_transfer::RotationTransfer;
     use crate::saw::saw::Saw;
     use crate::sequence::sequence::Sequence;
     use crate::sine::sine::Sine;
@@ -202,6 +203,7 @@ pub mod read_song {
         fn get_const(&self, const_name: &str) -> String {
             match const_name {
                 "sample_rate" => format!("{}", self.sample_rate),
+                "pi" => format!("{}", std::f32::consts::PI),
                 _ => panic!("Unknown const '{}'", const_name)
             }
         }
@@ -321,6 +323,7 @@ pub mod read_song {
                     "pre_render" => PreRender::from_yaml(&evaluated_params, self),
                     "ramp" => Ramp::from_yaml(&evaluated_params, self),
                     "recirculating_delay" => RecirculatingDelay::from_yaml(&evaluated_params, self),
+                    "rotation_transfer" => RotationTransfer::from_yaml(&evaluated_params, self),
                     "sequence" => Sequence::from_yaml(&evaluated_params, self),
                     "saw" => Saw::from_yaml(&evaluated_params, self),
                     "sine" => Sine::from_yaml(&evaluated_params, self),

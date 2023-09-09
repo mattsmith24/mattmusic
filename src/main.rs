@@ -30,6 +30,7 @@ mod pre_render;
 mod ramp;
 mod read_song;
 mod recirculating_delay;
+mod rotation_transfer;
 mod saw;
 mod sequence;
 mod sine;

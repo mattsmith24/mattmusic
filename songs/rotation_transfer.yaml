@@ -1,0 +1,23 @@
+# The rotation transfer is an example of a power-preserving transformation. The
+# average power of both stereo channels is not affected. The rotation
+# effectively shrinks the power of one channel by the same amount that it
+# increases the other.
+include:
+patches:
+sounds:
+  - name: wav
+    sound_type: import_wav
+    params:
+      - .\wavs\13628__incarnadine__david-c-scott-loss.wav
+      - cubic
+  - name: rotate1
+    sound_type: rotation_transfer
+    params:
+      - wav
+      - EXPR(CONST(pi) / 6.0)
+  - name: rotate
+    sound_type: export_wav
+    params:
+      - tmp/rotation_transfer.wav
+      - rotate1
+root: rotate

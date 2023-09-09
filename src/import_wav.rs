@@ -69,10 +69,11 @@ fn do_read_f32(reader: &mut hound::WavReader<BufReader<File>>, channels: u16) ->
 
 impl ImportWav {
     pub fn new(filename: &str, sample_rate: i32, interpolation: Interpolation) -> Self {
+        println!("Reading file: {}", filename);
         let mut reader = hound::WavReader::open(filename).unwrap();
         let samples: Vec<(f32, f32)>;
         let spec = reader.spec();
-        println!("Importing {}: {} {} bit channels, at {} Hz", filename, spec.channels, spec.bits_per_sample, spec.sample_rate);
+        println!("Importing {} {} bit channels, at {} Hz", spec.channels, spec.bits_per_sample, spec.sample_rate);
         match spec.sample_format {
             hound::SampleFormat::Float => samples = do_read_f32(&mut reader, spec.channels),
             hound::SampleFormat::Int => samples = do_read_i32(&mut reader, spec.channels, spec.bits_per_sample),
