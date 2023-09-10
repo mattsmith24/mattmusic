@@ -31,6 +31,7 @@ pub mod read_song {
     use crate::pre_render::pre_render::PreRender;
     use crate::ramp::ramp::Ramp;
     use crate::recirculating_delay::recirculating_delay::RecirculatingDelay;
+    use crate::reverberator::reverberator::Reverberator;
     use crate::rotation_transfer::rotation_transfer::RotationTransfer;
     use crate::saw::saw::Saw;
     use crate::sequence::sequence::Sequence;
@@ -38,6 +39,7 @@ pub mod read_song {
     use crate::square::square::Square;
     use crate::time_box::time_box::TimeBox;
     use crate::triangle::triangle::Triangle;
+    use crate::uneven_delay::uneven_delay::UnevenDelay;
     use crate::wavetable::wavetable::Wavetable;
 
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
@@ -323,6 +325,7 @@ pub mod read_song {
                     "pre_render" => PreRender::from_yaml(&evaluated_params, self),
                     "ramp" => Ramp::from_yaml(&evaluated_params, self),
                     "recirculating_delay" => RecirculatingDelay::from_yaml(&evaluated_params, self),
+                    "reverberator" => Reverberator::from_yaml(&evaluated_params, self),
                     "rotation_transfer" => RotationTransfer::from_yaml(&evaluated_params, self),
                     "sequence" => Sequence::from_yaml(&evaluated_params, self),
                     "saw" => Saw::from_yaml(&evaluated_params, self),
@@ -330,6 +333,7 @@ pub mod read_song {
                     "square" => Square::from_yaml(&evaluated_params, self),
                     "time_box" => TimeBox::from_yaml(&evaluated_params, self),
                     "triangle" => Triangle::from_yaml(&evaluated_params, self),
+                    "uneven_delay" => UnevenDelay::from_yaml(&evaluated_params, self),
                     "wavetable" => Wavetable::from_yaml(&evaluated_params, self),
                     &_ => todo!("sound_type: {}", sound_type)
                 }

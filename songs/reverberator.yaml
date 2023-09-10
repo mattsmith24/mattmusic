@@ -1,0 +1,19 @@
+include:
+patches:
+sounds:
+  - name: wav
+    sound_type: import_wav
+    params:
+      - .\wavs\84879__timkahn__what-if.wav
+      - cubic
+  - name: reverb1
+    sound_type: reverberator
+    params:
+      - wav
+      - "0.7"
+  - name: reverb
+    sound_type: export_wav
+    params:
+      - tmp/reverberator.wav
+      - reverb1
+root: reverb

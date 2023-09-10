@@ -30,6 +30,7 @@ mod pre_render;
 mod ramp;
 mod read_song;
 mod recirculating_delay;
+mod reverberator;
 mod rotation_transfer;
 mod saw;
 mod sequence;
@@ -39,6 +40,7 @@ mod square;
 mod time_box;
 mod traits;
 mod triangle;
+mod uneven_delay;
 mod wavetable;
 
 use traits::traits::{DynSoundSource, DynInstrument};
