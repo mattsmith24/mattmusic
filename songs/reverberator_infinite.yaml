@@ -1,0 +1,40 @@
+include:
+patches:
+sounds:
+  - name: wav
+    sound_type: import_wav
+    params:
+      - .\wavs\84879__timkahn__what-if.wav
+      - cubic
+  - name: wav_timebox
+    sound_type: time_box
+    params:
+      - "5.0"
+      - wav
+  - name: snapshot_envelope
+    sound_type: envelope
+    params:
+      - 0.1 0.0
+      - 0.01 1.0
+      - 0.25 1.0
+      - 0.01 0.0
+      - 0.4 0.0
+      - 0.01 1.0
+      - 0.25 1.0
+      - 0.01 0.0
+  - name: snapshot
+    sound_type: multiply
+    params:
+      - 0.0 snapshot_envelope
+      - 0.0 wav_timebox
+  - name: reverb
+    sound_type: reverberator
+    params:
+      - snapshot
+      - "1.0"
+  - name: wav_out
+    sound_type: export_wav
+    params:
+      - tmp/reverberator_infinite.wav
+      - reverb
+root: wav_out

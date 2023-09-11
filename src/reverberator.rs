@@ -28,7 +28,12 @@ impl Reverberator {
         // We assume the sample rate is around 48000 for this code.
         // The usual measure of reverberation time (RT) is the time at which the
         // gain drops by sixty decibels. Add 10% to that for good measure.
-        let duration = input.duration() + (-3.0 * (1920 + 3360) as f32 / 2.0 / gain.log10() * 1.1) as i32;
+        let duration;
+        if gain < 1.0 {
+            duration = input.duration() + (-3.0 * (1920 + 3360) as f32 / 2.0 / gain.log10() * 1.1) as i32;
+        } else {
+            duration = input.duration();
+        }
         let buffer = Arc::new(Mutex::new(Vec::<(f32,f32)>::new()));
         // Rotate + delaychain of: pi/10, 30ms, pi/10, 55ms, -pi/5, 80ms
         let rotation_1 = RotationTransfer::new(input, std::f32::consts::PI * 0.1);
