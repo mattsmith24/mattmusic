@@ -1,0 +1,23 @@
+# Using a sine wave to delay samples in the source is similar to frequency
+# modulation. The pitch is heard to vary up and down due to the doppler effect.
+include:
+patches:
+sounds:
+  - name: voice
+    sound_type: sine
+    params:
+      - "440.0"
+      - "1.0"
+      - "5.0"
+  - name: vibrato
+    sound_type: sine
+    params:
+      - "8.0"
+      - "40.0"
+      - "5.0"
+  - name: output
+    sound_type: delay_line
+    params:
+      - voice
+      - vibrato
+root: output

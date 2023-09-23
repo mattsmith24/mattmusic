@@ -17,6 +17,7 @@ pub mod read_song {
     use crate::cos_transfer::cos_transfer::CosTransfer;
     use crate::db2amp::db2amp::Db2Amp;
     use crate::dc::dc::DC;
+    use crate::delay_line::delay_line::DelayLine;
     use crate::envelope::envelope::Envelope;
     use crate::export_wav::export_wav::ExportWav;
     use crate::gaussian_transfer::gaussian_transfer::GaussianTransfer;
@@ -311,6 +312,7 @@ pub mod read_song {
                     "cos_transfer" => CosTransfer::from_yaml(&evaluated_params, self),
                     "db2amp" => Db2Amp::from_yaml(&evaluated_params, self),
                     "dc" => DC::from_yaml(&evaluated_params, self),
+                    "delay_line" => DelayLine::from_yaml(&evaluated_params, self),
                     "envelope" => Envelope::from_yaml(&evaluated_params, self),
                     "export_wav" => ExportWav::from_yaml(&evaluated_params, self),
                     "gaussian_transfer" => GaussianTransfer::from_yaml(&evaluated_params, self),

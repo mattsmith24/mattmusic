@@ -11,6 +11,7 @@ mod clip;
 mod cos_transfer;
 mod db2amp;
 mod dc;
+mod delay_line;
 mod envelope;
 mod export_wav;
 mod gaussian_transfer;
