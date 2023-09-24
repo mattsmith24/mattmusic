@@ -42,12 +42,11 @@ impl SoundSource for DelayLine {
     fn next_value(&self, n: i32, state: &mut SoundData) -> (f32, f32) {
         let data = &mut state.downcast_mut::<DelayLineData>().unwrap();
         let d = self.delay.next_value(n, &mut data.delay_data);
-        // We need at least 4 samples to do the cubic interpolation
-        if n >= (4 - 1) && d.round() as i32 <= MAX_DELAY {
+        let x0 = (n as f32 - d).floor() as i32 - 2;
+        if x0 >= 1 && d >= 0.0 && d.round() as i32 <= MAX_DELAY {
             // Cubic interpolation
             // We apply a base delay of 2 so we don't have to see into the future
             // when getting x0 + 2
-            let x0 = (n as f32 - d).floor() as i32 - 2;
             let ym1 = self.input.next_value(x0 - 1, &mut data.input_datam1); // y[x0 - 1]
             let y0 = self.input.next_value(x0, &mut data.input_data0); // y[x0]
             let y1 = self.input.next_value(x0 + 1, &mut data.input_data1); // y[x0 + 1]

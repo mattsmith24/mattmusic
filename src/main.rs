@@ -27,6 +27,7 @@ mod mix;
 mod multiply;
 mod noise;
 mod oscillator;
+mod pitch_shift;
 mod pre_render;
 mod ramp;
 mod read_song;

@@ -4,17 +4,16 @@ include:
 patches:
 sounds:
   - name: voice
-    sound_type: sine
+    sound_type: import_wav
     params:
-      - "440.0"
-      - "0.5"
-      - "5.0"
+      - .\wavs\84879__timkahn__what-if.wav
+      - cubic
   - name: wave
     sound_type: sine
     params:
       - "8.0"
       - "40.0"
-      - "5.0"
+      - "25.3"
   - name: vibrato
     sound_type: multiply
     params:

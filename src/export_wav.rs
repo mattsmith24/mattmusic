@@ -10,7 +10,7 @@ pub struct ExportWav {
 }
 
 impl ExportWav {
-    fn new(filename: &str, sample_rate: i32, source: DynSoundSource) -> Self {
+    pub fn new(filename: &str, sample_rate: i32, source: DynSoundSource) -> Self {
         println!("Writing file {}...", filename);
         let pre_render = PreRender::new(source);
         let spec = hound::WavSpec {

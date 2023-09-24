@@ -1,0 +1,23 @@
+# The pitch shift uses two delay lines that ramp 180 degrees out of phase to
+# create a continuous doppler effect.
+include:
+patches:
+sounds:
+  - name: voice
+    sound_type: import_wav
+    params:
+      - .\wavs\84879__timkahn__what-if.wav
+      - cubic
+  - name: output
+    sound_type: pitch_shift
+    params:
+      - voice
+      - "0.0001"
+      # transposition = 1 - f*s (abs value must be < 1)
+      # -ve frequency transposes up
+      # Frequences above 5Hz sound pretty bad
+      # sample windows above 50ms are very audible as echos
+      - "0.05"
+      - "-4.0"
+
+root: output

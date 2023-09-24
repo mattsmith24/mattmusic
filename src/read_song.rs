@@ -29,6 +29,7 @@ pub mod read_song {
     use crate::multiply::multiply::Multiply;
     use crate::noise::noise::Noise;
     use crate::oscillator::oscillator::Oscillator;
+    use crate::pitch_shift::pitch_shift::PitchShift;
     use crate::pre_render::pre_render::PreRender;
     use crate::ramp::ramp::Ramp;
     use crate::recirculating_delay::recirculating_delay::RecirculatingDelay;
@@ -324,6 +325,7 @@ pub mod read_song {
                     "multiply" => Multiply::from_yaml(&evaluated_params, self),
                     "noise" => Noise::from_yaml(&evaluated_params, self),
                     "oscillator" => Oscillator::from_yaml(&evaluated_params, self),
+                    "pitch_shift" => PitchShift::from_yaml(&evaluated_params, self),
                     "pre_render" => PreRender::from_yaml(&evaluated_params, self),
                     "ramp" => Ramp::from_yaml(&evaluated_params, self),
                     "recirculating_delay" => RecirculatingDelay::from_yaml(&evaluated_params, self),
