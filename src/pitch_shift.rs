@@ -1,19 +1,16 @@
 pub mod pitch_shift {
 
-use std::sync::{Arc, Mutex};
-
 use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
 use crate::knob::knob::Knob;
 
-use crate::buffer_reader::buffer_reader::BufferReader;
-use crate::buffer_writer::buffer_writer::BufferWriter;
 use crate::cos_transfer::cos_transfer::CosTransfer;
 use crate::dc::dc::DC;
 use crate::delay_line::delay_line::DelayLine;
 use crate::mix::mix::Mix;
 use crate::multiply::multiply::Multiply;
+use crate::pre_render::pre_render::PreRender;
 use crate::ramp::ramp::Ramp;
 use crate::sequence::sequence::Sequence;
 
@@ -107,10 +104,9 @@ fn new_circuit(input: DynSoundSource, base_delay: i32, window_size: i32, freq: f
 
 impl PitchShift {
     pub fn new(input: DynSoundSource, base_delay: i32, window_size: i32, freq: f32) -> Self {
-        // We can effectively copy input so it's used twice as long as the 'writer' is called first.
-        let buffer = Arc::new(Mutex::new(Vec::<(f32,f32)>::new()));
-        let input0 = BufferWriter::new(input, buffer.clone());
-        let input1 = BufferReader::new(buffer.clone(), input0.duration());
+        // We need to use the input twice so prerender it and clone.
+        let input0 = PreRender::new(input);
+        let input1 = input0.clone();
         let circuit0 = new_circuit(Box::new(input0), base_delay, window_size, freq, 0.0);
         let circuit1 = new_circuit(Box::new(input1), base_delay, window_size, freq, std::f32::consts::PI);
         let mut mix = Mix::new();

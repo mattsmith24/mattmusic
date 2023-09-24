@@ -5,7 +5,7 @@ pub mod pre_render {
 use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
-
+#[derive(Clone)]
 pub struct PreRender {
     rendered_sound_source: Vec::<(f32,f32)>
 }
