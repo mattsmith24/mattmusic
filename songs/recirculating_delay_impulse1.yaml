@@ -3,10 +3,11 @@ include:
 patches:
 sounds:
   - name: impulse
-    sound_type: dc
+    sound_type: pulse_train
     params:
       - "1.0"
       - EXPR(1.0 / CONST(sample_rate))
+      - "2.0"
   - name: delay1
     sound_type: patch recirculating_delay impulse
     params:

@@ -31,6 +31,7 @@ pub mod read_song {
     use crate::oscillator::oscillator::Oscillator;
     use crate::pitch_shift::pitch_shift::PitchShift;
     use crate::pre_render::pre_render::PreRender;
+    use crate::pulse_train::pulse_train::PulseTrain;
     use crate::ramp::ramp::Ramp;
     use crate::recirculating_delay::recirculating_delay::RecirculatingDelay;
     use crate::reverberator::reverberator::Reverberator;
@@ -327,6 +328,7 @@ pub mod read_song {
                     "oscillator" => Oscillator::from_yaml(&evaluated_params, self),
                     "pitch_shift" => PitchShift::from_yaml(&evaluated_params, self),
                     "pre_render" => PreRender::from_yaml(&evaluated_params, self),
+                    "pulse_train" => PulseTrain::from_yaml(&evaluated_params, self),
                     "ramp" => Ramp::from_yaml(&evaluated_params, self),
                     "recirculating_delay" => RecirculatingDelay::from_yaml(&evaluated_params, self),
                     "reverberator" => Reverberator::from_yaml(&evaluated_params, self),

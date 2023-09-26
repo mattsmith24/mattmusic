@@ -29,6 +29,7 @@ mod noise;
 mod oscillator;
 mod pitch_shift;
 mod pre_render;
+mod pulse_train;
 mod ramp;
 mod read_song;
 mod recirculating_delay;
