@@ -18,7 +18,6 @@ mod gaussian_transfer;
 mod generative_waveform;
 mod hann_window;
 mod import_wav;
-mod instruments;
 mod knob;
 mod low_pass_filter;
 mod midi_notes;
@@ -38,13 +37,17 @@ mod rotation_transfer;
 mod saw;
 mod sequence;
 mod sine;
-mod songs;
 mod square;
 mod time_box;
 mod traits;
 mod triangle;
 mod uneven_delay;
 mod wavetable;
+
+mod filters;
+mod instruments;
+mod songs;
+
 
 use traits::traits::{DynSoundSource, DynInstrument};
 use read_song::read_song::read_song;

@@ -45,6 +45,8 @@ pub mod read_song {
     use crate::uneven_delay::uneven_delay::UnevenDelay;
     use crate::wavetable::wavetable::Wavetable;
 
+    use crate::filters::elementary_non_recirculating_filter::elementary_non_recirculating_filter::ElementaryNonRecirculatingFilter;
+
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
     pub struct PatchItem {
         name: String,
@@ -315,6 +317,7 @@ pub mod read_song {
                     "db2amp" => Db2Amp::from_yaml(&evaluated_params, self),
                     "dc" => DC::from_yaml(&evaluated_params, self),
                     "delay_line" => DelayLine::from_yaml(&evaluated_params, self),
+                    "elementary_non_recirculating_filter" => ElementaryNonRecirculatingFilter::from_yaml(&evaluated_params, self),
                     "envelope" => Envelope::from_yaml(&evaluated_params, self),
                     "export_wav" => ExportWav::from_yaml(&evaluated_params, self),
                     "gaussian_transfer" => GaussianTransfer::from_yaml(&evaluated_params, self),
