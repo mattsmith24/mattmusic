@@ -10,7 +10,6 @@ use crate::dc::dc::DC;
 use crate::delay_line::delay_line::DelayLine;
 use crate::mix::mix::Mix;
 use crate::multiply::multiply::Multiply;
-use crate::pre_render::pre_render::PreRender;
 use crate::ramp::ramp::Ramp;
 use crate::sequence::sequence::Sequence;
 

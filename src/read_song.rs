@@ -46,6 +46,7 @@ pub mod read_song {
     use crate::wavetable::wavetable::Wavetable;
 
     use crate::filters::elementary_non_recirculating_filter::elementary_non_recirculating_filter::ElementaryNonRecirculatingFilter;
+    use crate::filters::elementary_recirculating_filter::elementary_recirculating_filter::ElementaryRecirculatingFilter;
 
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
     pub struct PatchItem {
@@ -318,6 +319,7 @@ pub mod read_song {
                     "dc" => DC::from_yaml(&evaluated_params, self),
                     "delay_line" => DelayLine::from_yaml(&evaluated_params, self),
                     "elementary_non_recirculating_filter" => ElementaryNonRecirculatingFilter::from_yaml(&evaluated_params, self),
+                    "elementary_recirculating_filter" => ElementaryRecirculatingFilter::from_yaml(&evaluated_params, self),
                     "envelope" => Envelope::from_yaml(&evaluated_params, self),
                     "export_wav" => ExportWav::from_yaml(&evaluated_params, self),
                     "gaussian_transfer" => GaussianTransfer::from_yaml(&evaluated_params, self),

@@ -1,0 +1,21 @@
+include:
+patches:
+sounds:
+  - name: pulses
+    sound_type: pulse_train
+    params:
+      - "1.0" # freq
+      - EXPR(1.0 / CONST(sample_rate)) # duty
+      - "5.0" # duration
+  - name: filter
+    sound_type: elementary_recirculating_filter
+    params:
+      - pulses # input
+      - "0.9" # gain magnitude (stable for values < 1.0)
+      - "-2.0" # gain angle
+  - name: output
+    sound_type: export_wav
+    params:
+      - tmp/elementary_recirculating_filter.wav
+      - filter
+root: output
