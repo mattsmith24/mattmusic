@@ -3,6 +3,7 @@ pub mod knob {
 use crate::traits::traits::{DynSoundSource, SoundData};
 use crate::dc::dc::DC;
 
+#[derive(Clone)]
 pub struct Knob {
     input: DynSoundSource,
 }

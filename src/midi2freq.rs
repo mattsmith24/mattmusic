@@ -3,6 +3,7 @@ use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 use crate::midi_notes::midi_notes::{midistr2freq, midi2freq};
 use crate::read_song::read_song::SongReader;
 
+#[derive(Clone)]
 pub struct Midi2Freq {
     freq: f32,
     duration: i32

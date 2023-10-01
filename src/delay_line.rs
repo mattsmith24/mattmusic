@@ -7,6 +7,7 @@ use crate::knob::knob::Knob;
 
 const MAX_DELAY: i32 = 48000 * 10;
 
+#[derive(Clone)]
 pub struct DelayLine {
     input: DynSoundSource,
     delay: Knob,

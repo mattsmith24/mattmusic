@@ -5,6 +5,7 @@ use std::sync::{Arc, Mutex};
 use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
+#[derive(Clone)]
 pub struct BufferReader {
     buffer: Arc<Mutex<Vec<(f32,f32)>>>,
     duration: i32,

@@ -6,6 +6,7 @@ use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 use crate::knob::knob::Knob;
 use crate::generative_waveform::generative_waveform::GenerativeWaveform;
 
+#[derive(Clone)]
 pub struct Square {
     generative_waveform: GenerativeWaveform
 }

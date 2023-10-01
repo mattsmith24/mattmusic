@@ -4,11 +4,13 @@ use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 use crate::dc::dc::DC;
 
+#[derive(Clone)]
 pub struct MultiplyInput {
     source: DynSoundSource,
     offset: f32
 }
 
+#[derive(Clone)]
 pub struct Multiply {
     inputs: Vec<MultiplyInput>
 }

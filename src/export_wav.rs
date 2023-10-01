@@ -5,6 +5,7 @@ use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 use crate::pre_render::pre_render::PreRender;
 use hound;
 
+#[derive(Clone)]
 pub struct ExportWav {
     buffer: PreRender
 }

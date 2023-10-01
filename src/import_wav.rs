@@ -12,6 +12,7 @@ use crate::ramp::ramp::Ramp;
 use crate::wavetable::wavetable::{Wavetable, Interpolation};
 
 
+#[derive(Clone)]
 pub struct ImportWav {
     wavetable: Box<Wavetable>,
 }

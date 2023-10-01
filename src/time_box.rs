@@ -3,7 +3,7 @@ pub mod time_box {
 use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
-
+#[derive(Clone)]
 pub struct TimeBox {
     duration: i32,
     source: DynSoundSource,

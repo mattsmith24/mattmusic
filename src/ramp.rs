@@ -5,6 +5,7 @@ use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
 use crate::knob::knob::Knob;
 
+#[derive(Clone)]
 pub struct Ramp {
     period: Knob,
     amplitude: Knob,

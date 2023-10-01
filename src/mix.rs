@@ -5,6 +5,7 @@ pub mod mix {
 
     use crate::sequence::sequence::Sequence;
 
+    #[derive(Clone)]
     pub struct Mix
     {
         sequence: Sequence,

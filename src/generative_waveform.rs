@@ -8,6 +8,7 @@ use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
 use crate::knob::knob::Knob;
 
+#[derive(Clone)]
 pub struct GenerativeWaveform {
     freq: Knob,
     harmonic_index_increment: i32,

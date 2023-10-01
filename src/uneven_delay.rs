@@ -3,6 +3,7 @@ pub mod uneven_delay {
 use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
+#[derive(Clone)]
 pub struct UnevenDelay {
     input: DynSoundSource,
     left_delay: i32,

@@ -9,6 +9,7 @@ edition = "2021"
 anyhow = "1.0.71"
 clap = { version = "4.3.11", features = ["derive"] }
 cpal = "0.15.2"
+dyn-clone = "1.0.14"
 evalexpr = "11.1.0"
 hound = "3.5.0"
 num = "0.4.1"

@@ -5,6 +5,7 @@ use num::complex::Complex;
 use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
+#[derive(Clone)]
 pub struct ElementaryNonRecirculatingFilter {
     input: DynSoundSource,
     complex_gain: Complex<f32>

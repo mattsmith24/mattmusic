@@ -5,6 +5,7 @@ use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
 use crate::knob::knob::Knob;
 
+#[derive(Clone)]
 pub struct PulseTrain {
     freq: Knob, // Frequency as fraction of sample rate
     duty: Knob, // Ratio of on to off in each period. 0.5 is square wave

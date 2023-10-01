@@ -3,6 +3,7 @@ pub mod cos_transfer {
 use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
+#[derive(Clone)]
 pub struct CosTransfer {
     source: DynSoundSource,
 }

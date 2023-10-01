@@ -4,6 +4,7 @@ use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
 
+#[derive(Clone)]
 struct SequenceMember {
     sound_source: DynSoundSource,
     start_time: i32,
@@ -15,6 +16,7 @@ struct SequenceMemberData {
     playing_start_time: i32
 }
 
+#[derive(Clone)]
 pub struct Sequence {
     notes: Vec<SequenceMember>,
     repeat: u32,

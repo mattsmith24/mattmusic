@@ -14,6 +14,7 @@ use crate::pre_render::pre_render::PreRender;
 use crate::ramp::ramp::Ramp;
 use crate::sequence::sequence::Sequence;
 
+#[derive(Clone)]
 pub struct PitchShift {
     output: DynSoundSource,
 }
@@ -105,10 +106,10 @@ fn new_circuit(input: DynSoundSource, base_delay: i32, window_size: i32, freq: f
 impl PitchShift {
     pub fn new(input: DynSoundSource, base_delay: i32, window_size: i32, freq: f32) -> Self {
         // We need to use the input twice so prerender it and clone.
-        let input0 = PreRender::new(input);
-        let input1 = input0.clone();
-        let circuit0 = new_circuit(Box::new(input0), base_delay, window_size, freq, 0.0);
-        let circuit1 = new_circuit(Box::new(input1), base_delay, window_size, freq, std::f32::consts::PI);
+        let input0 = input;
+        let input1 = dyn_clone::clone_box(&*input0);
+        let circuit0 = new_circuit(input0, base_delay, window_size, freq, 0.0);
+        let circuit1 = new_circuit(input1, base_delay, window_size, freq, std::f32::consts::PI);
         let mut mix = Mix::new();
         mix.add(circuit0);
         mix.add(circuit1);

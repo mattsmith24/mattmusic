@@ -3,6 +3,7 @@ pub mod dc {
 use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
+#[derive(Clone)]
 pub struct DC {
     value: f32,
     duration: i32

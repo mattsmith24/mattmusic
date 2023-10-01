@@ -3,12 +3,14 @@ pub mod wavetable {
 use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 
+#[derive(Clone)]
 pub enum Interpolation {
     Rounding,
     Linear,
     Cubic,
 }
 
+#[derive(Clone)]
 pub struct Wavetable {
     table: Vec::<(f32,f32)>,
     sweep: DynSoundSource,

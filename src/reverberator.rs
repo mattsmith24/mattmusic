@@ -18,6 +18,7 @@ use crate::multiply::multiply::Multiply;
 use crate::rotation_transfer::rotation_transfer::RotationTransfer;
 use crate::uneven_delay::uneven_delay::UnevenDelay;
 
+#[derive(Clone)]
 pub struct Reverberator {
     output: DynSoundSource,
     duration: i32,

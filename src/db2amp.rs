@@ -3,6 +3,7 @@ pub mod db2amp {
 use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 use crate::read_song::read_song::SongReader;
 
+#[derive(Clone)]
 pub struct Db2Amp {
     amp: f32,
     duration: i32

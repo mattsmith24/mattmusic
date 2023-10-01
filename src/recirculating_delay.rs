@@ -13,6 +13,7 @@ use crate::multiply::multiply::Multiply;
 use crate::sequence::sequence::Sequence;
 
 
+#[derive(Clone)]
 pub struct RecirculatingDelay {
     source: DynSoundSource,
 }
