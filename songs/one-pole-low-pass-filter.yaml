@@ -1,0 +1,38 @@
+# A one-pole low-pass filter. This simple filter is not really used for audio
+# but can smooth a human input such as turning a knob or moving a fader. The
+# pole lies on the real axis at a value < 1. The design of the filter comes from
+# choosing the "half-power" point which is the frequency at which the input
+# power is halfed. For values a lot less than 1/4 of sample frequency, the
+# approximation p = 1 - w can be used where w is the angular frequency of the
+# desired half-power point.
+include:
+patches:
+sounds:
+  - name: input
+    sound_type: pulse_train
+    params:
+      - "1.0" # freq
+      - EXPR(1.0 / CONST(sample_rate)) # duty
+      - "5.0" # duration
+  # - name: input
+  #   sound_type: import_wav
+  #   params:
+  #     - .\wavs\84879__timkahn__what-if.wav
+  #     - cubic
+  - name: filter
+    sound_type: elementary_recirculating_filter
+    params:
+      - input
+      - EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi)) # pole calculated from half-power point
+      - "0.0" # Pole lies on the real axis
+  - name: normalise
+    sound_type: multiply
+    params:
+      - 0.0 filter
+      - dc EXPR(100.0 / CONST(sample_rate) * 2.0 * CONST(pi)) 25.0
+  - name: output
+    sound_type: export_wav
+    params:
+      - tmp/one_pole_low_pass_filter.wav
+      - normalise
+root: output
