@@ -218,15 +218,8 @@ pub mod read_song {
 
         fn substitute_const_params_in_str(&self, param_str: &str) -> String {
             let substitute_param: String;
-            let mut needs_substitution = false;
-            let mut start_pos: usize = 0;
-            if param_str.starts_with("CONST(") {
-                needs_substitution = true;
-            } else if param_str.contains("CONST(") {
-                start_pos = param_str.find("CONST(").unwrap();
-                needs_substitution = true;
-            }
-            if needs_substitution {
+            if param_str.contains("CONST(") {
+                let start_pos = param_str.find("CONST(").unwrap();
                 let end_pos: usize;
                 match param_str[start_pos + 6..].find(")") {
                     Some(p) => end_pos = p + start_pos + 6,
@@ -235,7 +228,7 @@ pub mod read_song {
                 let const_name = &param_str[start_pos + 6..end_pos];
                 substitute_param = param_str[0..start_pos].to_string()
                     + &self.get_const(const_name)
-                    + &self.substitute_params_in_str(&param_str[end_pos+1..]);
+                    + &self.substitute_const_params_in_str(&param_str[end_pos+1..]);
             } else {
                 substitute_param = param_str.clone().to_string();
             }
