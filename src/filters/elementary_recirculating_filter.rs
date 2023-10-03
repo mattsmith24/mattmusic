@@ -18,6 +18,41 @@ impl ElementaryRecirculatingFilter {
             complex_gain: complex_gain
         }
     }
+
+    fn next_complex_value(&self, n:i32, data: &mut ElementaryRecirculatingFilterData) -> (Complex<f32>,Complex<f32>) {
+        let real_input_value = self.input.next_value(n, &mut data.input_data);
+        if n > 0 {
+            // Handle case where previous values haven't been processed.
+            // Sometimes sound sources higher up might start playing a sound
+            // part way through in which case we won't have a previous sample
+            // already buffered.
+            if data.delayed_data.len() < n as usize {
+                _ = self.next_complex_value(n - 1, data);
+            }
+            let input_value_0 = Complex::new(real_input_value.0, 0.0);
+            let input_value_1 = Complex::new(real_input_value.1, 0.0);
+            let delayed_input_value_0 = data.delayed_data[n as usize - 1].0;
+            let delayed_input_value_1 = data.delayed_data[n as usize - 1].1;
+            let output_0 = input_value_0 + delayed_input_value_0 * self.complex_gain;
+            let output_1 = input_value_1 + delayed_input_value_1 * self.complex_gain;
+            if data.delayed_data.len() == n as usize {
+                data.delayed_data.push((output_0, output_1));
+            } else {
+                data.delayed_data[n as usize] = (output_0, output_1);
+            }
+            (output_0, output_1)
+        } else {
+            let output = (Complex::new(real_input_value.0, 0.0), Complex::new(real_input_value.1, 0.0));
+            if n == 0 {
+                if data.delayed_data.len() == 0 {
+                    data.delayed_data.push(output);
+                } else {
+                    data.delayed_data[0] = output;
+                }
+            }
+            output
+        }
+    }
 }
 
 struct ElementaryRecirculatingFilterData {
@@ -36,23 +71,9 @@ impl SoundSource for ElementaryRecirculatingFilter {
     }
 
     fn next_value(&self, n:i32, state: &mut SoundData) -> (f32, f32) {
-        let data = &mut state.downcast_mut::<ElementaryRecirculatingFilterData>().unwrap();
-        let real_input_value = self.input.next_value(n, &mut data.input_data);
-        if n > 0 {
-            let input_value_0 = Complex::new(real_input_value.0, 0.0);
-            let input_value_1 = Complex::new(real_input_value.1, 0.0);
-            let delayed_input_value_0 = data.delayed_data[n as usize - 1].0;
-            let delayed_input_value_1 = data.delayed_data[n as usize - 1].1;
-            let output_0 = input_value_0 + delayed_input_value_0 * self.complex_gain;
-            let output_1 = input_value_1 + delayed_input_value_1 * self.complex_gain;
-            data.delayed_data.push((output_0, output_1));
-            (output_0.re, output_1.re)
-        } else {
-            if n == 0 {
-                data.delayed_data.push((Complex::new(real_input_value.0, 0.0), Complex::new(real_input_value.1, 0.0)));
-            }
-            real_input_value
-        }
+        let mut data = &mut state.downcast_mut::<ElementaryRecirculatingFilterData>().unwrap();
+        let output = self.next_complex_value(n, &mut data);
+        (output.0.re, output.1.re)
     }
 
     fn duration(&self) -> i32 {

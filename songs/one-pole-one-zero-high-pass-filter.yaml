@@ -3,17 +3,17 @@
 include:
 patches:
 sounds:
-  # - name: input
-  #   sound_type: pulse_train
-  #   params:
-  #     - "1.0" # freq
-  #     - EXPR(1.0 / CONST(sample_rate)) # duty
-  #     - "5.0" # duration
   - name: input
-    sound_type: import_wav
+    sound_type: pulse_train
     params:
-      - .\wavs\84879__timkahn__what-if.wav
-      - cubic
+      - "1.0" # freq
+      - EXPR(1.0 / CONST(sample_rate)) # duty
+      - "5.0" # duration
+  # - name: input
+  #   sound_type: import_wav
+  #   params:
+  #     - .\wavs\84879__timkahn__what-if.wav
+  #     - cubic
   - name: zero-filter
     sound_type: elementary_non_recirculating_filter
     params:
