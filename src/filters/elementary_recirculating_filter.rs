@@ -37,8 +37,8 @@ impl SoundSource for ElementaryRecirculatingFilter {
 
     fn next_value(&self, n:i32, state: &mut SoundData) -> (f32, f32) {
         let data = &mut state.downcast_mut::<ElementaryRecirculatingFilterData>().unwrap();
+        let real_input_value = self.input.next_value(n, &mut data.input_data);
         if n > 0 {
-            let real_input_value = self.input.next_value(n, &mut data.input_data);
             let input_value_0 = Complex::new(real_input_value.0, 0.0);
             let input_value_1 = Complex::new(real_input_value.1, 0.0);
             let delayed_input_value_0 = data.delayed_data[n as usize - 1].0;
@@ -49,9 +49,9 @@ impl SoundSource for ElementaryRecirculatingFilter {
             (output_0.re, output_1.re)
         } else {
             if n == 0 {
-                data.delayed_data.push((Complex::new(0.0, 0.0), Complex::new(0.0, 0.0)));
+                data.delayed_data.push((Complex::new(real_input_value.0, 0.0), Complex::new(real_input_value.1, 0.0)));
             }
-            (0.0, 0.0)
+            real_input_value
         }
     }
 

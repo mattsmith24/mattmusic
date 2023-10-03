@@ -1,0 +1,39 @@
+# A one-pole, one-zero high-pass filter. This can be used to remove the DC
+# component from a signal.
+include:
+patches:
+sounds:
+  # - name: input
+  #   sound_type: pulse_train
+  #   params:
+  #     - "1.0" # freq
+  #     - EXPR(1.0 / CONST(sample_rate)) # duty
+  #     - "5.0" # duration
+  - name: input
+    sound_type: import_wav
+    params:
+      - .\wavs\84879__timkahn__what-if.wav
+      - cubic
+  - name: zero-filter
+    sound_type: elementary_non_recirculating_filter
+    params:
+      - input
+      - "1.0" # Zero at magnitude 1
+      - "0.0" # Zero lies on the real axis
+  - name: pole-filter
+    sound_type: elementary_recirculating_filter
+    params:
+      - zero-filter
+      - EXPR(1.0 - 30.0 / CONST(sample_rate) * 2.0 * CONST(pi)) # pole calculated from half-power point
+      - "0.0" # Pole lies on the real axis
+  - name: normalise
+    sound_type: multiply
+    params:
+      - 0.0 pole-filter
+      - dc EXPR(1.0 - 30.0 / CONST(sample_rate) * 2.0 * CONST(pi)) max
+  - name: output
+    sound_type: export_wav
+    params:
+      - tmp/one_pole_one_zero_high_pass_filter.wav
+      - normalise
+root: output
