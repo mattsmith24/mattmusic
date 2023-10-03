@@ -11,6 +11,20 @@ pub struct ElementaryRecirculatingFilter {
     complex_gain: Complex<f32>
 }
 
+fn buffer_delayed_data(
+    delayed_data: &mut Vec<(Complex<f32>,Complex<f32>)>,
+    n: usize,
+    sample: (Complex<f32>,Complex<f32>)
+) {
+    // This assumes that any previous data has been buffered already and
+    // doesn't need updating. Also if we have data that has already been
+    // buffered from a previous run through of this sound, then just do
+    // nothing.
+    if delayed_data.len() == n {
+        delayed_data.push(sample);
+    }
+}
+
 impl ElementaryRecirculatingFilter {
     pub fn new(input: DynSoundSource, complex_gain: Complex<f32>) -> Self {
         ElementaryRecirculatingFilter {
@@ -35,20 +49,12 @@ impl ElementaryRecirculatingFilter {
             let delayed_input_value_1 = data.delayed_data[n as usize - 1].1;
             let output_0 = input_value_0 + delayed_input_value_0 * self.complex_gain;
             let output_1 = input_value_1 + delayed_input_value_1 * self.complex_gain;
-            if data.delayed_data.len() == n as usize {
-                data.delayed_data.push((output_0, output_1));
-            } else {
-                data.delayed_data[n as usize] = (output_0, output_1);
-            }
+            buffer_delayed_data(&mut data.delayed_data, n as usize, (output_0, output_1));
             (output_0, output_1)
         } else {
             let output = (Complex::new(real_input_value.0, 0.0), Complex::new(real_input_value.1, 0.0));
             if n == 0 {
-                if data.delayed_data.len() == 0 {
-                    data.delayed_data.push(output);
-                } else {
-                    data.delayed_data[0] = output;
-                }
+                buffer_delayed_data(&mut data.delayed_data, 0, output);
             }
             output
         }
