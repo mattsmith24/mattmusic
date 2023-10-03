@@ -29,7 +29,7 @@ sounds:
     sound_type: multiply
     params:
       - 0.0 filter
-      - dc EXPR(100.0 / CONST(sample_rate) * 2.0 * CONST(pi)) 25.0
+      - dc EXPR(100.0 / CONST(sample_rate) * 2.0 * CONST(pi)) max
   - name: output
     sound_type: export_wav
     params:

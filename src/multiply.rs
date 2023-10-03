@@ -62,6 +62,7 @@ impl SoundSource for Multiply {
 
     fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
         let mut multiply = Multiply::new();
+        let mut max_duration = 0.0;
         for param in params {
             println!("Multiply::from_yaml(param: {})", param);
             let parts: Vec<_> = param.split(" ").collect();
@@ -69,13 +70,22 @@ impl SoundSource for Multiply {
             // Otherwise we expect to see a dc offset and a source name
             if parts[0] == "dc" {
                 let val = parts[1].parse::<f32>().unwrap();
-                let duration = parts[2].parse::<f32>().unwrap() * reader.sample_rate as f32;
+                let duration: f32;
+                // If the dc component duration token is "max" then we use the
+                // running maximum duration of any previous sources.
+                if parts[2] == "max" {
+                    duration = max_duration;
+                    println!("max: duration = {}", duration);
+                } else {
+                    duration = parts[2].parse::<f32>().unwrap() * reader.sample_rate as f32;
+                }
                 let source = Box::new(DC::new(val, duration.round() as i32));
                 multiply.add(source, 0.0);
             } else {
                 let dc_offset = parts[0].parse::<f32>().unwrap();
                 let source_name = parts[1];
                 let source = reader.get_sound(source_name);
+                max_duration = max_duration.max(source.duration() as f32);
                 multiply.add(source, dc_offset);
             }
         }
