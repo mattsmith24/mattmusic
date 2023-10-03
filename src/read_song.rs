@@ -376,8 +376,11 @@ pub mod read_song {
                 if self.patch_context.active() {
                     item = self.get_patch_sound(sound_name);
                 } else {
-                    let sound_idx = self.yaml.sounds.binary_search_by_key(&sound_name, |s: &SoundItem| &s.name).unwrap();
-                    item = &self.yaml.sounds[sound_idx];
+                    if let Ok(sound_idx) = self.yaml.sounds.binary_search_by_key(&sound_name, |s: &SoundItem| &s.name) {
+                        item = &self.yaml.sounds[sound_idx];
+                    } else {
+                        panic!("get_sound: Couldn't find {}", sound_name);
+                    }
                 }
                 self.get_sound_from_type(&item.sound_type.clone(), &item.params.clone())
             }
