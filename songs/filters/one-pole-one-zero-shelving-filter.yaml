@@ -1,0 +1,46 @@
+# A one-pole, one-zero shelving filter. This will pass a low frequency gain,
+# then transition to a different gain at the transition frequency.
+
+# A high pass shelving filter is made by putting the pole and zero close to -1
+# instead of +1
+include:
+patches:
+sounds:
+  - name: input
+    sound_type: pulse_train
+    params:
+      - "1.0" # freq
+      - EXPR(1.0 / CONST(sample_rate)) # duty
+      - "5.0" # duration
+  # - name: input
+  #   sound_type: import_wav
+  #   params:
+  #     - .\wavs\84879__timkahn__what-if.wav
+  #     - cubic
+  - name: zero-filter
+    sound_type: elementary_non_recirculating_filter
+    params:
+      - input
+       # Zero at 1 - w * sqrt(gain)
+       # For high pass use w * sqrt(g) - 1
+      - EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) * 4.0^0.5)
+      - "0.0" # Zero lies on the real axis
+  - name: pole-filter
+    sound_type: elementary_recirculating_filter
+    params:
+      - zero-filter
+      # Pole is 1 - w/sqrt(gain)
+      # For high pass use w / sqrt(g) - 1
+      - EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 4.0^0.5)
+      - "0.0" # Pole lies on the real axis
+  - name: normalise
+    sound_type: multiply
+    params:
+      - 0.0 pole-filter
+      - dc 0.95 max
+  - name: output
+    sound_type: export_wav
+    params:
+      - tmp/one_pole_one_zero_shelving_filter.wav
+      - normalise
+root: output
