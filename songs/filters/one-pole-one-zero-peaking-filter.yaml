@@ -1,0 +1,57 @@
+# A one-pole, one-zero peaking filter. Gives a partial attenuation at a selected
+# center frequency.
+#
+# It's based on a shelving filter but the poles and zeros are rotated by ω to
+# set the centre frequency
+include:
+patches:
+sounds:
+  - name: input
+    sound_type: pulse_train
+    params:
+      - "1.0" # freq
+      - EXPR(1.0 / CONST(sample_rate)) # duty
+      - "5.0" # duration
+  # - name: input
+  #   sound_type: import_wav
+  #   params:
+  #     - .\wavs\84879__timkahn__what-if.wav
+  #     - cubic
+  - name: zero
+    sound_type: elementary_non_recirculating_filter
+    params:
+      - input
+      # q = 1 − d√g
+      # approximate d = β for bandwidth
+      - EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) * 0.5^0.5)
+      - EXPR(440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
+  - name: zero_conjugate
+    sound_type: elementary_non_recirculating_filter
+    params:
+      - zero
+      - EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) * 0.5^0.5)
+      - EXPR(-440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
+  - name: pole
+    sound_type: elementary_recirculating_filter
+    params:
+      - zero_conjugate
+        # p = 1 − d/√g
+      - EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 0.5^0.5)
+      - EXPR(440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
+  - name: pole_conjugate
+    sound_type: elementary_recirculating_filter
+    params:
+      - pole
+      - EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 0.5^0.5)
+      - EXPR(-440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
+  - name: normalise
+    sound_type: multiply
+    params:
+      - 0.0 pole_conjugate
+      - dc 0.95 max
+  - name: output
+    sound_type: export_wav
+    params:
+      - tmp/one_pole_one_zero_peaking_filter.wav
+      - normalise
+root: output
