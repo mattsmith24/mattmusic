@@ -2,6 +2,7 @@ pub mod traits {
 
 use std::any::Any;
 use dyn_clone::DynClone;
+use num::complex::Complex;
 
 use crate::read_song::read_song::SongReader;
 
@@ -15,6 +16,14 @@ pub trait SoundSource: DynClone {
 }
 dyn_clone::clone_trait_object!(SoundSource);
 pub type DynSoundSource = Box<dyn SoundSource + Send + Sync>;
+
+pub trait ComplexSoundSource: DynClone {
+    fn init_state(&self) -> SoundData;
+    fn next_value(&self, n: i32, state: &mut SoundData) -> (Complex::<f32>, Complex::<f32>);
+    fn duration(&self) -> i32;
+}
+dyn_clone::clone_trait_object!(ComplexSoundSource);
+pub type DynComplexSoundSource = Box<dyn ComplexSoundSource + Send + Sync>;
 
 pub trait Instrument {
     fn play(&self, freq: f32, duration: i32, strength: f32) -> DynSoundSource;

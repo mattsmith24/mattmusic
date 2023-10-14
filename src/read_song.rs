@@ -47,6 +47,7 @@ pub mod read_song {
 
     use crate::filters::elementary_non_recirculating_filter::elementary_non_recirculating_filter::ElementaryNonRecirculatingFilter;
     use crate::filters::elementary_recirculating_filter::elementary_recirculating_filter::ElementaryRecirculatingFilter;
+    use crate::filters::pole_zero_filter::pole_zero_filter::PoleZeroFilter;
 
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
     pub struct PatchItem {
@@ -326,6 +327,7 @@ pub mod read_song {
                     "oscillator" => Oscillator::from_yaml(&evaluated_params, self),
                     "pitch_shift" => PitchShift::from_yaml(&evaluated_params, self),
                     "pre_render" => PreRender::from_yaml(&evaluated_params, self),
+                    "pole_zero_filter" => PoleZeroFilter::from_yaml(&evaluated_params, self),
                     "pulse_train" => PulseTrain::from_yaml(&evaluated_params, self),
                     "ramp" => Ramp::from_yaml(&evaluated_params, self),
                     "recirculating_delay" => RecirculatingDelay::from_yaml(&evaluated_params, self),

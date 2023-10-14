@@ -17,41 +17,21 @@ sounds:
   #   params:
   #     - .\wavs\84879__timkahn__what-if.wav
   #     - cubic
-  - name: zero
-    sound_type: elementary_non_recirculating_filter
+  - name: filter
+    sound_type: pole_zero_filter
     params:
       - input
+      - "0.95"
       # q = 1 − d√g
       # approximate d = β for bandwidth
-      - EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) * 0.5^0.5)
-      - EXPR(440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
-  - name: zero_conjugate
-    sound_type: elementary_non_recirculating_filter
-    params:
-      - zero
-      - EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) * 0.5^0.5)
-      - EXPR(-440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
-  - name: pole
-    sound_type: elementary_recirculating_filter
-    params:
-      - zero_conjugate
+      - zero EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) * 0.5^0.5) EXPR(440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
+      - zero EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) * 0.5^0.5) EXPR(-440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
         # p = 1 − d/√g
-      - EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 0.5^0.5)
-      - EXPR(440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
-  - name: pole_conjugate
-    sound_type: elementary_recirculating_filter
-    params:
-      - pole
-      - EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 0.5^0.5)
-      - EXPR(-440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
-  - name: normalise
-    sound_type: multiply
-    params:
-      - 0.0 pole_conjugate
-      - dc 0.95 max
+      - pole EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 0.5^0.5) EXPR(440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
+      - pole EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 0.5^0.5) EXPR(-440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
   - name: output
     sound_type: export_wav
     params:
       - tmp/one_pole_one_zero_peaking_filter.wav
-      - normalise
+      - filter
 root: output

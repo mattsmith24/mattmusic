@@ -3,57 +3,94 @@ pub mod elementary_non_recirculating_filter {
 use num::complex::Complex;
 
 use crate::read_song::read_song::SongReader;
-use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
+use crate::traits::traits::{SoundSource, DynSoundSource, SoundData,
+    ComplexSoundSource, DynComplexSoundSource};
+use crate::filters::real_to_complex::real_to_complex::RealToComplex;
 
 #[derive(Clone)]
-pub struct ElementaryNonRecirculatingFilter {
-    input: DynSoundSource,
-    complex_gain: Complex<f32>
+pub struct ComplexElementaryNonRecirculatingFilter {
+    input: DynComplexSoundSource,
+    gain: Complex<f32>
 }
 
-impl ElementaryNonRecirculatingFilter {
-    pub fn new(input: DynSoundSource, complex_gain: Complex<f32>) -> Self {
-        ElementaryNonRecirculatingFilter {
+impl ComplexElementaryNonRecirculatingFilter {
+    pub fn new(input: DynComplexSoundSource, gain: Complex<f32>) -> Self {
+        ComplexElementaryNonRecirculatingFilter {
             input: input,
-            complex_gain: complex_gain
+            gain: gain
         }
     }
 }
 
-struct ElementaryNonRecirculatingFilterData {
+struct ComplexElementaryNonRecirculatingFilterData {
     input_data: SoundData,
     delayed_input_data: SoundData,
 }
 
-impl SoundSource for ElementaryNonRecirculatingFilter {
+impl ComplexSoundSource for ComplexElementaryNonRecirculatingFilter {
     fn init_state(&self) -> SoundData {
         Box::new(
-            ElementaryNonRecirculatingFilterData {
+            ComplexElementaryNonRecirculatingFilterData {
                 input_data: self.input.init_state(),
                 delayed_input_data: self.input.init_state(),
             }
         )
     }
 
-    fn next_value(&self, n:i32, state: &mut SoundData) -> (f32, f32) {
-        let data = &mut state.downcast_mut::<ElementaryNonRecirculatingFilterData>().unwrap();
-        let real_input_value = self.input.next_value(n, &mut data.input_data);
+    fn next_value(&self, n:i32, state: &mut SoundData) -> (Complex<f32>, Complex<f32>) {
+        let data = &mut state.downcast_mut::<ComplexElementaryNonRecirculatingFilterData>().unwrap();
+        let input_value = self.input.next_value(n, &mut data.input_data);
         if n > 0 {
-            let real_delayed_input_value = self.input.next_value(n - 1, &mut data.delayed_input_data);
-            let input_value_0 = Complex::new(real_input_value.0, 0.0);
-            let input_value_1 = Complex::new(real_input_value.1, 0.0);
-            let delayed_input_value_0 = Complex::new(real_delayed_input_value.0, 0.0);
-            let delayed_input_value_1 = Complex::new(real_delayed_input_value.1, 0.0);
-            let output_0 = input_value_0 - delayed_input_value_0 * self.complex_gain;
-            let output_1 = input_value_1 - delayed_input_value_1 * self.complex_gain;
-            (output_0.re, output_1.re)
+            let delayed_input_value = self.input.next_value(n - 1, &mut data.delayed_input_data);
+            let output_0 = input_value.0 - delayed_input_value.0 * self.gain;
+            let output_1 = input_value.1 - delayed_input_value.1 * self.gain;
+            (output_0, output_1)
         } else {
-            real_input_value
+            (input_value.0, input_value.1)
         }
     }
 
     fn duration(&self) -> i32 {
         self.input.duration()
+    }
+}
+
+
+#[derive(Clone)]
+pub struct ElementaryNonRecirculatingFilter {
+    complex_filter: ComplexElementaryNonRecirculatingFilter,
+}
+
+impl ElementaryNonRecirculatingFilter {
+    pub fn new(input: DynSoundSource, complex_gain: Complex<f32>) -> Self {
+        let complex_input = Box::new(RealToComplex::new(input));
+        ElementaryNonRecirculatingFilter {
+            complex_filter: ComplexElementaryNonRecirculatingFilter::new(complex_input, complex_gain)
+        }
+    }
+}
+
+struct ElementaryNonRecirculatingFilterData {
+    complex_filter_data: SoundData,
+}
+
+impl SoundSource for ElementaryNonRecirculatingFilter {
+    fn init_state(&self) -> SoundData {
+        Box::new(
+            ElementaryNonRecirculatingFilterData {
+                complex_filter_data: self.complex_filter.init_state(),
+            }
+        )
+    }
+
+    fn next_value(&self, n:i32, state: &mut SoundData) -> (f32, f32) {
+        let data = &mut state.downcast_mut::<ElementaryNonRecirculatingFilterData>().unwrap();
+        let output = self.complex_filter.next_value(n, &mut data.complex_filter_data);
+        (output.0.re, output.1.re)
+    }
+
+    fn duration(&self) -> i32 {
+        self.complex_filter.duration()
     }
 
     fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
