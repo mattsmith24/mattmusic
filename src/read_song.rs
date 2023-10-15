@@ -45,6 +45,7 @@ pub mod read_song {
     use crate::uneven_delay::uneven_delay::UnevenDelay;
     use crate::wavetable::wavetable::Wavetable;
 
+    use crate::filters::butterworth_filter::butterworth_filter::ButterworthFilter;
     use crate::filters::elementary_non_recirculating_filter::elementary_non_recirculating_filter::ElementaryNonRecirculatingFilter;
     use crate::filters::elementary_recirculating_filter::elementary_recirculating_filter::ElementaryRecirculatingFilter;
     use crate::filters::pole_zero_filter::pole_zero_filter::PoleZeroFilter;
@@ -271,7 +272,16 @@ pub mod read_song {
                     idx += 1;
                 }
                 end_pos = idx - 1; // Don't include the last bracket. We also skip the first bracket in the next line
-                let eval: f32 = evalexpr::eval_float(&param_str[start_pos + 5..end_pos]).unwrap() as f32;
+                let context = evalexpr::context_map! {
+                    "tan" => Function::new(|argument| {
+                        if let Ok(float) = argument.as_float() {
+                            Ok(evalexpr::Value::Float(float.tan()))
+                        } else {
+                            Err(evalexpr::EvalexprError::expected_float(argument.clone()))
+                        }
+                    }),
+                }.unwrap(); // Do proper error handling here
+                let eval: f32 = evalexpr::eval_float_with_context(&param_str[start_pos + 5..end_pos], &context).unwrap() as f32;
                 evaluated_param = param_str[0..start_pos].to_string() // prefix
                     + &eval.to_string() // replace EXPR(blah) with evaluated expression
                     + &self.evaluate_params_in_str(&param_str[end_pos+1..]); // evaluate any other params in the string
@@ -306,6 +316,7 @@ pub mod read_song {
                 match sound_type {
                     "buffer_reader" => BufferReader::from_yaml(&evaluated_params, self),
                     "buffer_writer" => BufferWriter::from_yaml(&evaluated_params, self),
+                    "butterworth_filter" => ButterworthFilter::from_yaml(&evaluated_params, self),
                     "cauchy_transfer" => CauchyTransfer::from_yaml(&evaluated_params, self),
                     "clip" => Clip::from_yaml(&evaluated_params, self),
                     "cos_transfer" => CosTransfer::from_yaml(&evaluated_params, self),

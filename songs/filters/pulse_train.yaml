@@ -1,0 +1,23 @@
+# This is a reference for comparing filters. The pulse train is used as an input
+# to filters to see the response
+#
+# In audacity, the "analyse" spectrum plot with Hann window size of 32768 shows
+# this as a smooth line from -74dB to -75dB at 7800Hz, -76dB at 11200Hz, -77dB
+# at 13700Hz to -81dB at 22000Hz. If you then analyse the output of a filter
+# that used the pulse train as an input, you can see where it deviates from that
+# curve.
+include:
+patches:
+sounds:
+  - name: input
+    sound_type: pulse_train
+    params:
+      - "1.0" # freq
+      - EXPR(1.0 / CONST(sample_rate)) # duty
+      - "5.0" # duration
+  - name: output
+    sound_type: export_wav
+    params:
+      - tmp/pulse_train.wav
+      - input
+root: output
