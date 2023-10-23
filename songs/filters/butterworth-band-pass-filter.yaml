@@ -1,0 +1,31 @@
+# A butterworth band-pass filter. This is a transform based off the Butterworth
+# low-pass filter
+include:
+patches:
+sounds:
+  - name: input
+    sound_type: pulse_train
+    params:
+      - "1.0" # freq
+      - EXPR(1.0 / CONST(sample_rate)) # duty
+      - "5.0" # duration
+  # - name: input
+  #   sound_type: import_wav
+  #   params:
+  #     - .\wavs\84879__timkahn__what-if.wav
+  #     - cubic
+  - name: filter
+    sound_type: butterworth_bandpass_filter
+    params:
+      - input
+      - "1.0E-6" # normalize
+      - "2" # n
+      - EXPR(tan(110.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 2.0)) # pole_r
+      - EXPR(10.0^15.0) # zero_r (puts zero at -1)
+      - "440.0" # center frequency
+  - name: output
+    sound_type: export_wav
+    params:
+      - tmp/butterworth_band_pass_filter.wav
+      - filter
+root: output

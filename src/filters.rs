@@ -1,3 +1,4 @@
+pub mod butterworth_bandpass_filter;
 pub mod butterworth_filter;
 pub mod elementary_non_recirculating_filter;
 pub mod elementary_recirculating_filter;

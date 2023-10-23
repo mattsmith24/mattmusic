@@ -11,7 +11,7 @@ pub struct ButterworthFilter {
     filter: PoleZeroFilter,
 }
 
-fn transform_pole_or_zero(num_points: usize, r: f32) -> Vec<Complex<f32>> {
+pub fn transform_pole_or_zero(num_points: usize, r: f32) -> Vec<Complex<f32>> {
     let mut res = Vec::<Complex::<f32>>::new();
     println!("r: {}", r);
     // This maths comes from The Theory and Technique of Electronic Music by
@@ -28,7 +28,7 @@ fn transform_pole_or_zero(num_points: usize, r: f32) -> Vec<Complex<f32>> {
         println!("alpha: {}", alpha);
         let point = Complex::new((1.0 - r.powf(2.0)) / (1.0 + r.powf(2.0) + 2.0 * r * alpha.cos()),
             (-2.0 * r * alpha.sin()) / (1.0 + r.powf(2.0) + 2.0 * r * alpha.cos()));
-        println!("point: {}, {}", point.re, point.im);
+        println!("point: {}", point);
         res.push(point);
     }
     res

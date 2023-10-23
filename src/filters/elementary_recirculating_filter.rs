@@ -13,20 +13,6 @@ pub struct ComplexElementaryRecirculatingFilter {
     gain: Complex<f32>
 }
 
-fn buffer_recirculating_data(
-    recirculating_data: &mut Vec<(Complex<f32>,Complex<f32>)>,
-    n: usize,
-    sample: (Complex<f32>,Complex<f32>)
-) {
-    // This assumes that any previous data has been buffered already and
-    // doesn't need updating. Also if we have data that has already been
-    // buffered from a previous run through of this sound, then just do
-    // nothing.
-    if recirculating_data.len() == n {
-        recirculating_data.push(sample);
-    }
-}
-
 impl ComplexElementaryRecirculatingFilter {
     pub fn new(input: DynComplexSoundSource, gain: Complex<f32>) -> Self {
         ComplexElementaryRecirculatingFilter {
@@ -38,7 +24,8 @@ impl ComplexElementaryRecirculatingFilter {
 
 struct ComplexElementaryRecirculatingFilterData {
     input_data: SoundData,
-    recirculating_data: Vec<(Complex<f32>,Complex<f32>)>
+    prev_sample: (Complex<f32>, Complex<f32>),
+    prev_sample_number: i32,
 }
 
 impl ComplexSoundSource for ComplexElementaryRecirculatingFilter {
@@ -46,7 +33,8 @@ impl ComplexSoundSource for ComplexElementaryRecirculatingFilter {
         Box::new(
             ComplexElementaryRecirculatingFilterData {
                 input_data: self.input.init_state(),
-                recirculating_data: Vec::<(Complex<f32>,Complex<f32>)>::new(),
+                prev_sample: (Complex::new(0.0, 0.0), Complex::new(0.0, 0.0)),
+                prev_sample_number: -1,
             }
         )
     }
@@ -55,26 +43,39 @@ impl ComplexSoundSource for ComplexElementaryRecirculatingFilter {
         let data = state.downcast_mut::<ComplexElementaryRecirculatingFilterData>().unwrap();
         let input_value = self.input.next_value(n, &mut data.input_data);
         if n > 0 {
-            // Handle case where previous values haven't been processed.
+            // Handle cases where the playback is out-of-order.
             // Sometimes sound sources higher up might start playing a sound
             // part way through in which case we won't have a previous sample
             // already buffered.
-            if data.recirculating_data.len() < n as usize {
-                for n1 in (data.recirculating_data.len() as i32)..n {
-                    _ = self.next_value(n1, state);
+            if data.prev_sample_number == n {
+                // We're repeating the previous sample
+                data.prev_sample
+            } else {
+                if data.prev_sample_number < n - 1 {
+                    // We've skipped forwards
+                    for n1 in (data.prev_sample_number+1)..n {
+                        _ = self.next_value(n1, state);
+                    }
                 }
+                else if data.prev_sample_number > n {
+                    // We've gone backwards
+                    for n1 in 0..n {
+                        _ = self.next_value(n1, state);
+                    }
+                }
+                // We have to reborrow state because we might have just updated it in the above loop
+                let data = state.downcast_mut::<ComplexElementaryRecirculatingFilterData>().unwrap();
+                let output_0 = input_value.0 + data.prev_sample.0 * self.gain;
+                let output_1 = input_value.1 + data.prev_sample.1 * self.gain;
+                data.prev_sample = (output_0, output_1);
+                data.prev_sample_number = n;
+                (output_0, output_1)
             }
-            // We have to reborrow state because we might have just updated it in the above loop
-            let data = state.downcast_mut::<ComplexElementaryRecirculatingFilterData>().unwrap();
-            let delayed_input_value = data.recirculating_data[n as usize - 1];
-            let output_0 = input_value.0 + delayed_input_value.0 * self.gain;
-            let output_1 = input_value.1 + delayed_input_value.1 * self.gain;
-            buffer_recirculating_data(&mut data.recirculating_data, n as usize, (output_0, output_1));
-            (output_0, output_1)
         } else {
             let output = input_value;
             if n == 0 {
-                buffer_recirculating_data(&mut data.recirculating_data, 0, output);
+                data.prev_sample = output;
+                data.prev_sample_number = n;
             }
             output
         }
