@@ -26,11 +26,11 @@ sounds:
       # g = gain in the peak
       # q = 1 − d√g
       # approximate d = β for bandwidth
-      - zero EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) * 0.5^0.5) EXPR(440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
-      - zero EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) * 0.5^0.5) EXPR(-440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
+      - zero,EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) * 0.5^0.5),EXPR(440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
+      - zero,EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) * 0.5^0.5),EXPR(-440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
         # p = 1 − d/√g
-      - pole EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 0.5^0.5) EXPR(440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
-      - pole EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 0.5^0.5) EXPR(-440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
+      - pole,EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 0.5^0.5),EXPR(440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
+      - pole,EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 0.5^0.5),EXPR(-440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
   - name: output
     sound_type: export_wav
     params:

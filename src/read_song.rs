@@ -140,7 +140,6 @@ pub mod read_song {
     impl SongReader {
 
         fn parse_knob(&mut self, knob_val: &str, dc_scale: f32) -> DynSoundSource {
-            println!("parse_knob({})", knob_val);
             let char1 = knob_val.chars().nth(0).unwrap();
             let note_range = 'A'..'H'; // doesn't include H
             if  note_range.contains(&char1) && knob_val.len() <= 3 {
@@ -264,11 +263,9 @@ pub mod read_song {
             let evaluated_param: String;
             let mut has_expr = false;
             let mut start_pos: usize = 0;
-            if param_str.starts_with("EXPR(") {
+            if param_str.contains("EXPR(") {
                 has_expr = true;
-            } else if param_str.contains(" EXPR(") {
-                has_expr = true;
-                start_pos = param_str.find(" EXPR(").unwrap() + 1;
+                start_pos = param_str.find("EXPR(").unwrap();
             }
             if has_expr {
                 // find end_pos

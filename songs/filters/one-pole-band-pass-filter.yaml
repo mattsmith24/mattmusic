@@ -23,8 +23,8 @@ sounds:
       # β ∗ (β + 2ω)
       - EXPR(100.0 * (100.0 + 2 * 440.0) / CONST(sample_rate)^2.0 * 4.0 * CONST(pi)^2.0)
       # 1 - β ,ω
-      - pole EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi)) EXPR(440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
-      - pole EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi)) EXPR(-440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
+      - pole,EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi)),EXPR(440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
+      - pole,EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi)),EXPR(-440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
   - name: output
     sound_type: export_wav
     params:

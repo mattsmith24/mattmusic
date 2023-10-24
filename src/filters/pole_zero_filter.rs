@@ -1,7 +1,5 @@
 pub mod pole_zero_filter {
 
-use num::complex::Complex;
-
 use crate::traits::traits::{SoundSource, DynSoundSource, DynComplexSoundSource, SoundData};
 use crate::read_song::read_song::SongReader;
 use crate::dc::dc::DC;
@@ -67,18 +65,12 @@ impl SoundSource for PoleZeroFilter {
         let mut zeros = Vec::<ComplexKnob>::new();
         for idx in 2..params.len() {
             let param = &params[idx];
-            let parts: Vec<_> = param.split(" ").collect();
-            if parts.len() != 3 {
-                panic!("PoleZeroFilter::from_yaml() param expected to be <pole|zero> <magnitude> <angle>. Instead got '{}'",
-                    param);
-            }
-            let param_type = parts[0];
-            let magnitude = parts[1].parse::<f32>().unwrap();
-            let angle = parts[2].parse::<f32>().unwrap();
-            let complex = Complex::from_polar(magnitude, angle);
+            let mut split = param.split(",");
+            let param_type = split.next().unwrap();
+            let point = reader.get_complex_knob(&(split.next().unwrap().to_owned()+","+split.next().unwrap()));
             match param_type {
-                "pole" => poles.push(ComplexKnob::dc(complex)),
-                "zero" => zeros.push(ComplexKnob::dc(complex)),
+                "pole" => poles.push(point),
+                "zero" => zeros.push(point),
                 &_ => panic!("PoleZeroFilter::from_yaml() param type expected to be 'pole' or 'zero'. Got '{}'", param_type)
             }
         }
