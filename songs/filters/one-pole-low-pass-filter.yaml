@@ -23,8 +23,7 @@ sounds:
     sound_type: elementary_recirculating_filter
     params:
       - input
-      - EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi)) # pole calculated from half-power point
-      - "0.0" # Pole lies on the real axis
+      - EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi)),0.0 # pole calculated from half-power point
   - name: normalise
     sound_type: multiply
     params:

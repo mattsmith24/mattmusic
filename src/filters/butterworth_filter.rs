@@ -4,6 +4,7 @@ use num::complex::Complex;
 
 use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 use crate::read_song::read_song::SongReader;
+use crate::knob::knob::ComplexKnob;
 use crate::filters::pole_zero_filter::pole_zero_filter::PoleZeroFilter;
 
 #[derive(Clone)]
@@ -39,8 +40,17 @@ impl ButterworthFilter {
     {
         let poles = transform_pole_or_zero(num_points, pole_r);
         let zeros = transform_pole_or_zero(num_points, zero_r);
+        // Create dc knobs
+        let mut pole_knobs = Vec::<ComplexKnob>::new();
+        for pole in &poles {
+            pole_knobs.push(ComplexKnob::dc(pole.clone()));
+        }
+        let mut zero_knobs = Vec::<ComplexKnob>::new();
+        for zero in &zeros {
+            zero_knobs.push(ComplexKnob::dc(zero.clone()));
+        }
         ButterworthFilter {
-            filter: PoleZeroFilter::new(input, poles, zeros, normalize),
+            filter: PoleZeroFilter::new(input, pole_knobs, zero_knobs, normalize),
         }
     }
 }

@@ -23,16 +23,14 @@ sounds:
       - input
        # Zero at 1 - w * sqrt(gain)
        # For high pass use w * sqrt(g) - 1
-      - EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) * 4.0^0.5)
-      - "0.0" # Zero lies on the real axis
+      - EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) * 4.0^0.5),0.0
   - name: pole-filter
     sound_type: elementary_recirculating_filter
     params:
       - zero-filter
       # Pole is 1 - w/sqrt(gain)
       # For high pass use w / sqrt(g) - 1
-      - EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 4.0^0.5)
-      - "0.0" # Pole lies on the real axis
+      - EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 4.0^0.5),0.0
   - name: normalise
     sound_type: multiply
     params:

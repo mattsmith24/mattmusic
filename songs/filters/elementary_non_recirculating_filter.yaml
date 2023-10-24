@@ -11,8 +11,7 @@ sounds:
     sound_type: elementary_non_recirculating_filter
     params:
       - pulses
-      - "0.5"
-      - "-2.0"
+      - "0.5,-2.0"
   - name: output
     sound_type: export_wav
     params:

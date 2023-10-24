@@ -5,16 +5,18 @@ use num::complex::Complex;
 use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource, SoundData,
     ComplexSoundSource, DynComplexSoundSource};
+use crate::dc::dc::DC;
+use crate::knob::knob::ComplexKnob;
 use crate::filters::real_to_complex::real_to_complex::RealToComplex;
 
 #[derive(Clone)]
 pub struct ComplexElementaryRecirculatingFilter {
     input: DynComplexSoundSource,
-    gain: Complex<f32>
+    gain: ComplexKnob,
 }
 
 impl ComplexElementaryRecirculatingFilter {
-    pub fn new(input: DynComplexSoundSource, gain: Complex<f32>) -> Self {
+    pub fn new(input: DynComplexSoundSource, gain: ComplexKnob) -> Self {
         ComplexElementaryRecirculatingFilter {
             input: input,
             gain: gain
@@ -26,6 +28,7 @@ struct ComplexElementaryRecirculatingFilterData {
     input_data: SoundData,
     prev_sample: (Complex<f32>, Complex<f32>),
     prev_sample_number: i32,
+    gain_data: SoundData,
 }
 
 impl ComplexSoundSource for ComplexElementaryRecirculatingFilter {
@@ -35,6 +38,7 @@ impl ComplexSoundSource for ComplexElementaryRecirculatingFilter {
                 input_data: self.input.init_state(),
                 prev_sample: (Complex::new(0.0, 0.0), Complex::new(0.0, 0.0)),
                 prev_sample_number: -1,
+                gain_data: self.gain.init_state(),
             }
         )
     }
@@ -65,8 +69,9 @@ impl ComplexSoundSource for ComplexElementaryRecirculatingFilter {
                 }
                 // We have to reborrow state because we might have just updated it in the above loop
                 let data = state.downcast_mut::<ComplexElementaryRecirculatingFilterData>().unwrap();
-                let output_0 = input_value.0 + data.prev_sample.0 * self.gain;
-                let output_1 = input_value.1 + data.prev_sample.1 * self.gain;
+                let gain = self.gain.next_value(n, &mut data.gain_data);
+                let output_0 = input_value.0 + data.prev_sample.0 * gain;
+                let output_1 = input_value.1 + data.prev_sample.1 * gain;
                 data.prev_sample = (output_0, output_1);
                 data.prev_sample_number = n;
                 (output_0, output_1)
@@ -95,8 +100,9 @@ pub struct ElementaryRecirculatingFilter {
 
 
 impl ElementaryRecirculatingFilter {
-    pub fn new(input: DynSoundSource, complex_gain: Complex<f32>) -> Self {
-        let complex_input = Box::new(RealToComplex::new(input));
+    pub fn new(input: DynSoundSource, complex_gain: ComplexKnob) -> Self {
+        let duration = input.duration();
+        let complex_input = Box::new(RealToComplex::new(input, Box::new(DC::new(0.0, duration))));
         ElementaryRecirculatingFilter {
             complex_filter: ComplexElementaryRecirculatingFilter::new(complex_input, complex_gain),
         }
@@ -128,9 +134,7 @@ impl SoundSource for ElementaryRecirculatingFilter {
 
     fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
         let input = reader.get_sound(&params[0]);
-        let complex_gain_magnitude = params[1].parse::<f32>().unwrap();
-        let complex_gain_angle = params[2].parse::<f32>().unwrap();
-        let complex_gain = Complex::from_polar(complex_gain_magnitude, complex_gain_angle);
+        let complex_gain = reader.get_complex_knob(&params[1]);
         Box::new(ElementaryRecirculatingFilter::new(input, complex_gain))
     }
 }

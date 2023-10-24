@@ -11,8 +11,7 @@ sounds:
     sound_type: elementary_recirculating_filter
     params:
       - pulses # input
-      - "0.9" # gain magnitude (stable for values < 1.0)
-      - "-2.0" # gain angle
+      - "0.8,-1.0" # gain (stable for |values| < 1.0)
   - name: output
     sound_type: export_wav
     params:

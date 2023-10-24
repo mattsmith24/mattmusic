@@ -5,16 +5,19 @@ use num::complex::Complex;
 use crate::read_song::read_song::SongReader;
 use crate::traits::traits::{SoundSource, DynSoundSource, SoundData,
     ComplexSoundSource, DynComplexSoundSource};
+use crate::dc::dc::DC;
+use crate::knob::knob::ComplexKnob;
 use crate::filters::real_to_complex::real_to_complex::RealToComplex;
+
 
 #[derive(Clone)]
 pub struct ComplexElementaryNonRecirculatingFilter {
     input: DynComplexSoundSource,
-    gain: Complex<f32>
+    gain: ComplexKnob,
 }
 
 impl ComplexElementaryNonRecirculatingFilter {
-    pub fn new(input: DynComplexSoundSource, gain: Complex<f32>) -> Self {
+    pub fn new(input: DynComplexSoundSource, gain: ComplexKnob) -> Self {
         ComplexElementaryNonRecirculatingFilter {
             input: input,
             gain: gain
@@ -25,6 +28,7 @@ impl ComplexElementaryNonRecirculatingFilter {
 struct ComplexElementaryNonRecirculatingFilterData {
     input_data: SoundData,
     delayed_input_data: SoundData,
+    gain_data: SoundData,
 }
 
 impl ComplexSoundSource for ComplexElementaryNonRecirculatingFilter {
@@ -33,6 +37,7 @@ impl ComplexSoundSource for ComplexElementaryNonRecirculatingFilter {
             ComplexElementaryNonRecirculatingFilterData {
                 input_data: self.input.init_state(),
                 delayed_input_data: self.input.init_state(),
+                gain_data: self.gain.init_state(),
             }
         )
     }
@@ -42,8 +47,9 @@ impl ComplexSoundSource for ComplexElementaryNonRecirculatingFilter {
         let input_value = self.input.next_value(n, &mut data.input_data);
         if n > 0 {
             let delayed_input_value = self.input.next_value(n - 1, &mut data.delayed_input_data);
-            let output_0 = input_value.0 - delayed_input_value.0 * self.gain;
-            let output_1 = input_value.1 - delayed_input_value.1 * self.gain;
+            let gain = self.gain.next_value(n, &mut data.gain_data);
+            let output_0 = input_value.0 - delayed_input_value.0 * gain;
+            let output_1 = input_value.1 - delayed_input_value.1 * gain;
             (output_0, output_1)
         } else {
             (input_value.0, input_value.1)
@@ -62,8 +68,9 @@ pub struct ElementaryNonRecirculatingFilter {
 }
 
 impl ElementaryNonRecirculatingFilter {
-    pub fn new(input: DynSoundSource, complex_gain: Complex<f32>) -> Self {
-        let complex_input = Box::new(RealToComplex::new(input));
+    pub fn new(input: DynSoundSource, complex_gain: ComplexKnob) -> Self {
+        let duration = input.duration();
+        let complex_input = Box::new(RealToComplex::new(input, Box::new(DC::new(0.0, duration))));
         ElementaryNonRecirculatingFilter {
             complex_filter: ComplexElementaryNonRecirculatingFilter::new(complex_input, complex_gain)
         }
@@ -95,9 +102,7 @@ impl SoundSource for ElementaryNonRecirculatingFilter {
 
     fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
         let input = reader.get_sound(&params[0]);
-        let complex_gain_magnitude = params[1].parse::<f32>().unwrap();
-        let complex_gain_angle = params[2].parse::<f32>().unwrap();
-        let complex_gain = Complex::from_polar(complex_gain_magnitude, complex_gain_angle);
+        let complex_gain = reader.get_complex_knob(&params[1]);
         Box::new(ElementaryNonRecirculatingFilter::new(input, complex_gain))
     }
 }

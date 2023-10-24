@@ -18,14 +18,12 @@ sounds:
     sound_type: elementary_non_recirculating_filter
     params:
       - input
-      - "1.0" # Zero at magnitude 1
-      - "0.0" # Zero lies on the real axis
+      - "1.0,0.0" # Zero at magnitude 1
   - name: pole-filter
     sound_type: elementary_recirculating_filter
     params:
       - zero-filter
-      - EXPR(1.0 - 30.0 / CONST(sample_rate) * 2.0 * CONST(pi)) # pole calculated from half-power point
-      - "0.0" # Pole lies on the real axis
+      - EXPR(1.0 - 30.0 / CONST(sample_rate) * 2.0 * CONST(pi)),0.0 # pole calculated from half-power point
   - name: normalise
     sound_type: multiply
     params:

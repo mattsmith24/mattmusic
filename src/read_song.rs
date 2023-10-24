@@ -7,7 +7,7 @@ pub mod read_song {
     use evalexpr;
 
     use crate::traits::traits::{DynSoundSource, SoundSource};
-    use crate::knob::knob::Knob;
+    use crate::knob::knob::{Knob, ComplexKnob};
     use crate::midi_notes::midi_notes::{midistr2freq, midi2freq};
 
     use crate::buffer_reader::buffer_reader::BufferReader;
@@ -50,6 +50,7 @@ pub mod read_song {
     use crate::filters::elementary_non_recirculating_filter::elementary_non_recirculating_filter::ElementaryNonRecirculatingFilter;
     use crate::filters::elementary_recirculating_filter::elementary_recirculating_filter::ElementaryRecirculatingFilter;
     use crate::filters::pole_zero_filter::pole_zero_filter::PoleZeroFilter;
+    use crate::filters::real_to_complex::real_to_complex::RealToComplex;
 
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
     pub struct PatchItem {
@@ -138,25 +139,38 @@ pub mod read_song {
 
     impl SongReader {
 
-        pub fn get_knob(&mut self, knob_val: &str, dc_scale: f32) -> Knob {
-            println!("get_knob({})", knob_val);
+        fn parse_knob(&mut self, knob_val: &str, dc_scale: f32) -> DynSoundSource {
+            println!("parse_knob({})", knob_val);
             let char1 = knob_val.chars().nth(0).unwrap();
             let note_range = 'A'..'H'; // doesn't include H
             if  note_range.contains(&char1) && knob_val.len() <= 3 {
-                Knob::dc(midistr2freq(knob_val) * dc_scale)
+                Box::new(DC::new(midistr2freq(knob_val) * dc_scale, core::i32::MAX))
             } else {
                 let int_parse = knob_val.parse::<i8>();
                 match int_parse {
-                    Ok(i) => Knob::dc(midi2freq(i) * dc_scale),
+                    Ok(i) => Box::new(DC::new(midi2freq(i) * dc_scale, core::i32::MAX)),
                     Err(_) => {
                         let float_parse = knob_val.parse::<f32>();
                         match float_parse {
-                            Ok(f) => Knob::dc(f * dc_scale),
-                            Err(_) => Knob::new(self.get_sound(knob_val)),
+                            Ok(f) => Box::new(DC::new(f * dc_scale, core::i32::MAX)),
+                            Err(_) => self.get_sound(knob_val),
                         }
                     }
                 }
             }
+        }
+
+        pub fn get_knob(&mut self, knob_val: &str, dc_scale: f32) -> Knob {
+            println!("get_knob({})", knob_val);
+            Knob::new(self.parse_knob(knob_val, dc_scale))
+        }
+
+        pub fn get_complex_knob(&mut self, knob_val: &str) -> ComplexKnob {
+            println!("get_complex_knob({})", knob_val);
+            let parts: Vec<_> = knob_val.split(",").collect();
+            let magnitude = self.parse_knob(&parts[0], 1.0);
+            let angle = self.parse_knob(&parts[1], 1.0);
+            ComplexKnob::new(Box::new(RealToComplex::new(magnitude, angle)))
         }
 
         fn get_patch(&mut self, patch_str: &str, params: &Vec::<String>) -> DynSoundSource {
