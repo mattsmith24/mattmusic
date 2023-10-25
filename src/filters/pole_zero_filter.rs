@@ -15,12 +15,12 @@ pub struct PoleZeroFilter {
 }
 
 impl PoleZeroFilter {
-    pub fn new(input: DynSoundSource, poles: Vec<ComplexKnob>, zeros: Vec<ComplexKnob>, normalize: f32) -> Self
+    pub fn new(input: DynSoundSource, normalize: DynSoundSource, poles: Vec<ComplexKnob>, zeros: Vec<ComplexKnob>) -> Self
     {
         let duration = input.duration();
         let mut normalize_input = Multiply::new();
         normalize_input.add(input, 0.0);
-        normalize_input.add(Box::new(DC::new(normalize, duration)), 0.0);
+        normalize_input.add(normalize, 0.0);
         let mut filter: DynComplexSoundSource = Box::new(RealToComplex::new(Box::new(normalize_input),
             Box::new(DC::new(0.0, duration))));
         for pole in &poles {
@@ -60,7 +60,12 @@ impl SoundSource for PoleZeroFilter {
 
     fn from_yaml(params: &Vec::<String>, reader: &mut SongReader) -> DynSoundSource {
         let input = reader.get_sound(&params[0]);
-        let normalize = params[1].parse::<f32>().unwrap();
+        let normalize: DynSoundSource;
+        if let Ok(normalize_dc) = params[1].parse::<f32>() {
+            normalize = Box::new(DC::new(normalize_dc, input.duration()));
+        } else {
+            normalize = reader.get_sound(&params[1]);
+        }
         let mut poles = Vec::<ComplexKnob>::new();
         let mut zeros = Vec::<ComplexKnob>::new();
         for idx in 2..params.len() {
@@ -74,7 +79,7 @@ impl SoundSource for PoleZeroFilter {
                 &_ => panic!("PoleZeroFilter::from_yaml() param type expected to be 'pole' or 'zero'. Got '{}'", param_type)
             }
         }
-        Box::new(PoleZeroFilter::new(input, poles, zeros, normalize))
+        Box::new(PoleZeroFilter::new(input, normalize, poles, zeros))
     }
 }
 

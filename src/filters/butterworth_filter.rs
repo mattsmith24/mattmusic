@@ -5,6 +5,7 @@ use num::complex::Complex;
 use crate::traits::traits::{SoundSource, DynSoundSource, SoundData};
 use crate::read_song::read_song::SongReader;
 use crate::knob::knob::ComplexKnob;
+use crate::dc::dc::DC;
 use crate::filters::pole_zero_filter::pole_zero_filter::PoleZeroFilter;
 
 #[derive(Clone)]
@@ -49,8 +50,10 @@ impl ButterworthFilter {
         for zero in &zeros {
             zero_knobs.push(ComplexKnob::dc(zero.clone()));
         }
+        let duration = input.duration();
+        let normalize_dc = Box::new(DC::new(normalize, duration));
         ButterworthFilter {
-            filter: PoleZeroFilter::new(input, pole_knobs, zero_knobs, normalize),
+            filter: PoleZeroFilter::new(input, normalize_dc, pole_knobs, zero_knobs),
         }
     }
 }

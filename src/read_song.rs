@@ -228,6 +228,7 @@ pub mod read_song {
             match const_name {
                 "sample_rate" => format!("{}", self.sample_rate),
                 "pi" => format!("{}", std::f32::consts::PI),
+                "max_int32" => format!("{}", core::i32::MAX),
                 _ => panic!("Unknown const '{}'", const_name)
             }
         }
