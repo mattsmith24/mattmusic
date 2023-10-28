@@ -26,7 +26,7 @@ sounds:
       # audacity shows when I analyse a pulse train.
       - "9.5E-1" # normalize
       - "4" # n
-      - EXPR(tan(440.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 2.0)) # pole_r
+      - EXPR(math::tan(440.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 2.0)) # pole_r
       # To put the zero at positive one, the zero = (1 - r^2) / (1 + r)^2. So if
       # r=0, then the zero point = 1
       - "0.0" # zero_r (puts zero at +1)

@@ -26,7 +26,7 @@ sounds:
       # audacity shows when I analyse a pulse train.
       - "0.00000063" # normalize
       - "4" # n
-      - EXPR(tan(440.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 2.0)) # pole_r
+      - EXPR(math::tan(440.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 2.0)) # pole_r
       - EXPR(10.0^10.0) # zero_r (puts zero at -1)
   - name: output
     sound_type: export_wav

@@ -20,7 +20,7 @@ sounds:
       - input
       - "2.8E-3" # normalize
       - "2" # n
-      - EXPR(tan(10000.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 2.0)) # pole_r
+      - EXPR(math::tan(10000.0 / CONST(sample_rate) * 2.0 * CONST(pi) / 2.0)) # pole_r
       - EXPR(10.0^15.0) # zero_r (puts zero at -1)
       - "440.0" # center frequency
   - name: output

@@ -286,11 +286,11 @@ pub mod read_song {
                 }
                 end_pos = idx - 1; // Don't include the last bracket. We also skip the first bracket in the next line
                 let context = evalexpr::context_map! {
-                    "tan" => Function::new(|argument| {
-                        if let Ok(float) = argument.as_float() {
-                            Ok(evalexpr::Value::Float(float.tan()))
+                    "midi2freq" => Function::new(|argument| {
+                        if let Ok(val) = argument.as_int() {
+                            Ok(evalexpr::Value::Float(midi2freq(val as i8).into()))
                         } else {
-                            Err(evalexpr::EvalexprError::expected_float(argument.clone()))
+                            Err(evalexpr::EvalexprError::expected_int(argument.clone()))
                         }
                     }),
                 }.unwrap(); // Do proper error handling here
