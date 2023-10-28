@@ -1,0 +1,101 @@
+# A simulated voltage controlled filter (pole_zero_filter) is varied by an ADSR
+# (attack, delay, sustain, release) aka envelope to change the brightness of the
+# notes being played by the instrument. This gives the instrument more dynamics.
+include:
+patches:
+  # INPUT(0) midi pitch
+  - name: instrument
+    root: instrument1
+    sounds:
+      - name: instrument1
+        sound_type: multiply
+        params:
+          - 0.0 filter
+          - 0.0 envelope
+      - name: filter
+        sound_type: pole_zero_filter
+        params:
+          - tone1
+          - normalize
+          - pole,pole,0.0
+      - name: tone1
+        sound_type: time_box
+        params:
+          - "0.4"
+          - tone
+      - name: tone
+        sound_type: saw
+        params:
+          - EXPR(midi2freq(INPUT(0)))
+          - "0.5"
+          - "0.4"
+      - name: normalize
+        sound_type: multiply
+        params:
+          - 0.0 pole1
+          - dc -1.0 max
+      - name: pole1
+        sound_type: multiply
+        params:
+          - 0.0 envelope
+          - dc EXPR(-1000.0 / CONST(sample_rate) * 2.0 * CONST(pi)) max
+      - name: pole
+        sound_type: mix
+        params:
+          - pole1
+          - dc 1.0 max
+      - name: envelope
+        sound_type: envelope
+        params:
+          - 0.200 1.0
+          - 0.100 1.0
+          - 0.100 0.0
+
+sounds:
+  - name: play58
+    sound_type: patch instrument
+    params:
+      - "58"
+  - name: play63
+    sound_type: patch instrument
+    params:
+      - "63"
+  - name: play70
+    sound_type: patch instrument
+    params:
+      - "70"
+  - name: play72
+    sound_type: patch instrument
+    params:
+      - "72"
+  - name: play65
+    sound_type: patch instrument
+    params:
+      - "65"
+  - name: play60
+    sound_type: patch instrument
+    params:
+      - "60"
+  - name: play67
+    sound_type: patch instrument
+    params:
+      - "67"
+  - name: play62
+    sound_type: patch instrument
+    params:
+      - "62"
+  - name: sequence1
+    sound_type: sequence
+    params:
+      - "10"
+      - "4.0"
+      - "0.0 play58"
+      - "0.5 play63"
+      - "1.0 play70"
+      - "1.5 play72"
+      - "2.0 play65"
+      - "2.5 play60"
+      - "3.0 play67"
+      - "3.5 play62"
+
+root: sequence1
