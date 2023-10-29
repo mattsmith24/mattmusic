@@ -1,0 +1,33 @@
+# An envelope follower provides a waveform that represents the power of the
+# input. It is implemented using the square of the input and a low pass filter
+# to get a kind of RMS output. The output doesn't sound like anything useful but
+# it can be used to control other effects based of the input signal's power
+include:
+patches:
+sounds:
+  - name: input
+    sound_type: import_wav
+    params:
+      - .\wavs\84879__timkahn__what-if.wav
+      - cubic
+  - name: square
+    sound_type: multiply
+    params:
+      - 0.0 input
+      - 0.0 input
+  - name: filter
+    sound_type: elementary_recirculating_filter
+    params:
+      - square
+      - EXPR(1.0 - 10.0 / CONST(sample_rate) * 2.0 * CONST(pi)),0.0
+  - name: normalise
+    sound_type: multiply
+    params:
+      - 0.0 filter
+      - dc EXPR(10.0 / CONST(sample_rate) * 2.0 * CONST(pi)) max
+  - name: output
+    sound_type: export_wav
+    params:
+      - tmp/envelope_follower.wav
+      - normalise
+root: output
