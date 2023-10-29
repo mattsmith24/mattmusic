@@ -1,0 +1,66 @@
+include:
+patches:
+  # INPUT(0) - note
+  # INPUT(1) - duration
+  # INPUT(2) - filter bandwidth Hz - lower values make the sound more 'zappy'
+  # INPUT(3) - filter start freq Hz - brightness
+  - name: filter_sweep
+    root: filter
+    sounds:
+      - name: filter
+        sound_type: pole_zero_filter
+        params:
+          - input
+          - normalize
+          # 1 - β ,ω
+          - pole,EXPR(1.0 - INPUT(2) / CONST(sample_rate) * 2.0 * CONST(pi)),pole_angle
+          - pole,EXPR(1.0 - INPUT(2) / CONST(sample_rate) * 2.0 * CONST(pi)),pole_conjugate_angle
+      - name: normalize
+        sound_type: multiply
+        params:
+          # β ∗ (β + 2ω)
+          - 0.0 β_plus_2ω
+          - dc EXPR(INPUT(2) / CONST(sample_rate) * 2.0 * CONST(pi)) max
+      - name: β_plus_2ω
+        sound_type: mix
+        params:
+          - 2ω
+          - dc EXPR(INPUT(2) / CONST(sample_rate) * 2.0 * CONST(pi)) max
+      - name: 2ω
+        sound_type: multiply
+        params:
+          - 0.0 reverse_sweep
+          - dc EXPR(2.0 / CONST(sample_rate) * 2.0 * CONST(pi)) max
+      - name: pole_angle
+        sound_type: multiply
+        params:
+          - 0.0 reverse_sweep
+          - dc EXPR(1.0 / CONST(sample_rate) * 2.0 * CONST(pi)) max
+      - name: negative_sweep
+        sound_type: multiply
+        params:
+          - 0.0 sweep
+          - dc -INPUT(3) max
+      - name: reverse_sweep
+        sound_type: mix
+        params:
+          - negative_sweep
+          - dc INPUT(3) max
+      - name: pole_conjugate_angle
+        sound_type: multiply
+        params:
+          - 0.0 pole_angle
+          - dc -1.0 max
+      - name: input
+        sound_type: saw
+        params:
+          - INPUT(0)
+          - "1.0"
+          - INPUT(1)
+      - name: sweep
+        sound_type: ramp
+        params:
+          - INPUT(1)
+          - "1.0"
+          - INPUT(1)
+

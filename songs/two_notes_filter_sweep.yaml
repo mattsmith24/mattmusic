@@ -1,0 +1,33 @@
+include:
+  - "filter_sweep_patch.yaml"
+
+patches:
+  - name: instrument
+    root: instrument1
+    sounds:
+      - name: instrument1
+        sound_type: patch filter_sweep
+        params:
+          - INPUT(0)
+          - "0.5"
+          - "400.0"
+          - "5000.0"
+
+sounds:
+  - name: sine1
+    sound_type: patch instrument
+    params:
+      - "G4"
+  - name: sine2
+    sound_type: patch instrument
+    params:
+      - "G3"
+  - name: sequence1
+    sound_type: sequence
+    params:
+      - "10"
+      - "1.0"
+      - "0.0 sine1"
+      - "0.5 sine2"
+
+root: sequence1
