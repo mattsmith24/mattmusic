@@ -48,6 +48,7 @@ pub mod read_song {
     use crate::filters::butterworth_bandpass_filter::butterworth_bandpass_filter::ButterworthBandpassFilter;
     use crate::filters::butterworth_filter::butterworth_filter::ButterworthFilter;
     use crate::filters::elementary_non_recirculating_filter::elementary_non_recirculating_filter::ElementaryNonRecirculatingFilter;
+    use crate::filters::elementary_non_recirculating_filter_2nd_form::elementary_non_recirculating_filter_2nd_form::ElementaryNonRecirculatingFilter2;
     use crate::filters::elementary_recirculating_filter::elementary_recirculating_filter::ElementaryRecirculatingFilter;
     use crate::filters::pole_zero_filter::pole_zero_filter::PoleZeroFilter;
     use crate::filters::real_to_complex::real_to_complex::RealToComplex;
@@ -338,6 +339,7 @@ pub mod read_song {
                     "dc" => DC::from_yaml(&evaluated_params, self),
                     "delay_line" => DelayLine::from_yaml(&evaluated_params, self),
                     "elementary_non_recirculating_filter" => ElementaryNonRecirculatingFilter::from_yaml(&evaluated_params, self),
+                    "elementary_non_recirculating_filter_2nd_form" => ElementaryNonRecirculatingFilter2::from_yaml(&evaluated_params, self),
                     "elementary_recirculating_filter" => ElementaryRecirculatingFilter::from_yaml(&evaluated_params, self),
                     "envelope" => Envelope::from_yaml(&evaluated_params, self),
                     "export_wav" => ExportWav::from_yaml(&evaluated_params, self),
