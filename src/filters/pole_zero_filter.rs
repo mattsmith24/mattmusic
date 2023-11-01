@@ -6,6 +6,7 @@ use crate::dc::dc::DC;
 use crate::knob::knob::ComplexKnob;
 use crate::multiply::multiply::Multiply;
 use crate::filters::elementary_non_recirculating_filter::elementary_non_recirculating_filter::ComplexElementaryNonRecirculatingFilter;
+use crate::filters::elementary_non_recirculating_filter_2nd_form::elementary_non_recirculating_filter_2nd_form::ComplexElementaryNonRecirculatingFilter2;
 use crate::filters::elementary_recirculating_filter::elementary_recirculating_filter::ComplexElementaryRecirculatingFilter;
 use crate::filters::real_to_complex::real_to_complex::RealToComplex;
 
@@ -15,7 +16,8 @@ pub struct PoleZeroFilter {
 }
 
 impl PoleZeroFilter {
-    pub fn new(input: DynSoundSource, normalize: DynSoundSource, poles: Vec<ComplexKnob>, zeros: Vec<ComplexKnob>) -> Self
+    pub fn new(input: DynSoundSource, normalize: DynSoundSource, poles: Vec<ComplexKnob>, zeros: Vec<ComplexKnob>,
+        zero2s: Vec<ComplexKnob>) -> Self
     {
         let duration = input.duration();
         let mut normalize_input = Multiply::new();
@@ -28,6 +30,9 @@ impl PoleZeroFilter {
         }
         for zero in &zeros {
             filter = Box::new(ComplexElementaryNonRecirculatingFilter::new(filter, zero.clone()));
+        }
+        for zero2 in &zero2s {
+            filter = Box::new(ComplexElementaryNonRecirculatingFilter2::new(filter, zero2.clone()));
         }
         PoleZeroFilter {
             filter: filter,
@@ -68,6 +73,7 @@ impl SoundSource for PoleZeroFilter {
         }
         let mut poles = Vec::<ComplexKnob>::new();
         let mut zeros = Vec::<ComplexKnob>::new();
+        let mut zero2s = Vec::<ComplexKnob>::new();
         for idx in 2..params.len() {
             let param = &params[idx];
             let mut split = param.split(",");
@@ -76,10 +82,11 @@ impl SoundSource for PoleZeroFilter {
             match param_type {
                 "pole" => poles.push(point),
                 "zero" => zeros.push(point),
+                "zero2" => zero2s.push(point),
                 &_ => panic!("PoleZeroFilter::from_yaml() param type expected to be 'pole' or 'zero'. Got '{}'", param_type)
             }
         }
-        Box::new(PoleZeroFilter::new(input, normalize, poles, zeros))
+        Box::new(PoleZeroFilter::new(input, normalize, poles, zeros, zero2s))
     }
 }
 

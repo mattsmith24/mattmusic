@@ -59,10 +59,11 @@ impl ButterworthBandpassFilter {
         for zero in &zeros {
             zero_knobs.push(ComplexKnob::dc(zero.clone()));
         }
+        let zero2_knobs = Vec::<ComplexKnob>::new();
         let duration = input.duration();
         let normalize_dc = Box::new(DC::new(normalize, duration));
         ButterworthBandpassFilter {
-            filter: PoleZeroFilter::new(input, normalize_dc, pole_knobs, zero_knobs),
+            filter: PoleZeroFilter::new(input, normalize_dc, pole_knobs, zero_knobs, zero2_knobs),
         }
     }
 }
