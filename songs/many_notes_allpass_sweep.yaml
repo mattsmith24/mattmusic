@@ -1,0 +1,101 @@
+# This demonstrates the effect of the allpass filter as the pole sweeps on the
+# real axis between 1 and -1. As the phase of the sound varies, it cancels with
+# itself.
+include:
+patches:
+  # INPUT(0) midi pitch
+  - name: instrument
+    root: instrument1
+    sounds:
+      - name: instrument1
+        sound_type: multiply
+        params:
+          - 0.0 tone
+          - 0.0 envelope
+      - name: tone
+        sound_type: saw
+        params:
+          - EXPR(midi2freq(INPUT(0)))
+          - "0.5"
+          - "0.4"
+      - name: envelope
+        sound_type: envelope
+        params:
+          - 0.200 1.0
+          - 0.100 1.0
+          - 0.100 0.0
+
+sounds:
+  - name: play58
+    sound_type: patch instrument
+    params:
+      - "58"
+  - name: play63
+    sound_type: patch instrument
+    params:
+      - "63"
+  - name: play70
+    sound_type: patch instrument
+    params:
+      - "70"
+  - name: play72
+    sound_type: patch instrument
+    params:
+      - "72"
+  - name: play65
+    sound_type: patch instrument
+    params:
+      - "65"
+  - name: play60
+    sound_type: patch instrument
+    params:
+      - "60"
+  - name: play67
+    sound_type: patch instrument
+    params:
+      - "67"
+  - name: play62
+    sound_type: patch instrument
+    params:
+      - "62"
+  - name: sequence1
+    sound_type: sequence
+    params:
+      - "10"
+      - "4.0"
+      - "0.0 play58"
+      - "0.5 play63"
+      - "1.0 play70"
+      - "1.5 play72"
+      - "2.0 play65"
+      - "2.5 play60"
+      - "3.0 play67"
+      - "3.5 play62"
+  - name: sweep
+    sound_type: sine
+    params:
+      - "0.1" # Hz
+      - "1.0" # amplitude
+      - "40.0" # seconds
+  - name: filter
+    sound_type: allpass_filter
+    params:
+      - sequence1
+      - sweep,0.0
+  - name: mix
+    sound_type: mix
+    params:
+      - sequence1
+      - filter
+  - name: volume
+    sound_type: multiply
+    params:
+      - 0.0 mix
+      - dc 0.5 max
+  - name: output
+    sound_type: export_wav
+    params:
+      - tmp/many_notes_allpass_sweep.wav
+      - volume
+
+root: output

@@ -1,0 +1,25 @@
+include:
+patches:
+sounds:
+  - name: input
+    sound_type: pulse_train
+    params:
+      - "1.0" # freq
+      - EXPR(1.0 / CONST(sample_rate)) # duty
+      - "5.0" # duration
+  # - name: input
+  #   sound_type: import_wav
+  #   params:
+  #     - .\wavs\84879__timkahn__what-if.wav
+  #     - cubic
+  - name: filter
+    sound_type: allpass_filter
+    params:
+      - input
+      - "0.8,0.0"
+  - name: output
+    sound_type: export_wav
+    params:
+      - tmp/allpass_filter.wav
+      - filter
+root: output

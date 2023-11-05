@@ -45,6 +45,7 @@ pub mod read_song {
     use crate::uneven_delay::uneven_delay::UnevenDelay;
     use crate::wavetable::wavetable::Wavetable;
 
+    use crate::filters::allpass_filter::allpass_filter::AllpassFilter;
     use crate::filters::butterworth_bandpass_filter::butterworth_bandpass_filter::ButterworthBandpassFilter;
     use crate::filters::butterworth_filter::butterworth_filter::ButterworthFilter;
     use crate::filters::elementary_non_recirculating_filter::elementary_non_recirculating_filter::ElementaryNonRecirculatingFilter;
@@ -328,6 +329,7 @@ pub mod read_song {
                 self.get_patch(&sound_type[6..], &evaluated_params)
             } else {
                 match sound_type {
+                    "allpass_filter" => AllpassFilter::from_yaml(&evaluated_params, self),
                     "buffer_reader" => BufferReader::from_yaml(&evaluated_params, self),
                     "buffer_writer" => BufferWriter::from_yaml(&evaluated_params, self),
                     "butterworth_bandpass_filter" => ButterworthBandpassFilter::from_yaml(&evaluated_params, self),
