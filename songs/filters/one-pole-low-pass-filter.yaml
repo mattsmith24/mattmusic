@@ -19,19 +19,19 @@ sounds:
   #   params:
   #     - .\wavs\84879__timkahn__what-if.wav
   #     - cubic
+  - name: cutoff
+    sound_type: dc
+    params:
+     - EXPR(100.0 / CONST(sample_rate) * 2.0 * CONST(pi))
+     - "1.0E10"
   - name: filter
-    sound_type: elementary_recirculating_filter
+    sound_type: low_pass_filter
     params:
       - input
-      - EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi)),0.0 # pole calculated from half-power point
-  - name: normalise
-    sound_type: multiply
-    params:
-      - 0.0 filter
-      - dc EXPR(100.0 / CONST(sample_rate) * 2.0 * CONST(pi)) max
+      - cutoff
   - name: output
     sound_type: export_wav
     params:
       - tmp/one_pole_low_pass_filter.wav
-      - normalise
+      - filter
 root: output

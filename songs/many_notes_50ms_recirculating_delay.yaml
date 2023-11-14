@@ -21,6 +21,7 @@ patches:
         sound_type: time_box
         params:
           - "0.4"
+          - "1.8E-3"
           - tone
       - name: tone
         sound_type: sine

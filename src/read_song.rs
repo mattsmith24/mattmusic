@@ -23,7 +23,6 @@ pub mod read_song {
     use crate::gaussian_transfer::gaussian_transfer::GaussianTransfer;
     use crate::hann_window::hann_window::HannWindow;
     use crate::import_wav::import_wav::ImportWav;
-    use crate::low_pass_filter::low_pass_filter::LowPassFilter;
     use crate::midi2freq::midi2freq::Midi2Freq;
     use crate::mix::mix::Mix;
     use crate::multiply::multiply::Multiply;
@@ -51,6 +50,7 @@ pub mod read_song {
     use crate::filters::elementary_non_recirculating_filter::elementary_non_recirculating_filter::ElementaryNonRecirculatingFilter;
     use crate::filters::elementary_non_recirculating_filter_2nd_form::elementary_non_recirculating_filter_2nd_form::ElementaryNonRecirculatingFilter2;
     use crate::filters::elementary_recirculating_filter::elementary_recirculating_filter::ElementaryRecirculatingFilter;
+    use crate::filters::low_pass_filter::low_pass_filter::LowPassFilter;
     use crate::filters::pole_zero_filter::pole_zero_filter::PoleZeroFilter;
     use crate::filters::real_to_complex::real_to_complex::RealToComplex;
 

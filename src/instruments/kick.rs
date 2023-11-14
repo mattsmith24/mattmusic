@@ -12,7 +12,7 @@ pub mod kick {
     use crate::mix::mix::Mix;
     use crate::envelope::envelope::{Envelope, EnvelopePoint};
     use crate::multiply::multiply::Multiply;
-    use crate::low_pass_filter::low_pass_filter::LowPassFilter;
+    use crate::filters::low_pass_filter::low_pass_filter::LowPassFilter;
     use crate::pre_render::pre_render::PreRender;
     //use crate::midi_notes::midi_notes::note2freq;
     //use crate::midi_notes::midi_notes as mn;
@@ -74,9 +74,9 @@ pub mod kick {
             filter_envelope_scale.add(Box::new(filter_envelope), 0.0);
             filter_envelope_scale.add(Box::new(DC::new(filter_scale, duration)), 0.0);
             let filter = LowPassFilter::new(
-                Knob::new(Box::new(filter_envelope_scale)),
-                300,
-                Box::new(mix));
+                Box::new(mix),
+                Box::new(filter_envelope_scale),
+                );
 
             let mut sine_envelope_multiply = Multiply::new();
             sine_envelope_multiply.add(Box::new(sine_envelope), 0.0);
@@ -91,7 +91,7 @@ pub mod kick {
             multiply.add(Box::new(envelope), 0.0);
             multiply.add(Box::new(sine), 1.0);
 
-            let timebox = TimeBox::new(duration, Box::new(multiply));
+            let timebox = TimeBox::new(duration, 88, Box::new(multiply));
 
             let output = PreRender::new(Box::new(timebox));
             // if !Path::new("output.csv").exists() {

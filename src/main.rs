@@ -19,7 +19,6 @@ mod generative_waveform;
 mod hann_window;
 mod import_wav;
 mod knob;
-mod low_pass_filter;
 mod midi_notes;
 mod midi2freq;
 mod mix;

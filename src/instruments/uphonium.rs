@@ -3,9 +3,10 @@ pub mod uphonium {
     use crate::traits::traits::{DynSoundSource, Instrument} ;
     use crate::knob::knob::Knob;
     use crate::sine::sine::Sine;
+    use crate::dc::dc::DC;
     use crate::envelope::envelope::{Envelope, EnvelopePoint};
     use crate::multiply::multiply::Multiply;
-    use crate::low_pass_filter::low_pass_filter::LowPassFilter;
+    use crate::filters::low_pass_filter::low_pass_filter::LowPassFilter;
     use crate::pre_render::pre_render::PreRender;
     use crate::generative_waveform::generative_waveform::GenerativeWaveform;
 
@@ -67,9 +68,8 @@ pub mod uphonium {
                 false,
                 duration);
             let low_pass = LowPassFilter::new(
-                Knob::dc(2000.0/self.sample_rate as f32),
-                100,
-                Box::new(pure_tone)
+                Box::new(pure_tone),
+                Box::new(DC::new(2000.0 * 2.0 * std::f32::consts::PI / self.sample_rate as f32, duration))
             );
             Box::new(PreRender::new(Box::new(low_pass)))
         }

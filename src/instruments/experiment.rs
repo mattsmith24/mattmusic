@@ -52,7 +52,7 @@ pub mod experiment {
             //mix.add(Box::new(DC::new(1.0, duration)), 0.0);
             mix.add(p1, strength);
             mix.add(p2, strength);
-            let timebox = TimeBox::new(duration, Box::new(mix));
+            let timebox = TimeBox::new(duration, 88, Box::new(mix));
             let output = PreRender::new(Box::new(timebox));
             Box::new(output)
         }

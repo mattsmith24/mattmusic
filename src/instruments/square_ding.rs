@@ -41,7 +41,7 @@ impl Instrument for SquareDing {
         multiply.add(Box::new(DC::new(strength, duration)), 0.0);
         multiply.add(Box::new(tremolo_wave), 1.0);
 
-        Box::new(TimeBox::new(duration, Box::new(multiply)))
+        Box::new(TimeBox::new(duration, 88, Box::new(multiply)))
     }
 }
 

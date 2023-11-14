@@ -38,5 +38,6 @@ sounds:
     sound_type: time_box
     params:
       - EXPR(558720.0 / 44100.0)
+      - "1.8E-3"
       - recenter
 root: timebox
