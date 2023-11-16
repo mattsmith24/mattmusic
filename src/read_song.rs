@@ -50,6 +50,7 @@ pub mod read_song {
     use crate::filters::elementary_non_recirculating_filter::elementary_non_recirculating_filter::ElementaryNonRecirculatingFilter;
     use crate::filters::elementary_non_recirculating_filter_2nd_form::elementary_non_recirculating_filter_2nd_form::ElementaryNonRecirculatingFilter2;
     use crate::filters::elementary_recirculating_filter::elementary_recirculating_filter::ElementaryRecirculatingFilter;
+    use crate::filters::high_pass_filter::high_pass_filter::HighPassFilter;
     use crate::filters::low_pass_filter::low_pass_filter::LowPassFilter;
     use crate::filters::pole_zero_filter::pole_zero_filter::PoleZeroFilter;
     use crate::filters::real_to_complex::real_to_complex::RealToComplex;
@@ -347,6 +348,7 @@ pub mod read_song {
                     "export_wav" => ExportWav::from_yaml(&evaluated_params, self),
                     "gaussian_transfer" => GaussianTransfer::from_yaml(&evaluated_params, self),
                     "hann_window" => HannWindow::from_yaml(&evaluated_params, self),
+                    "high_pass_filter" => HighPassFilter::from_yaml(&evaluated_params, self),
                     "import_wav" => ImportWav::from_yaml(&evaluated_params, self),
                     "low_pass_filter" => LowPassFilter::from_yaml(&evaluated_params, self),
                     "midi2freq" => Midi2Freq::from_yaml(&evaluated_params, self),
