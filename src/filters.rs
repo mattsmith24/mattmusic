@@ -1,4 +1,5 @@
 pub mod allpass_filter;
+pub mod band_pass_filter;
 pub mod butterworth_bandpass_filter;
 pub mod butterworth_filter;
 pub mod elementary_non_recirculating_filter;

@@ -1,7 +1,4 @@
-# A one-pole band-pass filter. Take a low pass filter with cutoff frequency at
-# the desired bandwidth β. Rotate it in the Z coordinates by the center
-# frequency ω. Create a conjugate pole to match it and multiply by normalising
-# factor β ∗ (β + 2ω)
+# one-pole band-pass filter.
 include:
 patches:
 sounds:
@@ -16,15 +13,22 @@ sounds:
   #   params:
   #     - .\wavs\84879__timkahn__what-if.wav
   #     - cubic
+  - name: cutoff
+    sound_type: dc
+    params:
+      - EXPR(440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
+      - "1.0E10"
+  - name: bandwidth
+    sound_type: dc
+    params:
+      - EXPR(100.0 / CONST(sample_rate) * 2.0 * CONST(pi))
+      - "1.0E10"
   - name: filter
-    sound_type: pole_zero_filter
+    sound_type: band_pass_filter
     params:
       - input
-      # β ∗ (β + 2ω)
-      - EXPR(100.0 * (100.0 + 2 * 440.0) / CONST(sample_rate)^2.0 * 4.0 * CONST(pi)^2.0)
-      # 1 - β ,ω
-      - pole,EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi)),EXPR(440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
-      - pole,EXPR(1.0 - 100.0 / CONST(sample_rate) * 2.0 * CONST(pi)),EXPR(-440.0 / CONST(sample_rate) * 2.0 * CONST(pi))
+      - cutoff
+      - bandwidth
   - name: output
     sound_type: export_wav
     params:
