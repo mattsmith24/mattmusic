@@ -7,35 +7,22 @@ patches:
   - name: filter_sweep
     root: filter
     sounds:
-      - name: filter
-        sound_type: pole_zero_filter
+      - name: bandwidth
+        sound_type: dc
         params:
-          - input
-          - normalize
-          # 1 - β ,ω
-          - pole,EXPR(1.0 - INPUT(2) / CONST(sample_rate) * 2.0 * CONST(pi)),pole_angle
-          - pole,EXPR(1.0 - INPUT(2) / CONST(sample_rate) * 2.0 * CONST(pi)),pole_conjugate_angle
-      - name: normalize
-        sound_type: multiply
-        params:
-          # β ∗ (β + 2ω)
-          - 0.0 β_plus_2ω
-          - dc EXPR(INPUT(2) / CONST(sample_rate) * 2.0 * CONST(pi)) max
-      - name: β_plus_2ω
-        sound_type: mix
-        params:
-          - 2ω
-          - dc EXPR(INPUT(2) / CONST(sample_rate) * 2.0 * CONST(pi)) max
-      - name: 2ω
-        sound_type: multiply
-        params:
-          - 0.0 reverse_sweep
-          - dc EXPR(2.0 / CONST(sample_rate) * 2.0 * CONST(pi)) max
-      - name: pole_angle
+          - EXPR(INPUT(2) / CONST(sample_rate) * 2.0 * CONST(pi))
+          - "1.0E10"
+      - name: centre
         sound_type: multiply
         params:
           - 0.0 reverse_sweep
           - dc EXPR(1.0 / CONST(sample_rate) * 2.0 * CONST(pi)) max
+      - name: filter
+        sound_type: band_pass_filter
+        params:
+          - input
+          - centre
+          - bandwidth
       - name: negative_sweep
         sound_type: multiply
         params:
@@ -46,11 +33,6 @@ patches:
         params:
           - negative_sweep
           - dc INPUT(3) max
-      - name: pole_conjugate_angle
-        sound_type: multiply
-        params:
-          - 0.0 pole_angle
-          - dc -1.0 max
       - name: input
         sound_type: saw
         params:
