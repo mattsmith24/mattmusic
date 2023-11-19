@@ -15,8 +15,15 @@ impl PreRender {
         let mut buf = Vec::<(f32, f32)>::new();
         let mut sample_clock = 0i32;
         let duration = source.duration();
+        println!("PreRender {} samples", duration);
         let mut source_data = source.init_state();
+        let mut report_threshold = 10.0;
         while sample_clock < duration {
+            let percent_done = sample_clock as f32 * 100.0 / duration as f32;
+            if percent_done > report_threshold {
+                println!("Processed {} samples, {}%", sample_clock, percent_done);
+                report_threshold += 10.0;
+            }
             buf.push(source.next_value(sample_clock, &mut source_data));
             sample_clock += 1;
         }
