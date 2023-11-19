@@ -86,15 +86,15 @@ pub mod read_song {
 
     struct PatchContextItem {
         params: Vec::<String>,
-        patch_source_input: String,
+        patch_source_input: Option<DynSoundSource>,
         patch_index: usize,
     }
 
     impl PatchContextItem {
-        fn from_params(params: &Vec::<String>, patch_source_input: &str, patch_index: usize) -> PatchContextItem {
+        fn from_params(params: &Vec::<String>, patch_source_input: Option<DynSoundSource>, patch_index: usize) -> PatchContextItem {
             PatchContextItem {
                 params: params.clone(),
-                patch_source_input: patch_source_input.to_string(),
+                patch_source_input: patch_source_input,
                 patch_index: patch_index }
         }
     }
@@ -107,7 +107,7 @@ pub mod read_song {
         fn new() -> PatchContext {
             PatchContext { stack: Vec::<PatchContextItem>::new(), current_idx: -1 }
         }
-        fn push(&mut self, params: &Vec::<String>, patch_source_input: &str, patch_index: usize) {
+        fn push(&mut self, params: &Vec::<String>, patch_source_input: Option<DynSoundSource>, patch_index: usize) {
             self.stack.push(PatchContextItem::from_params(params, patch_source_input, patch_index));
             self.current_idx = self.stack.len() as i32 - 1;
         }
@@ -118,12 +118,6 @@ pub mod read_song {
         }
         fn current(&self) -> &PatchContextItem {
             &self.stack[self.current_idx as usize]
-        }
-        fn set_parent_context(&mut self) {
-            self.current_idx -= 1;
-        }
-        fn set_child_context(&mut self) {
-            self.current_idx += 1;
         }
         fn get_param(&self, index: usize) -> String {
             let params = &self.current().params;
@@ -182,11 +176,14 @@ pub mod read_song {
             let patch_name = parts[0].clone();
             let patch_source_input;
             if parts.len() > 1 {
-                patch_source_input = parts[1].clone();
+                patch_source_input = Some(self.get_sound(parts[1].clone()));
             } else {
-                patch_source_input = "";
+                patch_source_input = None;
             }
-            let patch_idx = self.yaml.patches.binary_search_by_key(&patch_name, |s: &PatchItem| &s.name).unwrap();
+            let patch_idx = match self.yaml.patches.binary_search_by_key(&patch_name, |s: &PatchItem| &s.name) {
+                Ok(patch_idx) => patch_idx,
+                Err(_e) => panic!("Couldn't find patch '{}'", &patch_name)
+            };
             let patch_root = self.yaml.patches[patch_idx].root.clone();
             self.patch_context.push(params, patch_source_input, patch_idx);
             let res = self.get_sound(&patch_root);
@@ -383,7 +380,10 @@ pub mod read_song {
             println!("get_patch_sound({})", sound_name);
             let idx = self.patch_context.current().patch_index;
             let patch = &self.yaml.patches[idx];
-            let sound_idx = patch.sounds.binary_search_by_key(&sound_name, |s: &SoundItem| &s.name).unwrap();
+            let sound_idx = match patch.sounds.binary_search_by_key(&sound_name, |s: &SoundItem| &s.name) {
+                Ok(sound_idx) => sound_idx,
+                Err(_e) => panic!("Couldn't find sound '{}' in patch", &sound_name)
+            };
             &patch.sounds[sound_idx]
         }
 
@@ -401,11 +401,10 @@ pub mod read_song {
         pub fn get_sound(&mut self, sound_name: &str) -> DynSoundSource {
             println!("get_sound({})", sound_name);
             if sound_name == "PATCH_INPUT" {
-                let patch_source_input = self.patch_context.current().patch_source_input.clone();
-                self.patch_context.set_parent_context();
-                let res = self.get_sound(&patch_source_input);
-                self.patch_context.set_child_context();
-                res
+                match &self.patch_context.current().patch_source_input {
+                    Some(res) => res.clone(),
+                    None => panic!("PATCH_INPUT not found for patch")
+                }
             } else {
                 let item;
                 if self.patch_context.active() {
