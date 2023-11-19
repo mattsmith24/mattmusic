@@ -1,0 +1,57 @@
+# Phaser based on Figure 8.33 in _The Theory and Technique of Electronic Music_
+# by Miller Puckette
+include:
+patches:
+  # PATCH_INPUT: input
+  # INPUT(0): period
+  - name: phaser
+    root: output
+    sounds:
+      - name: ramp
+        sound_type: ramp
+        params:
+          - INPUT(0)
+          - "1.0"
+          - "1.0E10"
+      - name: triangle
+        sound_type: mix
+        params:
+          - ramp
+          - dc -0.5 max
+      - name: parabola
+        sound_type: multiply
+        params:
+          - 0.0 triangle
+          - 0.0 triangle
+          - dc -0.6 max
+      - name: phase_ctrl
+        sound_type: mix
+        params:
+          - parabola
+          - dc 0.97 max
+      - name: ap1
+        sound_type: allpass_filter
+        params:
+          - PATCH_INPUT
+          - phase_ctrl,0.0
+      - name: ap2
+        sound_type: allpass_filter
+        params:
+          - ap1
+          - phase_ctrl,0.0
+      - name: ap3
+        sound_type: allpass_filter
+        params:
+          - ap2
+          - phase_ctrl,0.0
+      - name: ap4
+        sound_type: allpass_filter
+        params:
+          - ap3
+          - phase_ctrl,0.0
+      - name: output
+        sound_type: mix
+        params:
+          - PATCH_INPUT
+          - ap4
+
